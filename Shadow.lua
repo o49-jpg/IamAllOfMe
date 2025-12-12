@@ -246,8 +246,8 @@ local inhibitorCooldown = false
 local lastInputTime = 0
 local INPUT_THRESHOLD = 0.1
 local originalWalkSpeed = humanoid.WalkSpeed
-local SPRINT_SPEED = 240
-local INHIBITOR_SPEED = 320
+local SPRINT_SPEED = 360
+local INHIBITOR_SPEED = 480
 local INHIBITOR_DURATION = 40
 
 -- Acrobatics variables
@@ -1836,7 +1836,7 @@ local function activateSuperForm()
     
     -- Power boost
     local originalSuperWalkSpeed = humanoid.WalkSpeed
-    humanoid.WalkSpeed = 500
+    humanoid.WalkSpeed = 650
     isInhibitorActive = true
     
     -- Create aura
@@ -4884,5 +4884,6 @@ for i = 1, 30 do
     ultimateText.TextTransparency = 0 + (i * 0.033)
     wait(0.05)
 end
+
 
 ultimateGui:Destroy()
