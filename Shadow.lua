@@ -1,5 +1,26 @@
 -- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
--- Executor Compatible
+
+-- Animations
+
+local DASH_IDS = {
+    Backward = 17487011138,
+    Forward = 17487127966,
+    Left = 17487087157,
+    Right = 17486926788
+}
+
+local BASE_ANIMS = {
+    Idle = 18691887203,
+    Walk = 18692101922,
+    Jump = 18713038822,
+    Fall = 18713036728,
+    Sprint = 132536459271202
+}
+
+-- Animator6D
+loadstring(game:HttpGet("https://raw.githubusercontent.com/gObl00x/Stuff/refs/heads/main/Animator6D.lua"))()
+
+wait(1.5)
 
 -- Loading Notification System
 local function showLoadingNotification()
@@ -222,22 +243,41 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Animation system
-local animationFolder = Instance.new("Folder")
-animationFolder.Name = "ShadowAnimations"
+-- Animator6D Animation Control
+local currentAnimation = nil
+local animTrackInstance = nil
 
-local idleAnim = Instance.new("Animation")
-idleAnim.AnimationId = "rbxassetid://79010940132903"
-idleAnim.Name = "Idle"
-idleAnim.Parent = animationFolder
+local ANIMATIONS = {
+    Idle = 18691887203,        -- Your idle animation ID
+    Walk = 18692101922,        -- Your walk animation ID  
+    Jump = 18713038822,        -- Your jump animation ID
+    Fall = 18713036728,        -- Your fall animation ID
+    Sprint = 132536459271202   -- Your sprint animation ID
+}
 
-local sprintAnim = Instance.new("Animation")
-sprintAnim.AnimationId = "rbxassetid://70995369496624"
-sprintAnim.Name = "Sprint"
-sprintAnim.Parent = animationFolder
+-- Function to play animations with Animator6D
+local function playAnimIfChanged(animId, looped)
+    if currentAnimation == animId then return end
+    
+    -- Stop current animation
+    if animTrackInstance then
+        getgenv().Animator6D(0, 1, true) -- Stop animation
+        animTrackInstance = nil
+    end
+    
+    -- Play new animation
+    currentAnimation = animId
+    animTrackInstance = getgenv().Animator6D(animId, 1, looped ~= false)
+end
 
-local idleTrack = humanoid:LoadAnimation(idleAnim)
-local sprintTrack = humanoid:LoadAnimation(sprintAnim)
+-- Function to stop current animation
+local function stopCurrentAnimation()
+    if animTrackInstance then
+        getgenv().Animator6D(0, 1, true)
+        animTrackInstance = nil
+    end
+    currentAnimation = nil
+end
 
 -- Movement control variables
 local isSprinting = false
@@ -246,17 +286,17 @@ local inhibitorCooldown = false
 local lastInputTime = 0
 local INPUT_THRESHOLD = 0.1
 local originalWalkSpeed = humanoid.WalkSpeed
-local SPRINT_SPEED = 360
-local INHIBITOR_SPEED = 480
+local SPRINT_SPEED = 440
+local INHIBITOR_SPEED = 520
 local INHIBITOR_DURATION = 40
 
 -- Acrobatics variables
 local isAcrobaticsMode = false
 local isCtrlHeld = false
-local ACROBATICS_FLIP_SPEED = 720 -- degrees per second
+local ACROBATICS_FLIP_SPEED = 1480 -- degrees per second
 local FLIP_DURATION = 0.5 -- seconds for a full flip
 local lastFlipTime = 0
-local FLIP_COOLDOWN = 0.3 -- seconds between flips
+local FLIP_COOLDOWN = 0.2 -- seconds between flips
 local acrobaticsEffect = nil
 
 -- Invisibility variables
@@ -1749,11 +1789,16 @@ end
 local function activateDimensionShift()
     if abilityCooldowns.U then return end
     abilityCooldowns.U = true
-    
+
+    if not humanoidRootPart then
+        abilityCooldowns.U = false
+        return
+    end
+
     -- Create dimensional rift
     local dimensionRift = Instance.new("Part")
     dimensionRift.Size = Vector3.new(50, 50, 50)
-    dimensionRift.Position = humanoidRootPart.Position
+    dimensionRift.CFrame = humanoidRootPart.CFrame
     dimensionRift.Material = Enum.Material.Glass
     dimensionRift.Color = Color3.fromRGB(0, 255, 255)
     dimensionRift.Transparency = 0.8
@@ -1761,52 +1806,60 @@ local function activateDimensionShift()
     dimensionRift.CanCollide = false
     dimensionRift.Shape = Enum.PartType.Ball
     dimensionRift.Parent = workspace
-    
+
     local dimensionLight = Instance.new("PointLight")
-    dimensionLight.Color = Color3.fromRGB(0, 255, 255)
+    dimensionLight.Color = dimensionRift.Color
     dimensionLight.Range = 300
     dimensionLight.Brightness = 8
     dimensionLight.Parent = dimensionRift
-    
-    -- Invert colors and physics
-    spawn(function()
-        for i = 1, 30 do
-            for _, part in pairs(workspace:GetDescendants()) do
-                if part:IsA("BasePart") and not part:IsDescendantOf(character) then
-                    local distance = (part.Position - humanoidRootPart.Position).Magnitude
+
+    task.spawn(function()
+        for _ = 1, 30 do
+            for _, part in ipairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart")
+                and not part:IsDescendantOf(character)
+                and part.Parent then
+
+                    local distance =
+                        (part.Position - humanoidRootPart.Position).Magnitude
+
                     if distance <= 150 then
-                        -- Invert color
+                        -- Invert color safely
+                        local c = part.Color
                         part.Color = Color3.fromRGB(
-                            255 - (part.Color.R * 255),
-                            255 - (part.Color.G * 255),
-                            255 - (part.Color.B * 255)
+                            255 - math.floor(c.R * 255),
+                            255 - math.floor(c.G * 255),
+                            255 - math.floor(c.B * 255)
                         )
-                        
-                        -- Apply anti-gravity
+
+                        -- Anti-gravity force
                         local antiGravity = Instance.new("BodyForce")
-                        antiGravity.Force = Vector3.new(0, part:GetMass() * 196.2 * 2, 0)
+                        antiGravity.Force =
+                            Vector3.new(0, part:GetMass() * 392.4, 0)
                         antiGravity.Parent = part
-                        game:GetService("Debris"):AddItem(antiGravity, 0.1)
+                        Debris:AddItem(antiGravity, 0.1)
                     end
                 end
             end
-            
-            -- Rotating rift effect
-            dimensionRift.CFrame = dimensionRift.CFrame * CFrame.Angles(0, math.rad(10), math.rad(5))
-            
-            wait(0.1)
+
+            dimensionRift.CFrame *= CFrame.Angles(
+                0,
+                math.rad(10),
+                math.rad(5)
+            )
+
+            task.wait(0.1)
         end
-        
+
         -- Rift collapse
         for i = 1, 20 do
-            dimensionRift.Transparency = 0.8 + (i * 0.01)
-            dimensionLight.Brightness = 8 - (i * 0.4)
-            wait(0.05)
+            dimensionRift.Transparency = math.clamp(0.8 + i * 0.01, 0, 1)
+            dimensionLight.Brightness = math.max(0, 8 - i * 0.4)
+            task.wait(0.05)
         end
-        
+
         dimensionRift:Destroy()
-        
-        wait(30)
+        task.wait(30)
         abilityCooldowns.U = false
     end)
 end
@@ -1836,7 +1889,7 @@ local function activateSuperForm()
     
     -- Power boost
     local originalSuperWalkSpeed = humanoid.WalkSpeed
-    humanoid.WalkSpeed = 650
+    humanoid.WalkSpeed = 700
     isInhibitorActive = true
     
     -- Create aura
@@ -4327,29 +4380,12 @@ local function toggleSprint()
         local targetSpeed = isInhibitorActive and INHIBITOR_SPEED or SPRINT_SPEED
         humanoid.WalkSpeed = targetSpeed
         
-        if sprintTrack then
-            sprintTrack:Play()
-            sprintTrack:AdjustSpeed(1.5)
-        end
-        
         toggleRocketEffects(true)
         
         sprintStatus.Text = "Sprint: ACTIVE"
         sprintStatus.TextColor3 = Color3.fromRGB(255, 165, 0)
     else
         humanoid.WalkSpeed = originalWalkSpeed
-        
-        if sprintTrack then
-            sprintTrack:Stop()
-        end
-        
-        if not isSprinting and humanoid.MoveDirection.Magnitude < 0.1 then
-            if idleTrack then
-                idleTrack:Play()
-            end
-        end
-        
-        toggleRocketEffects(false)
         
         sprintStatus.Text = "Sprint: READY"
         sprintStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
@@ -4563,17 +4599,19 @@ end
 local function updateMovement()
     local moveDirection = humanoid.MoveDirection
     local isMoving = moveDirection.Magnitude > 0.1
+    local vel = humanoidRootPart.Velocity
     
-    if not isSprinting then
-        if isMoving then
-            if idleTrack.IsPlaying then
-                idleTrack:Stop()
-            end
-        else
-            if not idleTrack.IsPlaying then
-                idleTrack:Play()
-            end
-        end
+    -- Animation based on movement state
+    if isSprinting and isMoving then
+        playAnimIfChanged(ANIMATIONS.Sprint, true)
+    elseif not isMoving then
+        playAnimIfChanged(ANIMATIONS.Idle, true)
+    elseif vel.y > 1 then
+        playAnimIfChanged(ANIMATIONS.Jump, true)
+    elseif vel.y < -2 then
+        playAnimIfChanged(ANIMATIONS.Fall, true)
+    elseif isMoving then
+        playAnimIfChanged(ANIMATIONS.Walk, true)
     end
     
     -- Check for acrobatics flips when CTRL is held
@@ -4708,21 +4746,6 @@ connections.characterAdded = player.CharacterAdded:Connect(function(newChar)
     
     chaosSpearCooldown = false
     chaosBlastCooldown = false
-    
-    animationFolder:ClearAllChildren()
-    
-    idleAnim = Instance.new("Animation")
-    idleAnim.AnimationId = "rbxassetid://79010940132903"
-    idleAnim.Name = "Idle"
-    idleAnim.Parent = animationFolder
-    
-    sprintAnim = Instance.new("Animation")
-    sprintAnim.AnimationId = "rbxassetid://70995369496624"
-    sprintAnim.Name = "Sprint"
-    sprintAnim.Parent = animationFolder
-    
-    idleTrack = humanoid:LoadAnimation(idleAnim)
-    sprintTrack = humanoid:LoadAnimation(sprintAnim)
     
     collectVisibleParts()
     createRocketEffects()
@@ -4884,6 +4907,5 @@ for i = 1, 30 do
     ultimateText.TextTransparency = 0 + (i * 0.033)
     wait(0.05)
 end
-
 
 ultimateGui:Destroy()
