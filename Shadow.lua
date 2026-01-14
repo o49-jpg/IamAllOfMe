@@ -382,6 +382,101 @@ local utilityCooldowns = {
     ["AltF8"] = false  -- Chaos Portal
 }
 
+-- NUM PAD Control Variables
+local numPadMode = 1 -- 1-4 for different ability pages
+local numPadActive = true
+local numPadKeybinds = {
+    ["NumPad1"] = {Function = nil, Mode = 1, Description = "Page 1: Basic Abilities"},
+    ["NumPad2"] = {Function = nil, Mode = 2, Description = "Page 2: Sorcery Abilities"},
+    ["NumPad3"] = {Function = nil, Mode = 3, Description = "Page 3: Combat Techniques"},
+    ["NumPad4"] = {Function = nil, Mode = 4, Description = "Page 4: Utility Abilities"},
+    ["NumPad5"] = {Function = "activateQuickTeleport", Description = "Quick Teleport"},
+    ["NumPad6"] = {Function = "activateComboMode", Description = "Combo Mode Toggle"},
+    ["NumPad7"] = {Function = "activateAerialMode", Description = "Aerial Mode Toggle"},
+    ["NumPad8"] = {Function = "activateDefenseMode", Description = "Defense Mode Toggle"},
+    ["NumPad9"] = {Function = "activateUltimateMode", Description = "Ultimate Mode Toggle"},
+    ["NumPad0"] = {Function = "toggleNumPadActive", Description = "Toggle NUM PAD"},
+    ["NumPad."] = {Function = "activateEmergencyEscape", Description = "Emergency Escape"},
+    ["NumPadEnter"] = {Function = "executeCurrentMode", Description = "Execute Mode"},
+    ["NumPadAdd"] = {Function = "increaseChaosPower", Description = "Boost Power"},
+    ["NumPadSubtract"] = {Function = "decreaseChaosPower", Description = "Reduce Power"},
+    ["NumPadMultiply"] = {Function = "toggleAutoAbility", Description = "Auto Ability"},
+    ["NumPadDivide"] = {Function = "toggleAIMode", Description = "AI Mode"}
+}
+
+-- Mode-specific ability sets
+local modeAbilities = {
+    [1] = { -- Basic Mode
+        Name = "BASIC CHAOS",
+        Color = Color3.fromRGB(255, 0, 0),
+        Abilities = {
+            ["NumPad1"] = "activateChaosVortex",
+            ["NumPad2"] = "activateBlackTornado",
+            ["NumPad3"] = "activateChaosRift",
+            ["NumPad4"] = "activateShadowClone",
+            ["NumPad5"] = "activateChaosCage",
+            ["NumPad6"] = "activateTimeStop",
+            ["NumPad7"] = "activateChaosWave",
+            ["NumPad8"] = "activateTeleportDash",
+            ["NumPad9"] = "activateGravityField"
+        }
+    },
+    [2] = { -- Sorcery Mode
+        Name = "CHAOS SORCERY",
+        Color = Color3.fromRGB(150, 0, 200),
+        Abilities = {
+            ["NumPad1"] = "activateChaosBind",
+            ["NumPad2"] = "activateVoidLance",
+            ["NumPad3"] = "activateTemporalEcho",
+            ["NumPad4"] = "activateDimensionalMirror",
+            ["NumPad5"] = "activateElementalStorm",
+            ["NumPad6"] = "activateGravityWell",
+            ["NumPad7"] = "activatePhantomArmy",
+            ["NumPad8"] = "activateSoulShatter",
+            ["NumPad9"] = "activateRealityAnchor"
+        }
+    },
+    [3] = { -- Combat Mode
+        Name = "COMBAT TECHNIQUES",
+        Color = Color3.fromRGB(255, 100, 0),
+        Abilities = {
+            ["NumPad1"] = "activateChaosFist",
+            ["NumPad2"] = "activateShadowKick",
+            ["NumPad3"] = "activateSpinningChaos",
+            ["NumPad4"] = "activateTeleportStrike",
+            ["NumPad5"] = "activateAuraBurst",
+            ["NumPad6"] = "activateCounterStrike",
+            ["NumPad7"] = "activateChaosBarrage",
+            ["NumPad8"] = "activateUltimateRush",
+            ["NumPad9"] = "activateComboFinisher"
+        }
+    },
+    [4] = { -- Support Mode
+        Name = "SUPPORT/UTILITY",
+        Color = Color3.fromRGB(0, 150, 255),
+        Abilities = {
+            ["NumPad1"] = "activateChaosVision",
+            ["NumPad2"] = "activateTeleportBeacon",
+            ["NumPad3"] = "activateForceBarrier",
+            ["NumPad4"] = "activateMassTeleport",
+            ["NumPad5"] = "activateObjectRepair",
+            ["NumPad6"] = "activateSlowField",
+            ["NumPad7"] = "activateSpeedBoost",
+            ["NumPad8"] = "activateChaosPortal",
+            ["NumPad9"] = "activateMassHeal"
+        }
+    }
+}
+
+-- Mode state variables
+local comboMode = false
+local aerialMode = false
+local defenseMode = false
+local ultimateMode = false
+local autoAbility = false
+local aiMode = false
+local chaosPower = 1.0
+
 -- Create hand effects
 local function createHandEffects()
     local handEffects = {}
