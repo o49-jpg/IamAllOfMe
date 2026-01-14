@@ -3726,6 +3726,233 @@ local function activateChaosPortal()
 end
 
 -- ============================================================================
+-- NUM PAD CONTROL FUNCTIONS
+-- ============================================================================
+
+-- Mode switching
+local function switchNumPadMode(mode)
+    if mode >= 1 and mode <= 4 then
+        numPadMode = mode
+        createModeNotification("MODE " .. mode .. ": " .. modeAbilities[mode].Name, modeAbilities[mode].Color)
+        updateNumPadDisplay()
+    end
+end
+
+-- Quick Teleport
+local function activateQuickTeleport()
+    local mouse = player:GetMouse()
+    local targetPos = mouse.Hit.Position + Vector3.new(0, 5, 0)
+    humanoidRootPart.CFrame = CFrame.new(targetPos)
+    createEffectNotification("QUICK TELEPORT", Color3.fromRGB(0, 255, 255))
+end
+
+-- Combo Mode
+local function activateComboMode()
+    comboMode = not comboMode
+    createEffectNotification("COMBO MODE: " .. (comboMode and "ON" or "OFF"), Color3.fromRGB(255, 100, 0))
+    
+    if comboMode then
+        -- Enhanced abilities in combo mode
+        humanoid.WalkSpeed = humanoid.WalkSpeed * 1.3
+        createModeEffect(Color3.fromRGB(255, 100, 0))
+    else
+        humanoid.WalkSpeed = originalWalkSpeed
+    end
+end
+
+-- Aerial Mode
+local function activateAerialMode()
+    aerialMode = not aerialMode
+    createEffectNotification("AERIAL MODE: " .. (aerialMode and "ON" or "OFF"), Color3.fromRGB(0, 200, 255))
+    
+    if aerialMode then
+        -- Flight capabilities
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        humanoidRootPart.Velocity = Vector3.new(0, 100, 0)
+        createModeEffect(Color3.fromRGB(0, 200, 255))
+    end
+end
+
+-- Defense Mode
+local function activateDefenseMode()
+    defenseMode = not defenseMode
+    createEffectNotification("DEFENSE MODE: " .. (defenseMode and "ON" or "OFF"), Color3.fromRGB(0, 255, 100))
+    
+    if defenseMode then
+        -- Enhanced defense
+        activateChaosShield()
+        createModeEffect(Color3.fromRGB(0, 255, 100))
+    end
+end
+
+-- Ultimate Mode
+local function activateUltimateMode()
+    ultimateMode = not ultimateMode
+    createEffectNotification("ULTIMATE MODE: " .. (ultimateMode and "ON" or "OFF"), Color3.fromRGB(255, 255, 0))
+    
+    if ultimateMode then
+        -- All powers enhanced
+        chaosPower = 2.0
+        activateSuperForm()
+        createModeEffect(Color3.fromRGB(255, 255, 0))
+    else
+        chaosPower = 1.0
+    end
+end
+
+-- Toggle NUM PAD active
+local function toggleNumPadActive()
+    numPadActive = not numPadActive
+    createEffectNotification("NUM PAD: " .. (numPadActive and "ACTIVE" or "INACTIVE"), 
+        numPadActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0))
+    updateNumPadDisplay()
+end
+
+-- Emergency Escape
+local function activateEmergencyEscape()
+    createEffectNotification("EMERGENCY ESCAPE!", Color3.fromRGB(255, 50, 50))
+    
+    -- Teleport far away
+    local escapePos = humanoidRootPart.Position + Vector3.new(math.random(-500, 500), 100, math.random(-500, 500))
+    humanoidRootPart.CFrame = CFrame.new(escapePos)
+    
+    -- Create protective barrier
+    activateChaosShield()
+    
+    -- Clear all negative effects
+    comboMode = false
+    aerialMode = false
+    defenseMode = false
+    ultimateMode = false
+end
+
+-- Execute current mode's special
+local function executeCurrentMode()
+    local modeData = modeAbilities[numPadMode]
+    createEffectNotification("EXECUTE: " .. modeData.Name, modeData.Color)
+    
+    -- Special execution based on mode
+    if numPadMode == 1 then
+        activateChaosOverload()
+    elseif numPadMode == 2 then
+        activateElementalStorm()
+    elseif numPadMode == 3 then
+        activateUltimateRush()
+    elseif numPadMode == 4 then
+        activateMassTeleport()
+    end
+end
+
+-- Power adjustment
+local function increaseChaosPower()
+    chaosPower = math.min(chaosPower + 0.2, 3.0)
+    createEffectNotification("POWER: x" .. string.format("%.1f", chaosPower), Color3.fromRGB(255, 200, 0))
+    updateAbilityDamage()
+end
+
+local function decreaseChaosPower()
+    chaosPower = math.max(chaosPower - 0.2, 0.5)
+    createEffectNotification("POWER: x" .. string.format("%.1f", chaosPower), Color3.fromRGB(200, 200, 200))
+    updateAbilityDamage()
+end
+
+-- Auto ability toggle
+local function toggleAutoAbility()
+    autoAbility = not autoAbility
+    createEffectNotification("AUTO ABILITY: " .. (autoAbility and "ON" or "OFF"), 
+        autoAbility and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(100, 100, 100))
+    
+    if autoAbility then
+        startAutoAbilityCycle()
+    end
+end
+
+-- AI Mode toggle
+local function toggleAIMode()
+    aiMode = not aiMode
+    createEffectNotification("AI MODE: " .. (aiMode and "ACTIVE" or "INACTIVE"), 
+        aiMode and Color3.fromRGB(150, 0, 255) or Color3.fromRGB(100, 100, 100))
+    
+    if aiMode then
+        startAIAssist()
+    end
+end
+
+-- Utility functions for NUM PAD
+local function createEffectNotification(text, color)
+    -- Create quick notification
+    local notification = Instance.new("ScreenGui")
+    notification.Name = "NumPadNotification"
+    notification.DisplayOrder = 20
+    notification.ResetOnSpawn = false
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 250, 0, 60)
+    frame.Position = UDim2.new(0.5, -125, 0.1, 0)
+    frame.BackgroundColor3 = color
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Parent = notification
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Text = text
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextSize = 18
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Parent = frame
+    
+    notification.Parent = player:WaitForChild("PlayerGui")
+    
+    -- Animate and destroy
+    spawn(function()
+        wait(1.5)
+        for i = 1, 10 do
+            frame.BackgroundTransparency = 0.3 + (i * 0.07)
+            textLabel.TextTransparency = i * 0.1
+            wait(0.05)
+        end
+        notification:Destroy()
+    end)
+end
+
+local function createModeEffect(color)
+    local effect = Instance.new("Part")
+    effect.Size = Vector3.new(20, 20, 20)
+    effect.Position = humanoidRootPart.Position
+    effect.Material = Enum.Material.Neon
+    effect.Color = color
+    effect.Transparency = 0.7
+    effect.Anchored = true
+    effect.CanCollide = false
+    effect.Shape = Enum.PartType.Ball
+    effect.Parent = workspace
+    
+    local light = Instance.new("PointLight")
+    light.Color = color
+    light.Range = 50
+    light.Brightness = 5
+    light.Parent = effect
+    
+    spawn(function()
+        for i = 1, 10 do
+            effect.Transparency = 0.7 + (i * 0.03)
+            light.Brightness = 5 - (i * 0.5)
+            effect.Size = effect.Size + Vector3.new(2, 2, 2)
+            wait(0.1)
+        end
+        effect:Destroy()
+    end)
+end
+
+local function updateAbilityDamage()
+    -- Adjust all ability damages based on chaosPower
+    -- This would modify your existing ability functions
+    print("Power multiplier updated: x" .. chaosPower)
+end
+
+-- ============================================================================
 -- EXISTING ABILITIES (Snap, Spear, Blast)
 -- ============================================================================
 
@@ -4539,7 +4766,88 @@ end
 -- ============================================================================
 
 local function onInputBegan(input, gameProcessed)
-    if gameProcessed then return end
+
+    -- NUM PAD Controls
+    elseif input.KeyCode == Enum.KeyCode.NumPad1 then
+        if numPadActive then
+            local ability = modeAbilities[numPadMode].Abilities["NumPad1"]
+            if ability then
+                -- Execute mode-specific ability
+                if ability == "activateChaosVortex" then activateChaosVortex()
+                elseif ability == "activateChaosBind" then activateChaosBind()
+                elseif ability == "activateChaosFist" then activateChaosFist()
+                elseif ability == "activateChaosVision" then activateChaosVision()
+                end
+            else
+                -- Mode switching
+                switchNumPadMode(1)
+            end
+        end
+    elseif input.KeyCode == Enum.KeyCode.NumPad2 then
+        if numPadActive then
+            local ability = modeAbilities[numPadMode].Abilities["NumPad2"]
+            if ability then
+                if ability == "activateBlackTornado" then activateBlackTornado()
+                elseif ability == "activateVoidLance" then activateVoidLance()
+                elseif ability == "activateShadowKick" then activateShadowKick()
+                elseif ability == "activateTeleportBeacon" then activateTeleportBeacon()
+                end
+            else
+                switchNumPadMode(2)
+            end
+        end
+    elseif input.KeyCode == Enum.KeyCode.NumPad3 then
+        if numPadActive then
+            local ability = modeAbilities[numPadMode].Abilities["NumPad3"]
+            if ability then
+                if ability == "activateChaosRift" then activateChaosRift()
+                elseif ability == "activateTemporalEcho" then activateTemporalEcho()
+                elseif ability == "activateSpinningChaos" then activateSpinningChaos()
+                elseif ability == "activateForceBarrier" then activateForceBarrier()
+                end
+            else
+                switchNumPadMode(3)
+            end
+        end
+    elseif input.KeyCode == Enum.KeyCode.NumPad4 then
+        if numPadActive then
+            local ability = modeAbilities[numPadMode].Abilities["NumPad4"]
+            if ability then
+                if ability == "activateShadowClone" then activateShadowClone()
+                elseif ability == "activateDimensionalMirror" then activateDimensionalMirror()
+                elseif ability == "activateTeleportStrike" then activateTeleportStrike()
+                elseif ability == "activateMassTeleport" then activateMassTeleport()
+                end
+            else
+                switchNumPadMode(4)
+            end
+        end
+    elseif input.KeyCode == Enum.KeyCode.NumPad5 then
+        if numPadActive then activateQuickTeleport() end
+    elseif input.KeyCode == Enum.KeyCode.NumPad6 then
+        if numPadActive then activateComboMode() end
+    elseif input.KeyCode == Enum.KeyCode.NumPad7 then
+        if numPadActive then activateAerialMode() end
+    elseif input.KeyCode == Enum.KeyCode.NumPad8 then
+        if numPadActive then activateDefenseMode() end
+    elseif input.KeyCode == Enum.KeyCode.NumPad9 then
+        if numPadActive then activateUltimateMode() end
+    elseif input.KeyCode == Enum.KeyCode.NumPad0 then
+        toggleNumPadActive()
+    elseif input.KeyCode == Enum.KeyCode.NumPadPeriod then
+        if numPadActive then activateEmergencyEscape() end
+    elseif input.KeyCode == Enum.KeyCode.NumPadEnter then
+        if numPadActive then executeCurrentMode() end
+    elseif input.KeyCode == Enum.KeyCode.NumPadAdd then
+        if numPadActive then increaseChaosPower() end
+    elseif input.KeyCode == Enum.KeyCode.NumPadSubtract then
+        if numPadActive then decreaseChaosPower() end
+    elseif input.KeyCode == Enum.KeyCode.NumPadMultiply then
+        if numPadActive then toggleAutoAbility() end
+    elseif input.KeyCode == Enum.KeyCode.NumPadDivide then
+        if numPadActive then toggleAIMode() end
+        
+        if gameProcessed then return end
     
     local inputService = game:GetService("UserInputService")
     
@@ -4809,6 +5117,181 @@ makeDraggable(invisButton)
 makeDraggable(inhibitorButton)
 makeDraggable(acrobaticsButton)
 
+-- NUM PAD GUI Panel
+local numPadGUI = Instance.new("ScreenGui")
+numPadGUI.Name = "NumPadGUI"
+numPadGUI.DisplayOrder = 15
+numPadGUI.ResetOnSpawn = false
+
+-- Main NUM PAD frame
+local numPadFrame = Instance.new("Frame")
+numPadFrame.Name = "NumPadFrame"
+numPadFrame.Size = UDim2.new(0, 320, 0, 220)
+numPadFrame.Position = UDim2.new(1, -330, 0.5, -110)
+numPadFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
+numPadFrame.BackgroundTransparency = 0.3
+numPadFrame.BorderSizePixel = 0
+numPadFrame.Parent = numPadGUI
+
+local numPadCorner = Instance.new("UICorner")
+numPadCorner.CornerRadius = UDim.new(0, 8)
+numPadCorner.Parent = numPadFrame
+
+-- Title
+local numPadTitle = Instance.new("TextLabel")
+numPadTitle.Text = "🎮 NUM PAD CONTROLS"
+numPadTitle.TextColor3 = Color3.fromRGB(255, 255, 0)
+numPadTitle.TextSize = 18
+numPadTitle.Font = Enum.Font.GothamBold
+numPadTitle.BackgroundTransparency = 1
+numPadTitle.Size = UDim2.new(1, 0, 0, 30)
+numPadTitle.Position = UDim2.new(0, 0, 0, 5)
+numPadTitle.Parent = numPadFrame
+
+-- Mode indicator
+local modeIndicator = Instance.new("TextLabel")
+modeIndicator.Name = "ModeIndicator"
+modeIndicator.Text = "MODE 1: BASIC CHAOS"
+modeIndicator.TextColor3 = Color3.fromRGB(255, 0, 0)
+modeIndicator.TextSize = 14
+modeIndicator.Font = Enum.Font.GothamBold
+modeIndicator.BackgroundTransparency = 1
+modeIndicator.Size = UDim2.new(1, 0, 0, 25)
+modeIndicator.Position = UDim2.new(0, 0, 0, 35)
+modeIndicator.Parent = numPadFrame
+
+-- Status indicator
+local numPadStatus = Instance.new("TextLabel")
+numPadStatus.Name = "NumPadStatus"
+numPadStatus.Text = "STATUS: ACTIVE"
+numPadStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+numPadStatus.TextSize = 12
+numPadStatus.Font = Enum.Font.Gotham
+numPadStatus.BackgroundTransparency = 1
+numPadStatus.Size = UDim2.new(1, 0, 0, 20)
+numPadStatus.Position = UDim2.new(0, 0, 0, 60)
+numPadStatus.Parent = numPadFrame
+
+-- Key layout grid
+local numPadGrid = Instance.new("Frame")
+numPadGrid.Name = "NumPadGrid"
+numPadGrid.Size = UDim2.new(1, -20, 0, 130)
+numPadGrid.Position = UDim2.new(0, 10, 0, 85)
+numPadGrid.BackgroundTransparency = 1
+numPadGrid.Parent = numPadFrame
+
+-- Create 3x3 grid
+local keyPositions = {
+    ["NumPad7"] = {0, 0}, ["NumPad8"] = {1, 0}, ["NumPad9"] = {2, 0},
+    ["NumPad4"] = {0, 1}, ["NumPad5"] = {1, 1}, ["NumPad6"] = {2, 1},
+    ["NumPad1"] = {0, 2}, ["NumPad2"] = {1, 2}, ["NumPad3"] = {2, 2}
+}
+
+local keyFrames = {}
+for key, pos in pairs(keyPositions) do
+    local keyFrame = Instance.new("Frame")
+    keyFrame.Size = UDim2.new(0.32, 0, 0.32, 0)
+    keyFrame.Position = UDim2.new(pos[1] * 0.33, 0, pos[2] * 0.33, 0)
+    keyFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    keyFrame.BackgroundTransparency = 0.5
+    keyFrame.Name = key
+    keyFrame.Parent = numPadGrid
+    
+    local keyCorner = Instance.new("UICorner")
+    keyCorner.CornerRadius = UDim.new(0, 4)
+    keyCorner.Parent = keyFrame
+    
+    local keyLabel = Instance.new("TextLabel")
+    keyLabel.Text = key:gsub("NumPad", "")
+    keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyLabel.TextSize = 12
+    keyLabel.Font = Enum.Font.GothamBold
+    keyLabel.BackgroundTransparency = 1
+    keyLabel.Size = UDim2.new(1, 0, 0.4, 0)
+    keyLabel.Position = UDim2.new(0, 0, 0, 5)
+    keyLabel.Parent = keyFrame
+    
+    local abilityLabel = Instance.new("TextLabel")
+    abilityLabel.Name = "AbilityName"
+    abilityLabel.Text = ""
+    abilityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    abilityLabel.TextSize = 8
+    abilityLabel.Font = Enum.Font.Gotham
+    abilityLabel.BackgroundTransparency = 1
+    abilityLabel.Size = UDim2.new(1, 0, 0.6, 0)
+    abilityLabel.Position = UDim2.new(0, 0, 0.4, 0)
+    abilityLabel.TextWrapped = true
+    abilityLabel.Parent = keyFrame
+    
+    table.insert(keyFrames, keyFrame)
+end
+
+-- Function to update NUM PAD display
+local function updateNumPadDisplay()
+    local modeData = modeAbilities[numPadMode]
+    modeIndicator.Text = "MODE " .. numPadMode .. ": " .. modeData.Name
+    modeIndicator.TextColor3 = modeData.Color
+    
+    numPadStatus.Text = "STATUS: " .. (numPadActive and "ACTIVE" or "INACTIVE")
+    numPadStatus.TextColor3 = numPadActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    
+    -- Update key labels
+    for _, keyFrame in pairs(keyFrames) do
+        local keyName = keyFrame.Name
+        local abilityLabel = keyFrame:FindFirstChild("AbilityName")
+        
+        if modeData.Abilities[keyName] then
+            local abilityName = modeData.Abilities[keyName]:gsub("activate", "")
+            abilityName = abilityName:gsub("([A-Z])", " %1"):gsub("^%s+", "")
+            abilityLabel.Text = abilityName
+            keyFrame.BackgroundColor3 = modeData.Color
+            keyFrame.BackgroundTransparency = 0.3
+        else
+            abilityLabel.Text = ""
+            keyFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+            keyFrame.BackgroundTransparency = 0.5
+        end
+    end
+end
+
+-- Make draggable
+local function makeNumPadDraggable()
+    local isDragging = false
+    local dragStart, frameStart
+    
+    numPadFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = true
+            dragStart = input.Position
+            frameStart = numPadFrame.Position
+        end
+    end)
+    
+    numPadFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging then
+            local delta = input.Position - dragStart
+            numPadFrame.Position = UDim2.new(
+                frameStart.X.Scale, 
+                frameStart.X.Offset + delta.X,
+                frameStart.Y.Scale, 
+                frameStart.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    numPadFrame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+end
+
+makeNumPadDraggable()
+numPadGUI.Parent = player:WaitForChild("PlayerGui")
+
+-- Initialize NUM PAD display
+updateNumPadDisplay()
+
 -- Character respawn handling
 connections.characterAdded = player.CharacterAdded:Connect(function(newChar)
     character = newChar
@@ -4874,6 +5357,58 @@ _G.ShadowConnections = connections
 showLoadingNotification()
 wait(0.5)
 local themeMusic = playThemeMusic()
+
+-- Add NUM PAD help to final message
+wait(1)
+local numPadHelp = Instance.new("ScreenGui")
+numPadHelp.Name = "NumPadHelp"
+numPadHelp.DisplayOrder = 5
+numPadHelp.ResetOnSpawn = false
+
+local helpFrame = Instance.new("Frame")
+helpFrame.Size = UDim2.new(0, 400, 0, 200)
+helpFrame.Position = UDim2.new(0.5, -200, 0.7, -100)
+helpFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+helpFrame.BackgroundTransparency = 0.7
+helpFrame.BorderSizePixel = 0
+helpFrame.Parent = numPadHelp
+
+local helpText = [[🎮 NUM PAD CONTROLS ADDED 🎮
+
+NUM 1-4: Switch Modes (Basic/Sorcery/Combat/Utility)
+NUM 5: Quick Teleport | NUM 6: Combo Mode
+NUM 7: Aerial Mode | NUM 8: Defense Mode
+NUM 9: Ultimate Mode | NUM 0: Toggle NUM PAD
+.: Emergency Escape | ENTER: Execute Mode
++: Increase Power | -: Decrease Power
+*: Auto Ability | /: AI Mode
+
+Each mode changes NUM 1-9 abilities!
+]]
+
+local textLabel = Instance.new("TextLabel")
+textLabel.Text = helpText
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+textLabel.TextSize = 14
+textLabel.Font = Enum.Font.Gotham
+textLabel.BackgroundTransparency = 1
+textLabel.Size = UDim2.new(1, -20, 1, -20)
+textLabel.Position = UDim2.new(0, 10, 0, 10)
+textLabel.TextWrapped = true
+textLabel.Parent = helpFrame
+
+numPadHelp.Parent = player:WaitForChild("PlayerGui")
+
+-- Auto-close help
+spawn(function()
+    wait(10)
+    for i = 1, 20 do
+        helpFrame.BackgroundTransparency = 0.7 + (i * 0.015)
+        textLabel.TextTransparency = i * 0.05
+        wait(0.05)
+    end
+    numPadHelp:Destroy()
+end)
 
 print("==================================================================================")
 print("⚡ SHADOW THE HEDGEHOG - COMPLETE CHAOS ARSENAL WITH 4 PAGES ⚡")
