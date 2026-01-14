@@ -645,7 +645,7 @@ local function checkMovementAndFlip()
     
     local inputService = game:GetService("UserInputService")
     local moveDirection = Vector3.new(0, 0, 0)
-    local hasMovement = false
+    local hasMovement = true
     
     -- Check which movement keys are pressed
     if inputService:IsKeyDown(Enum.KeyCode.W) then
@@ -1908,16 +1908,11 @@ local function activateDimensionShift()
     dimensionLight.Brightness = 8
     dimensionLight.Parent = dimensionRift
 
-    task.spawn(function()
+    spawn(function()
         for _ = 1, 30 do
-            for _, part in ipairs(workspace:GetDescendants()) do
-                if part:IsA("BasePart")
-                and not part:IsDescendantOf(character)
-                and part.Parent then
-
-                    local distance =
-                        (part.Position - humanoidRootPart.Position).Magnitude
-
+            for _, part in pairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part:IsDescendantOf(character) and part.Parent then
+                    local distance = (part.Position - humanoidRootPart.Position).Magnitude
                     if distance <= 150 then
                         -- Invert color safely
                         local c = part.Color
@@ -1929,32 +1924,26 @@ local function activateDimensionShift()
 
                         -- Anti-gravity force
                         local antiGravity = Instance.new("BodyForce")
-                        antiGravity.Force =
-                            Vector3.new(0, part:GetMass() * 392.4, 0)
+                        antiGravity.Force = Vector3.new(0, part:GetMass() * 392.4, 0)
                         antiGravity.Parent = part
-                        Debris:AddItem(antiGravity, 0.1)
+                        game:GetService("Debris"):AddItem(antiGravity, 0.1)
                     end
                 end
             end
 
-            dimensionRift.CFrame *= CFrame.Angles(
-                0,
-                math.rad(10),
-                math.rad(5)
-            )
-
-            task.wait(0.1)
+            dimensionRift.CFrame = dimensionRift.CFrame * CFrame.Angles(0, math.rad(10), math.rad(5))
+            wait(0.1)
         end
 
         -- Rift collapse
         for i = 1, 20 do
             dimensionRift.Transparency = math.clamp(0.8 + i * 0.01, 0, 1)
             dimensionLight.Brightness = math.max(0, 8 - i * 0.4)
-            task.wait(0.05)
+            wait(0.05)
         end
 
         dimensionRift:Destroy()
-        task.wait(30)
+        wait(30)
         abilityCooldowns.U = false
     end)
 end
@@ -3638,7 +3627,9 @@ local function activateSpeedBoost()
     speedParticles.Enabled = false
     speedParticles:Destroy()
     
-    speedIndicator.Text = "Speed: " .. math.floor(humanoid.WalkSpeed)
+    if speedIndicator then
+        speedIndicator.Text = "Speed: " .. math.floor(humanoid.WalkSpeed)
+    end
     
     wait(25)
     utilityCooldowns["AltF7"] = false
@@ -3728,6 +3719,43 @@ end
 -- ============================================================================
 -- NUM PAD CONTROL FUNCTIONS
 -- ============================================================================
+
+-- Missing functions that were referenced
+local function createModeNotification(text, color)
+    local notification = Instance.new("ScreenGui")
+    notification.Name = "ModeNotification"
+    notification.DisplayOrder = 20
+    notification.ResetOnSpawn = false
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 60)
+    frame.Position = UDim2.new(0.5, -150, 0.2, 0)
+    frame.BackgroundColor3 = color
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Parent = notification
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Text = text
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextSize = 20
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Parent = frame
+    
+    notification.Parent = player:WaitForChild("PlayerGui")
+    
+    spawn(function()
+        wait(2)
+        for i = 1, 10 do
+            frame.BackgroundTransparency = 0.3 + (i * 0.07)
+            textLabel.TextTransparency = i * 0.1
+            wait(0.05)
+        end
+        notification:Destroy()
+    end)
+end
 
 -- Mode switching
 local function switchNumPadMode(mode)
@@ -3878,6 +3906,52 @@ local function toggleAIMode()
     end
 end
 
+-- Missing auto ability and AI functions
+local function startAutoAbilityCycle()
+    spawn(function()
+        while autoAbility do
+            -- Cycle through random abilities
+            local abilities = {
+                activateChaosVortex, activateBlackTornado, activateChaosRift,
+                activateShadowClone, activateChaosCage, activateTimeStop,
+                activateChaosWave, activateTeleportDash, activateGravityField
+            }
+            
+            local randomAbility = abilities[math.random(1, #abilities)]
+            randomAbility()
+            wait(math.random(3, 8))
+        end
+    end)
+end
+
+local function startAIAssist()
+    spawn(function()
+        while aiMode do
+            -- AI will automatically use defensive abilities when threatened
+            local nearbyThreats = 0
+            
+            for _, part in pairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                    local distance = (part.Position - humanoidRootPart.Position).Magnitude
+                    if distance <= 50 and part.Velocity.Magnitude > 10 then
+                        nearbyThreats = nearbyThreats + 1
+                    end
+                end
+            end
+            
+            if nearbyThreats > 3 then
+                -- Use defensive ability
+                activateChaosShield()
+            elseif nearbyThreats > 0 then
+                -- Use offensive ability
+                activateChaosBlast()
+            end
+            
+            wait(1)
+        end
+    end)
+end
+
 -- Utility functions for NUM PAD
 local function createEffectNotification(text, color)
     -- Create quick notification
@@ -3948,7 +4022,6 @@ end
 
 local function updateAbilityDamage()
     -- Adjust all ability damages based on chaosPower
-    -- This would modify your existing ability functions
     print("Power multiplier updated: x" .. chaosPower)
 end
 
@@ -4766,9 +4839,12 @@ end
 -- ============================================================================
 
 local function onInputBegan(input, gameProcessed)
-
+    if gameProcessed then return end
+    
+    local inputService = game:GetService("UserInputService")
+    
     -- NUM PAD Controls
-    elseif input.KeyCode == Enum.KeyCode.NumPad1 then
+    if input.KeyCode == Enum.KeyCode.NumPad1 then
         if numPadActive then
             local ability = modeAbilities[numPadMode].Abilities["NumPad1"]
             if ability then
@@ -4847,12 +4923,8 @@ local function onInputBegan(input, gameProcessed)
     elseif input.KeyCode == Enum.KeyCode.NumPadDivide then
         if numPadActive then toggleAIMode() end
         
-        if gameProcessed then return end
-    
-    local inputService = game:GetService("UserInputService")
-    
     -- Existing controls
-    if input.KeyCode == Enum.KeyCode.LeftShift then
+    elseif input.KeyCode == Enum.KeyCode.LeftShift then
         toggleSprint()
     elseif input.KeyCode == Enum.KeyCode.RightShift then
         activateInhibitorRings()
@@ -5045,10 +5117,6 @@ end
 -- Initialize
 collectVisibleParts()
 createRocketEffects()
-
-if idleTrack then
-    idleTrack:Play()
-end
 
 -- Setup connections
 local connections = {}
@@ -5339,10 +5407,6 @@ connections.characterAdded = player.CharacterAdded:Connect(function(newChar)
     sprintStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
     speedIndicator.Text = "Speed: " .. math.floor(originalWalkSpeed)
     
-    if idleTrack then
-        idleTrack:Play()
-    end
-    
     -- Cleanup acrobatics effect
     if acrobaticsEffect then
         acrobaticsEffect:Destroy()
@@ -5410,6 +5474,69 @@ spawn(function()
     numPadHelp:Destroy()
 end)
 
+-- Ultimate notification
+wait(1)
+local ultimateGui = Instance.new("ScreenGui")
+ultimateGui.Name = "UltimateNotification"
+ultimateGui.DisplayOrder = 998
+ultimateGui.ResetOnSpawn = false
+
+local ultimateFrame = Instance.new("Frame")
+ultimateFrame.Size = UDim2.new(0, 600, 0, 180)
+ultimateFrame.Position = UDim2.new(0.5, -300, 0.3, -90)
+ultimateFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ultimateFrame.BackgroundTransparency = 0.7
+ultimateFrame.BorderSizePixel = 0
+ultimateFrame.Parent = ultimateGui
+
+local ultimateCorner = Instance.new("UICorner")
+ultimateCorner.CornerRadius = UDim.new(0, 12)
+ultimateCorner.Parent = ultimateFrame
+
+local ultimateText = Instance.new("TextLabel")
+ultimateText.Size = UDim2.new(1, -20, 1, -20)
+ultimateText.Position = UDim2.new(0, 10, 0, 10)
+ultimateText.Text = "CHAOS ARSENAL EXPANDED!\n4 PAGES • 41 ABILITIES • TOTAL DOMINANCE\nNETWORK CONTROL: ABSOLUTE\nSHADOW: ULTIMATE CHAOS FORM ACHIEVED!"
+ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
+ultimateText.TextSize = 24
+ultimateText.Font = Enum.Font.GothamBold
+ultimateText.BackgroundTransparency = 1
+ultimateText.TextWrapped = true
+ultimateText.TextYAlignment = Enum.TextYAlignment.Center
+ultimateText.Parent = ultimateFrame
+
+ultimateGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+ultimateFrame.BackgroundTransparency = 1
+ultimateText.TextTransparency = 1
+
+-- Animate with chaos energy
+for i = 1, 30 do
+    ultimateFrame.BackgroundTransparency = 1 - (i * 0.033)
+    ultimateText.TextTransparency = 1 - (i * 0.033)
+    
+    -- Chaos energy pulse
+    if i % 3 == 0 then
+        ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
+    elseif i % 3 == 1 then
+        ultimateText.TextColor3 = Color3.fromRGB(255, 100, 0)
+    else
+        ultimateText.TextColor3 = Color3.fromRGB(255, 0, 100)
+    end
+    
+    wait(0.05)
+end
+
+wait(5)
+
+for i = 1, 30 do
+    ultimateFrame.BackgroundTransparency = 0.3 + (i * 0.023)
+    ultimateText.TextTransparency = i * 0.033
+    wait(0.05)
+end
+
+ultimateGui:Destroy()
+
 print("==================================================================================")
 print("⚡ SHADOW THE HEDGEHOG - COMPLETE CHAOS ARSENAL WITH 4 PAGES ⚡")
 print("==================================================================================")
@@ -5476,66 +5603,3 @@ print("")
 print("Network control: MAXIMUM")
 print("Total pages: 4")
 print("==================================================================================")
-
--- Ultimate notification
-wait(1)
-local ultimateGui = Instance.new("ScreenGui")
-ultimateGui.Name = "UltimateNotification"
-ultimateGui.DisplayOrder = 998
-ultimateGui.ResetOnSpawn = false
-
-local ultimateFrame = Instance.new("Frame")
-ultimateFrame.Size = UDim2.new(0, 600, 0, 180)
-ultimateFrame.Position = UDim2.new(0.5, -300, 0.3, -90)
-ultimateFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ultimateFrame.BackgroundTransparency = 0.7
-ultimateFrame.BorderSizePixel = 0
-ultimateFrame.Parent = ultimateGui
-
-local ultimateCorner = Instance.new("UICorner")
-ultimateCorner.CornerRadius = UDim.new(0, 12)
-ultimateCorner.Parent = ultimateFrame
-
-local ultimateText = Instance.new("TextLabel")
-ultimateText.Size = UDim2.new(1, -20, 1, -20)
-ultimateText.Position = UDim2.new(0, 10, 0, 10)
-ultimateText.Text = "CHAOS ARSENAL EXPANDED!\n4 PAGES • 41 ABILITIES • TOTAL DOMINANCE\nNETWORK CONTROL: ABSOLUTE\nSHADOW: ULTIMATE CHAOS FORM ACHIEVED!"
-ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
-ultimateText.TextSize = 24
-ultimateText.Font = Enum.Font.GothamBold
-ultimateText.BackgroundTransparency = 1
-ultimateText.TextWrapped = true
-ultimateText.TextYAlignment = Enum.TextYAlignment.Center
-ultimateText.Parent = ultimateFrame
-
-ultimateGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
-ultimateFrame.BackgroundTransparency = 1
-ultimateText.TextTransparency = 1
-
--- Animate with chaos energy
-for i = 1, 30 do
-    ultimateFrame.BackgroundTransparency = 1 - (i * 0.033)
-    ultimateText.TextTransparency = 1 - (i * 0.033)
-    
-    -- Chaos energy pulse
-    if i % 3 == 0 then
-        ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
-    elseif i % 3 == 1 then
-        ultimateText.TextColor3 = Color3.fromRGB(255, 100, 0)
-    else
-        ultimateText.TextColor3 = Color3.fromRGB(255, 0, 100)
-    end
-    
-    wait(0.05)
-end
-
-wait(5)
-
-for i = 1, 30 do
-    ultimateFrame.BackgroundTransparency = 0 + (i * 0.033)
-    ultimateText.TextTransparency = 0 + (i * 0.033)
-    wait(0.05)
-end
-
-ultimateGui:Destroy()
