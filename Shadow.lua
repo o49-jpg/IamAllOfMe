@@ -1,4 +1,4 @@
--- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
+ -- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
 
 -- Animations
 
@@ -114,11 +114,13 @@ local function playThemeMusic()
     end
     
     local sound = Instance.new("Sound")
-    sound.Name = "ShadowTheme"
-    sound.SoundId = "rbxassetid://101807473608803"
-    sound.Volume = 0.5
-    sound.Looped = true
-    sound.Playing = true
+sound.Name = "ShadowTheme"
+local asset_id = getcustomasset("ShadowTheme.mp3") -- Replace with your actual file path
+sound.SoundId = asset_id
+sound.Volume = 0.5
+sound.Looped = true
+sound.Parent = workspace
+sound:Play()   
     
     local musicGui = Instance.new("ScreenGui")
     musicGui.Name = "ShadowMusicGUI"
@@ -4843,85 +4845,84 @@ local function onInputBegan(input, gameProcessed)
     
     local inputService = game:GetService("UserInputService")
     
-    -- NUM PAD Controls
-    if input.KeyCode == Enum.KeyCode.NumPad1 then
-        if numPadActive then
-            local ability = modeAbilities[numPadMode].Abilities["NumPad1"]
-            if ability then
-                -- Execute mode-specific ability
-                if ability == "activateChaosVortex" then activateChaosVortex()
-                elseif ability == "activateChaosBind" then activateChaosBind()
-                elseif ability == "activateChaosFist" then activateChaosFist()
-                elseif ability == "activateChaosVision" then activateChaosVision()
-                end
-            else
-                -- Mode switching
-                switchNumPadMode(1)
+-- NUM PAD Controls
+if input.KeyCode == Enum.KeyCode.KeypadOne then
+    if numPadActive then
+        local ability = modeAbilities[numPadMode].Abilities["NumPad1"]
+        if ability then
+            if ability == "activateChaosVortex" then activateChaosVortex()
+            elseif ability == "activateChaosBind" then activateChaosBind()
+            elseif ability == "activateChaosFist" then activateChaosFist()
+            elseif ability == "activateChaosVision" then activateChaosVision()
             end
+        else
+            switchNumPadMode(1)
         end
-    elseif input.KeyCode == Enum.KeyCode.NumPad2 then
-        if numPadActive then
-            local ability = modeAbilities[numPadMode].Abilities["NumPad2"]
-            if ability then
-                if ability == "activateBlackTornado" then activateBlackTornado()
-                elseif ability == "activateVoidLance" then activateVoidLance()
-                elseif ability == "activateShadowKick" then activateShadowKick()
-                elseif ability == "activateTeleportBeacon" then activateTeleportBeacon()
-                end
-            else
-                switchNumPadMode(2)
+    end
+elseif input.KeyCode == Enum.KeyCode.KeypadTwo then  -- Fixed: KeypadTwo
+    if numPadActive then
+        local ability = modeAbilities[numPadMode].Abilities["NumPad2"]
+        if ability then
+            if ability == "activateBlackTornado" then activateBlackTornado()
+            elseif ability == "activateVoidLance" then activateVoidLance()
+            elseif ability == "activateShadowKick" then activateShadowKick()
+            elseif ability == "activateTeleportBeacon" then activateTeleportBeacon()
             end
+        else
+            switchNumPadMode(2)
         end
-    elseif input.KeyCode == Enum.KeyCode.NumPad3 then
-        if numPadActive then
-            local ability = modeAbilities[numPadMode].Abilities["NumPad3"]
-            if ability then
-                if ability == "activateChaosRift" then activateChaosRift()
-                elseif ability == "activateTemporalEcho" then activateTemporalEcho()
-                elseif ability == "activateSpinningChaos" then activateSpinningChaos()
-                elseif ability == "activateForceBarrier" then activateForceBarrier()
-                end
-            else
-                switchNumPadMode(3)
+    end
+elseif input.KeyCode == Enum.KeyCode.KeypadThree then  -- Fixed: KeypadThree
+    if numPadActive then
+        local ability = modeAbilities[numPadMode].Abilities["NumPad3"]
+        if ability then
+            if ability == "activateChaosRift" then activateChaosRift()
+            elseif ability == "activateTemporalEcho" then activateTemporalEcho()
+            elseif ability == "activateSpinningChaos" then activateSpinningChaos()
+            elseif ability == "activateForceBarrier" then activateForceBarrier()
             end
+        else
+            switchNumPadMode(3)
         end
-    elseif input.KeyCode == Enum.KeyCode.NumPad4 then
-        if numPadActive then
-            local ability = modeAbilities[numPadMode].Abilities["NumPad4"]
-            if ability then
-                if ability == "activateShadowClone" then activateShadowClone()
-                elseif ability == "activateDimensionalMirror" then activateDimensionalMirror()
-                elseif ability == "activateTeleportStrike" then activateTeleportStrike()
-                elseif ability == "activateMassTeleport" then activateMassTeleport()
-                end
-            else
-                switchNumPadMode(4)
+    end
+elseif input.KeyCode == Enum.KeyCode.KeypadFour then  -- Fixed: KeypadFour
+    if numPadActive then
+        local ability = modeAbilities[numPadMode].Abilities["NumPad4"]
+        if ability then
+            if ability == "activateShadowClone" then activateShadowClone()
+            elseif ability == "activateDimensionalMirror" then activateDimensionalMirror()
+            elseif ability == "activateTeleportStrike" then activateTeleportStrike()
+            elseif ability == "activateMassTeleport" then activateMassTeleport()
             end
+        else
+            switchNumPadMode(4)
         end
-    elseif input.KeyCode == Enum.KeyCode.NumPad5 then
-        if numPadActive then activateQuickTeleport() end
-    elseif input.KeyCode == Enum.KeyCode.NumPad6 then
-        if numPadActive then activateComboMode() end
-    elseif input.KeyCode == Enum.KeyCode.NumPad7 then
-        if numPadActive then activateAerialMode() end
-    elseif input.KeyCode == Enum.KeyCode.NumPad8 then
-        if numPadActive then activateDefenseMode() end
-    elseif input.KeyCode == Enum.KeyCode.NumPad9 then
-        if numPadActive then activateUltimateMode() end
-    elseif input.KeyCode == Enum.KeyCode.NumPad0 then
-        toggleNumPadActive()
-    elseif input.KeyCode == Enum.KeyCode.NumPadPeriod then
-        if numPadActive then activateEmergencyEscape() end
-    elseif input.KeyCode == Enum.KeyCode.NumPadEnter then
-        if numPadActive then executeCurrentMode() end
-    elseif input.KeyCode == Enum.KeyCode.NumPadAdd then
-        if numPadActive then increaseChaosPower() end
-    elseif input.KeyCode == Enum.KeyCode.NumPadSubtract then
-        if numPadActive then decreaseChaosPower() end
-    elseif input.KeyCode == Enum.KeyCode.NumPadMultiply then
-        if numPadActive then toggleAutoAbility() end
-    elseif input.KeyCode == Enum.KeyCode.NumPadDivide then
-        if numPadActive then toggleAIMode() end
+    end
+elseif input.KeyCode == Enum.KeyCode.KeypadFive then  -- Fixed: KeypadFive
+    if numPadActive then activateQuickTeleport() end
+elseif input.KeyCode == Enum.KeyCode.KeypadSix then  -- Fixed: KeypadSix
+    if numPadActive then activateComboMode() end
+elseif input.KeyCode == Enum.KeyCode.KeypadSeven then  -- Fixed: KeypadSeven
+    if numPadActive then activateAerialMode() end
+elseif input.KeyCode == Enum.KeyCode.KeypadEight then  -- Fixed: KeypadEight
+    if numPadActive then activateDefenseMode() end
+elseif input.KeyCode == Enum.KeyCode.KeypadNine then  -- Fixed: KeypadNine
+    if numPadActive then activateUltimateMode() end
+elseif input.KeyCode == Enum.KeyCode.KeypadZero then  -- Fixed: KeypadZero
+    toggleNumPadActive()
+elseif input.KeyCode == Enum.KeyCode.KeypadPeriod then
+    if numPadActive then activateEmergencyEscape() end
+elseif input.KeyCode == Enum.KeyCode.KeypadEnter then
+    if numPadActive then executeCurrentMode() end
+elseif input.KeyCode == Enum.KeyCode.KeypadPlus then
+    if numPadActive then increaseChaosPower() end
+elseif input.KeyCode == Enum.KeyCode.KeypadMinus then
+    if numPadActive then decreaseChaosPower() end
+elseif input.KeyCode == Enum.KeyCode.KeypadMultiply then
+    if numPadActive then toggleAutoAbility() end
+elseif input.KeyCode == Enum.KeyCode.KeypadDivide then
+    if numPadActive then toggleAIMode() end
+end   
         
     -- Existing controls
     elseif input.KeyCode == Enum.KeyCode.LeftShift then
