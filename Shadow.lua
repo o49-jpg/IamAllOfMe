@@ -1,4 +1,4 @@
- -- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
+-- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
 
 -- Animations
 
