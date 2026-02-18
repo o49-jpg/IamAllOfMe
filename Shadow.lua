@@ -115,7 +115,7 @@ local function playThemeMusic()
     
     local sound = Instance.new("Sound")
 sound.Name = "ShadowTheme"
-local asset_id = getcustomasset("ShadowTheme.mp3") -- Replace with your actual file path
+local asset_id = getcustomasset("allofme.mp3") -- Replace with your actual file path
 sound.SoundId = asset_id
 sound.Volume = 0.5
 sound.Looped = true
@@ -4837,6 +4837,638 @@ local function activateInhibitorRings()
 end
 
 -- ============================================================================
+-- FORM DEFINITIONS - 4 COMPLETELY DIFFERENT TRANSFORMATIONS
+-- ============================================================================
+
+-- Current active form (1-4)
+local currentForm = 1
+local isFormActive = false
+local formTimer = 0
+local maxFormTime = 60 -- seconds per form
+
+-- FORM 1: CHAOS STRIKE FORM (Offensive Combat Form)
+local form1Abilities = {
+    -- NUM PAD moves for Form 1 (COMPLETELY UNIQUE)
+    ["NumPad1"] = {
+        name = "CHAOS BARRAGE",
+        func = function()
+            -- Rapid energy projectile barrage (unique to Form 1)
+            for i = 1, 20 do
+                local proj = Instance.new("Part")
+                proj.Size = Vector3.new(3, 3, 3)
+                proj.Position = humanoidRootPart.Position + humanoidRootPart.CFrame.lookVector * 5
+                proj.Material = Enum.Material.Neon
+                proj.Color = Color3.fromRGB(255, 0, 0)
+                proj.Anchored = false
+                proj.CanCollide = false
+                proj.Parent = workspace
+                
+                local bv = Instance.new("BodyVelocity")
+                bv.Velocity = humanoidRootPart.CFrame.lookVector * 200 + Vector3.new(0, math.random(-10, 10), 0)
+                bv.MaxForce = Vector3.new(10000, 10000, 10000)
+                bv.Parent = proj
+                
+                game:GetService("Debris"):AddItem(proj, 3)
+                game:GetService("Debris"):AddItem(bv, 0.5)
+                
+                wait(0.05)
+            end
+        end,
+        icon = "⚡", color = Color3.fromRGB(255, 0, 0), cooldown = 5
+    },
+    ["NumPad2"] = {
+        name = "RAIL CANNON",
+        func = function()
+            -- Massive penetrating beam (unique to Form 1)
+            local beam = Instance.new("Part")
+            beam.Size = Vector3.new(5, 5, 200)
+            beam.Position = humanoidRootPart.Position + humanoidRootPart.CFrame.lookVector * 100
+            beam.Material = Enum.Material.Neon
+            beam.Color = Color3.fromRGB(255, 50, 0)
+            beam.Anchored = true
+            beam.CanCollide = false
+            beam.Parent = workspace
+            
+            local light = Instance.new("PointLight")
+            light.Color = Color3.fromRGB(255, 50, 0)
+            light.Range = 100
+            light.Brightness = 10
+            light.Parent = beam
+            
+            -- Damage everything in beam path
+            for _, part in pairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                    local distance = (part.Position - beam.Position).Magnitude
+                    if distance <= 50 then
+                        part:Destroy()
+                    end
+                end
+            end
+            
+            wait(0.5)
+            beam:Destroy()
+        end,
+        icon = "🔫", color = Color3.fromRGB(255, 100, 0), cooldown = 8
+    },
+    ["NumPad3"] = {
+        name = "DESTRUCTION FIELD",
+        func = function()
+            -- Expanding destruction aura (unique to Form 1)
+            local field = Instance.new("Part")
+            field.Size = Vector3.new(10, 10, 10)
+            field.Position = humanoidRootPart.Position
+            field.Material = Enum.Material.Neon
+            field.Color = Color3.fromRGB(255, 0, 0)
+            field.Anchored = true
+            field.CanCollide = false
+            field.Shape = Enum.PartType.Ball
+            field.Parent = workspace
+            
+            for i = 1, 30 do
+                field.Size = field.Size + Vector3.new(5, 5, 5)
+                field.Transparency = i * 0.03
+                
+                -- Destroy objects in range
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                        local dist = (part.Position - field.Position).Magnitude
+                        if dist <= field.Size.X/2 then
+                            part:Destroy()
+                        end
+                    end
+                end
+                
+                wait(0.03)
+            end
+            
+            field:Destroy()
+        end,
+        icon = "💥", color = Color3.fromRGB(255, 50, 50), cooldown = 12
+    },
+    ["NumPad4"] = {
+        name = "CHAOS SLASH",
+        func = function()
+            -- Energy blade slashes (unique to Form 1)
+            for i = 1, 5 do
+                local slash = Instance.new("Part")
+                slash.Size = Vector3.new(30, 5, 5)
+                slash.CFrame = humanoidRootPart.CFrame * CFrame.Angles(0, math.rad(i * 20), 0)
+                slash.Position = humanoidRootPart.Position + humanoidRootPart.CFrame.lookVector * 15
+                slash.Material = Enum.Material.Neon
+                slash.Color = Color3.fromRGB(255, 100, 0)
+                slash.Anchored = true
+                slash.CanCollide = false
+                slash.Parent = workspace
+                
+                -- Damage objects in slash path
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                        local dist = (part.Position - slash.Position).Magnitude
+                        if dist <= 20 then
+                            part:Destroy()
+                        end
+                    end
+                end
+                
+                game:GetService("Debris"):AddItem(slash, 1)
+                wait(0.1)
+            end
+        end,
+        icon = "⚔️", color = Color3.fromRGB(255, 150, 0), cooldown = 6
+    },
+    ["NumPad5"] = {
+        name = "IMPACT CRATER",
+        func = function()
+            -- Ground slam creating crater (unique to Form 1)
+            humanoidRootPart.Velocity = Vector3.new(0, -200, 0)
+            wait(0.3)
+            
+            local explosion = Instance.new("Explosion")
+            explosion.Position = humanoidRootPart.Position
+            explosion.BlastRadius = 50
+            explosion.BlastPressure = 1000000
+            explosion.Parent = workspace
+            
+            -- Create crater
+            local crater = Instance.new("Part")
+            crater.Size = Vector3.new(60, 10, 60)
+            crater.Position = humanoidRootPart.Position - Vector3.new(0, 5, 0)
+            crater.Material = Enum.Material.Slate
+            crater.Color = Color3.fromRGB(50, 50, 50)
+            crater.Anchored = true
+            crater.Parent = workspace
+            
+            game:GetService("Debris"):AddItem(crater, 10)
+        end,
+        icon = "💢", color = Color3.fromRGB(255, 50, 0), cooldown = 10
+    },
+    -- Add more Form 1 unique abilities for NumPad6-9...
+}
+
+-- FORM 2: SHADOW SORCERER FORM (Magic/Spell Form)
+local form2Abilities = {
+    ["NumPad1"] = {
+        name = "VOID ORB",
+        func = function()
+            -- Black hole projectile that sucks objects (unique to Form 2)
+            local orb = Instance.new("Part")
+            orb.Size = Vector3.new(10, 10, 10)
+            orb.Position = humanoidRootPart.Position + humanoidRootPart.CFrame.lookVector * 10
+            orb.Material = Enum.Material.Neon
+            orb.Color = Color3.fromRGB(0, 0, 0)
+            orb.Anchored = false
+            orb.CanCollide = false
+            orb.Shape = Enum.PartType.Ball
+            orb.Parent = workspace
+            
+            local light = Instance.new("PointLight")
+            light.Color = Color3.fromRGB(150, 0, 255)
+            light.Range = 50
+            light.Brightness = 5
+            light.Parent = orb
+            
+            local bv = Instance.new("BodyVelocity")
+            bv.Velocity = humanoidRootPart.CFrame.lookVector * 50
+            bv.MaxForce = Vector3.new(10000, 10000, 10000)
+            bv.Parent = orb
+            
+            -- Suck effect
+            spawn(function()
+                for i = 1, 50 do
+                    for _, part in pairs(workspace:GetDescendants()) do
+                        if part:IsA("BasePart") and not part:IsDescendantOf(character) and part ~= orb then
+                            local dist = (part.Position - orb.Position).Magnitude
+                            if dist <= 80 then
+                                local suck = Instance.new("BodyVelocity")
+                                suck.Velocity = (orb.Position - part.Position).Unit * 100
+                                suck.MaxForce = Vector3.new(10000, 10000, 10000)
+                                suck.Parent = part
+                                game:GetService("Debris"):AddItem(suck, 0.1)
+                            end
+                        end
+                    end
+                    wait(0.1)
+                end
+                orb:Destroy()
+            end)
+        end,
+        icon = "⚫", color = Color3.fromRGB(150, 0, 255), cooldown = 8
+    },
+    ["NumPad2"] = {
+        name = "DIMENSIONAL RIFT",
+        func = function()
+            -- Portal that teleports objects to void (unique to Form 2)
+            local rift = Instance.new("Part")
+            rift.Size = Vector3.new(30, 40, 5)
+            rift.Position = humanoidRootPart.Position + humanoidRootPart.CFrame.lookVector * 30
+            rift.Material = Enum.Material.Neon
+            rift.Color = Color3.fromRGB(100, 0, 255)
+            rift.Anchored = true
+            rift.CanCollide = false
+            rift.Parent = workspace
+            
+            -- Teleport objects into rift
+            for i = 1, 30 do
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                        local dist = (part.Position - rift.Position).Magnitude
+                        if dist <= 40 then
+                            part.Position = Vector3.new(0, -1000, 0)
+                            game:GetService("Debris"):AddItem(part, 5)
+                        end
+                    end
+                end
+                wait(0.1)
+            end
+            
+            rift:Destroy()
+        end,
+        icon = "🌀", color = Color3.fromRGB(100, 0, 200), cooldown = 12
+    },
+    -- Add more Form 2 unique abilities...
+}
+
+-- FORM 3: SHADOW WARRIOR FORM (Martial Arts Form)
+local form3Abilities = {
+    ["NumPad1"] = {
+        name = "HURRICANE KICK",
+        func = function()
+            -- Spinning kick attack (unique to Form 3)
+            for i = 1, 10 do
+                local angle = math.rad(i * 36)
+                local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
+                
+                -- Create kick wave
+                local wave = Instance.new("Part")
+                wave.Size = Vector3.new(15, 5, 5)
+                wave.CFrame = CFrame.new(humanoidRootPart.Position, humanoidRootPart.Position + direction) * CFrame.new(0, 0, -10)
+                wave.Material = Enum.Material.Neon
+                wave.Color = Color3.fromRGB(255, 200, 0)
+                wave.Anchored = true
+                wave.CanCollide = false
+                wave.Parent = workspace
+                
+                -- Launch objects in path
+                for _, part in pairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                        local dist = (part.Position - wave.Position).Magnitude
+                        if dist <= 20 then
+                            local force = Instance.new("BodyVelocity")
+                            force.Velocity = direction * 200 + Vector3.new(0, 50, 0)
+                            force.MaxForce = Vector3.new(10000, 10000, 10000)
+                            force.Parent = part
+                            game:GetService("Debris"):AddItem(force, 0.5)
+                        end
+                    end
+                end
+                
+                game:GetService("Debris"):AddItem(wave, 1)
+                wait(0.05)
+            end
+        end,
+        icon = "🥋", color = Color3.fromRGB(255, 200, 0), cooldown = 6
+    },
+    -- Add more Form 3 unique abilities...
+}
+
+-- FORM 4: SHADOW GOD FORM (Ultimate Reality Warping Form)
+local form4Abilities = {
+    ["NumPad1"] = {
+        name = "REALITY EDIT",
+        func = function()
+            -- Convert everything to neon/delete (unique to Form 4)
+            for _, part in pairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part:IsDescendantOf(character) then
+                    part.Material = Enum.Material.Neon
+                    part.Color = Color3.fromRGB(255, 255, 255)
+                    part.Reflectance = 0.5
+                    
+                    -- Random teleport
+                    if math.random() > 0.5 then
+                        part.Position = Vector3.new(
+                            math.random(-500, 500),
+                            math.random(50, 500),
+                            math.random(-500, 500)
+                        )
+                    end
+                end
+            end
+        end,
+        icon = "👑", color = Color3.fromRGB(255, 255, 255), cooldown = 15
+    },
+    -- Add more Form 4 unique abilities...
+}
+
+-- All forms combined
+local formAbilities = {
+    [1] = form1Abilities,
+    [2] = form2Abilities,
+    [3] = form3Abilities,
+    [4] = form4Abilities
+}
+
+-- Form transformation function
+local function transformToForm(formNumber)
+    if isFormActive then
+        -- Detransform first
+        deactivateForm()
+        wait(0.5)
+    end
+    
+    currentForm = formNumber
+    isFormActive = true
+    formTimer = maxFormTime
+    
+    -- Transformation visual effect
+    local transformEffect = Instance.new("Part")
+    transformEffect.Size = Vector3.new(20, 30, 20)
+    transformEffect.Position = humanoidRootPart.Position
+    transformEffect.Material = Enum.Material.Neon
+    transformEffect.Color = formAbilities[formNumber][1].color
+    transformEffect.Anchored = true
+    transformEffect.CanCollide = false
+    transformEffect.Shape = Enum.PartType.Cylinder
+    transformEffect.Parent = workspace
+    
+    -- Transformation colors based on form
+    local formColors = {
+        [1] = Color3.fromRGB(255, 0, 0),    -- Red
+        [2] = Color3.fromRGB(150, 0, 255),  -- Purple
+        [3] = Color3.fromRGB(255, 165, 0),  -- Orange
+        [4] = Color3.fromRGB(255, 255, 255) -- White
+    }
+    
+    -- Aura effect
+    local aura = Instance.new("ParticleEmitter")
+    aura.Color = ColorSequence.new(formColors[formNumber])
+    aura.Size = NumberSequence.new(3)
+    aura.Transparency = NumberSequence.new(0.5)
+    aura.Speed = NumberRange.new(10, 20)
+    aura.Lifetime = NumberRange.new(0.5, 1)
+    aura.Rate = 100
+    aura.Parent = humanoidRootPart
+    
+    -- Power up sound
+    local transformSound = Instance.new("Sound")
+    transformSound.SoundId = "rbxassetid://9120387654" -- Replace with actual sound
+    transformSound.Volume = 1
+    transformSound.Parent = humanoidRootPart
+    transformSound:Play()
+    
+    -- Spiral transformation animation
+    for i = 1, 30 do
+        transformEffect.CFrame = transformEffect.CFrame * CFrame.Angles(0, math.rad(12), math.rad(6))
+        transformEffect.Size = transformEffect.Size + Vector3.new(2, 3, 2)
+        transformEffect.Transparency = i * 0.03
+        wait(0.03)
+    end
+    
+    transformEffect:Destroy()
+    
+    -- Show form notification
+    local formNames = {"CHAOS STRIKE FORM", "SHADOW SORCERER FORM", "SHADOW WARRIOR FORM", "SHADOW GOD FORM"}
+    createFormNotification("⚡ " .. formNames[formNumber] .. " ACTIVATED ⚡", formColors[formNumber])
+    
+    -- Form timer countdown
+    spawn(function()
+        while isFormActive and formTimer > 0 do
+            formTimer = formTimer - 1
+            updateFormDisplay()
+            wait(1)
+        end
+        
+        if formTimer <= 0 then
+            deactivateForm()
+        end
+    end)
+    
+    return true
+end
+
+-- Deactivate current form
+local function deactivateForm()
+    isFormActive = false
+    
+    -- Remove aura
+    for _, child in pairs(humanoidRootPart:GetChildren()) do
+        if child:IsA("ParticleEmitter") then
+            child:Destroy()
+        end
+    end
+    
+    createFormNotification("⚡ FORM DEACTIVATED ⚡", Color3.fromRGB(100, 100, 100))
+end
+
+-- Form notification
+local function createFormNotification(text, color)
+    local notif = Instance.new("ScreenGui")
+    notif.Name = "FormNotification"
+    notif.DisplayOrder = 999
+    notif.ResetOnSpawn = false
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 400, 0, 80)
+    frame.Position = UDim2.new(0.5, -200, 0.3, -40)
+    frame.BackgroundColor3 = color
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Parent = notif
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+    
+    local label = Instance.new("TextLabel")
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 24
+    label.Font = Enum.Font.GothamBold
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.Parent = frame
+    
+    notif.Parent = player:WaitForChild("PlayerGui")
+    
+    -- Animate in/out
+    frame.BackgroundTransparency = 1
+    label.TextTransparency = 1
+    
+    for i = 1, 10 do
+        frame.BackgroundTransparency = 0.3 - (i * 0.03)
+        label.TextTransparency = 1 - (i * 0.1)
+        wait(0.03)
+    end
+    
+    wait(2)
+    
+    for i = 1, 10 do
+        frame.BackgroundTransparency = 0 + (i * 0.03)
+        label.TextTransparency = i * 0.1
+        wait(0.03)
+    end
+    
+    notif:Destroy()
+end
+
+-- Update form display
+local function updateFormDisplay()
+    -- Update GUI elements with form timer
+    if formDisplay then
+        formDisplay.Text = "FORM: " .. currentForm .. " | TIME: " .. formTimer .. "s"
+    end
+end
+
+-- ============================================================================
+-- NEW NUM PAD INPUT HANDLER FOR FORMS
+-- ============================================================================
+
+-- Replace the existing NUM PAD input section with this:
+local function handleNumPadInput(key)
+    if not isFormActive then
+        -- If no form active, NUM PAD switches forms
+        if key == "NumPad1" then
+            transformToForm(1)
+        elseif key == "NumPad2" then
+            transformToForm(2)
+        elseif key == "NumPad3" then
+            transformToForm(3)
+        elseif key == "NumPad4" then
+            transformToForm(4)
+        elseif key == "NumPad0" then
+            -- Deactivate form
+            deactivateForm()
+        end
+        return
+    end
+    
+    -- If form active, use the form's unique abilities
+    local ability = formAbilities[currentForm][key]
+    if ability and not ability.onCooldown then
+        ability.func()
+        
+        -- Cooldown handling
+        ability.onCooldown = true
+        spawn(function()
+            wait(ability.cooldown)
+            ability.onCooldown = false
+        end)
+    end
+end
+
+-- ============================================================================
+-- FORM DISPLAY GUI
+-- ============================================================================
+
+local formGUI = Instance.new("ScreenGui")
+formGUI.Name = "FormGUI"
+formGUI.DisplayOrder = 20
+formGUI.ResetOnSpawn = false
+
+local formFrame = Instance.new("Frame")
+formFrame.Size = UDim2.new(0, 300, 0, 150)
+formFrame.Position = UDim2.new(0.5, -150, 0, 10)
+formFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
+formFrame.BackgroundTransparency = 0.3
+formFrame.BorderSizePixel = 0
+formFrame.Parent = formGUI
+
+local formCorner = Instance.new("UICorner")
+formCorner.CornerRadius = UDim.new(0, 8)
+formCorner.Parent = formFrame
+
+local formTitle = Instance.new("TextLabel")
+formTitle.Text = "⚡ FORM TRANSFORMATION SYSTEM ⚡"
+formTitle.TextColor3 = Color3.fromRGB(255, 255, 0)
+formTitle.TextSize = 16
+formTitle.Font = Enum.Font.GothamBold
+formTitle.BackgroundTransparency = 1
+formTitle.Size = UDim2.new(1, 0, 0, 30)
+formTitle.Position = UDim2.new(0, 0, 0, 5)
+formTitle.Parent = formFrame
+
+local formStatus = Instance.new("TextLabel")
+formStatus.Name = "FormStatus"
+formStatus.Text = "NO FORM ACTIVE"
+formStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+formStatus.TextSize = 14
+formStatus.Font = Enum.Font.GothamBold
+formStatus.BackgroundTransparency = 1
+formStatus.Size = UDim2.new(1, 0, 0, 25)
+formStatus.Position = UDim2.new(0, 0, 0, 35)
+formStatus.Parent = formFrame
+
+local formDisplay = Instance.new("TextLabel")
+formDisplay.Name = "FormDisplay"
+formDisplay.Text = "NUM 1-4: TRANSFORM | NUM 0: CANCEL"
+formDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
+formDisplay.TextSize = 12
+formDisplay.Font = Enum.Font.Gotham
+formDisplay.BackgroundTransparency = 1
+formDisplay.Size = UDim2.new(1, 0, 0, 25)
+formDisplay.Position = UDim2.new(0, 0, 0, 60)
+formDisplay.Parent = formFrame
+
+-- Form descriptions
+local formDescriptions = {
+    "FORM 1: CHAOS STRIKE - Offensive combat abilities",
+    "FORM 2: SHADOW SORCERY - Mystical spell abilities",
+    "FORM 3: SHADOW WARRIOR - Martial arts abilities",
+    "FORM 4: SHADOW GOD - Reality warping abilities"
+}
+
+for i = 1, 4 do
+    local desc = Instance.new("TextLabel")
+    desc.Text = formDescriptions[i]
+    desc.TextColor3 = i == 1 and Color3.fromRGB(255, 0, 0) or
+                     i == 2 and Color3.fromRGB(150, 0, 255) or
+                     i == 3 and Color3.fromRGB(255, 165, 0) or
+                     Color3.fromRGB(255, 255, 255)
+    desc.TextSize = 11
+    desc.Font = Enum.Font.Gotham
+    desc.BackgroundTransparency = 1
+    desc.Size = UDim2.new(1, -10, 0, 20)
+    desc.Position = UDim2.new(0, 5, 0, 85 + ((i-1) * 20))
+    desc.TextXAlignment = Enum.TextXAlignment.Left
+    desc.Parent = formFrame
+end
+
+formGUI.Parent = player:WaitForChild("PlayerGui")
+
+-- Make draggable
+local function makeFormDraggable()
+    local isDragging = false
+    local dragStart, frameStart
+    
+    formFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = true
+            dragStart = input.Position
+            frameStart = formFrame.Position
+        end
+    end)
+    
+    formFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging then
+            local delta = input.Position - dragStart
+            formFrame.Position = UDim2.new(
+                frameStart.X.Scale, 
+                frameStart.X.Offset + delta.X,
+                frameStart.Y.Scale, 
+                frameStart.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    formFrame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+end
+
+makeFormDraggable()
+
+-- ============================================================================
 -- INPUT HANDLING FOR ALL ABILITIES
 -- ============================================================================
 
@@ -4845,85 +5477,28 @@ local function onInputBegan(input, gameProcessed)
     
     local inputService = game:GetService("UserInputService")
     
--- NUM PAD Controls
-if input.KeyCode == Enum.KeyCode.KeypadOne then
-    if numPadActive then
-        local ability = modeAbilities[numPadMode].Abilities["NumPad1"]
-        if ability then
-            if ability == "activateChaosVortex" then activateChaosVortex()
-            elseif ability == "activateChaosBind" then activateChaosBind()
-            elseif ability == "activateChaosFist" then activateChaosFist()
-            elseif ability == "activateChaosVision" then activateChaosVision()
-            end
-        else
-            switchNumPadMode(1)
-        end
-    end
-elseif input.KeyCode == Enum.KeyCode.KeypadTwo then  -- Fixed: KeypadTwo
-    if numPadActive then
-        local ability = modeAbilities[numPadMode].Abilities["NumPad2"]
-        if ability then
-            if ability == "activateBlackTornado" then activateBlackTornado()
-            elseif ability == "activateVoidLance" then activateVoidLance()
-            elseif ability == "activateShadowKick" then activateShadowKick()
-            elseif ability == "activateTeleportBeacon" then activateTeleportBeacon()
-            end
-        else
-            switchNumPadMode(2)
-        end
-    end
-elseif input.KeyCode == Enum.KeyCode.KeypadThree then  -- Fixed: KeypadThree
-    if numPadActive then
-        local ability = modeAbilities[numPadMode].Abilities["NumPad3"]
-        if ability then
-            if ability == "activateChaosRift" then activateChaosRift()
-            elseif ability == "activateTemporalEcho" then activateTemporalEcho()
-            elseif ability == "activateSpinningChaos" then activateSpinningChaos()
-            elseif ability == "activateForceBarrier" then activateForceBarrier()
-            end
-        else
-            switchNumPadMode(3)
-        end
-    end
-elseif input.KeyCode == Enum.KeyCode.KeypadFour then  -- Fixed: KeypadFour
-    if numPadActive then
-        local ability = modeAbilities[numPadMode].Abilities["NumPad4"]
-        if ability then
-            if ability == "activateShadowClone" then activateShadowClone()
-            elseif ability == "activateDimensionalMirror" then activateDimensionalMirror()
-            elseif ability == "activateTeleportStrike" then activateTeleportStrike()
-            elseif ability == "activateMassTeleport" then activateMassTeleport()
-            end
-        else
-            switchNumPadMode(4)
-        end
-    end
-elseif input.KeyCode == Enum.KeyCode.KeypadFive then  -- Fixed: KeypadFive
-    if numPadActive then activateQuickTeleport() end
-elseif input.KeyCode == Enum.KeyCode.KeypadSix then  -- Fixed: KeypadSix
-    if numPadActive then activateComboMode() end
-elseif input.KeyCode == Enum.KeyCode.KeypadSeven then  -- Fixed: KeypadSeven
-    if numPadActive then activateAerialMode() end
-elseif input.KeyCode == Enum.KeyCode.KeypadEight then  -- Fixed: KeypadEight
-    if numPadActive then activateDefenseMode() end
-elseif input.KeyCode == Enum.KeyCode.KeypadNine then  -- Fixed: KeypadNine
-    if numPadActive then activateUltimateMode() end
-elseif input.KeyCode == Enum.KeyCode.KeypadZero then  -- Fixed: KeypadZero
-    toggleNumPadActive()
-elseif input.KeyCode == Enum.KeyCode.KeypadPeriod then
-    if numPadActive then activateEmergencyEscape() end
-elseif input.KeyCode == Enum.KeyCode.KeypadEnter then
-    if numPadActive then executeCurrentMode() end
-elseif input.KeyCode == Enum.KeyCode.KeypadPlus then
-    if numPadActive then increaseChaosPower() end
-elseif input.KeyCode == Enum.KeyCode.KeypadMinus then
-    if numPadActive then decreaseChaosPower() end
-elseif input.KeyCode == Enum.KeyCode.KeypadMultiply then
-    if numPadActive then toggleAutoAbility() end
-elseif input.KeyCode == Enum.KeyCode.KeypadDivide then
-    if numPadActive then toggleAIMode() end
-end   
-        
+    -- NUM PAD Controls (now for forms)
+    if input.KeyCode == Enum.KeyCode.KeypadOne then
+        handleNumPadInput("NumPad1")
+    elseif input.KeyCode == Enum.KeyCode.KeypadTwo then
+        handleNumPadInput("NumPad2")
+    elseif input.KeyCode == Enum.KeyCode.KeypadThree then
+        handleNumPadInput("NumPad3")
+    elseif input.KeyCode == Enum.KeyCode.KeypadFour then
+        handleNumPadInput("NumPad4")
+    elseif input.KeyCode == Enum.KeyCode.KeypadFive then
+        handleNumPadInput("NumPad5")
+    elseif input.KeyCode == Enum.KeyCode.KeypadSix then
+        handleNumPadInput("NumPad6")
+    elseif input.KeyCode == Enum.KeyCode.KeypadSeven then
+        handleNumPadInput("NumPad7")
+    elseif input.KeyCode == Enum.KeyCode.KeypadEight then
+        handleNumPadInput("NumPad8")
+    elseif input.KeyCode == Enum.KeyCode.KeypadNine then
+        handleNumPadInput("NumPad9")
+    elseif input.KeyCode == Enum.KeyCode.KeypadZero then
+        handleNumPadInput("NumPad0")
+    
     -- Existing controls
     elseif input.KeyCode == Enum.KeyCode.LeftShift then
         toggleSprint()
@@ -4983,11 +5558,7 @@ end
     elseif input.KeyCode == Enum.KeyCode.P then
         activateSuperForm()
     
-    -- ========================================================================
     -- PAGE 2: Chaos Sorcerer Abilities (Alt + Number keys)
-    -- ========================================================================
-    
-    -- Check for Alt modifier
     elseif (inputService:IsKeyDown(Enum.KeyCode.LeftAlt) or inputService:IsKeyDown(Enum.KeyCode.RightAlt)) then
         -- Alt + Number keys
         if input.KeyCode == Enum.KeyCode.One then
@@ -5030,11 +5601,7 @@ end
             activateChaosPortal()
         end
     
-    -- ========================================================================
     -- PAGE 3: Combat Techniques (Function keys F1-F8)
-    -- ========================================================================
-    
-    -- Function keys (Page 3 - Combat)
     elseif input.KeyCode == Enum.KeyCode.F1 then
         activateChaosFist()
     elseif input.KeyCode == Enum.KeyCode.F2 then
@@ -5186,363 +5753,84 @@ makeDraggable(invisButton)
 makeDraggable(inhibitorButton)
 makeDraggable(acrobaticsButton)
 
--- NUM PAD GUI Panel
-local numPadGUI = Instance.new("ScreenGui")
-numPadGUI.Name = "NumPadGUI"
-numPadGUI.DisplayOrder = 15
-numPadGUI.ResetOnSpawn = false
+-- ============================================================================
+-- INITIALIZATION
+-- ============================================================================
 
--- Main NUM PAD frame
-local numPadFrame = Instance.new("Frame")
-numPadFrame.Name = "NumPadFrame"
-numPadFrame.Size = UDim2.new(0, 320, 0, 220)
-numPadFrame.Position = UDim2.new(1, -330, 0.5, -110)
-numPadFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
-numPadFrame.BackgroundTransparency = 0.3
-numPadFrame.BorderSizePixel = 0
-numPadFrame.Parent = numPadGUI
-
-local numPadCorner = Instance.new("UICorner")
-numPadCorner.CornerRadius = UDim.new(0, 8)
-numPadCorner.Parent = numPadFrame
-
--- Title
-local numPadTitle = Instance.new("TextLabel")
-numPadTitle.Text = "🎮 NUM PAD CONTROLS"
-numPadTitle.TextColor3 = Color3.fromRGB(255, 255, 0)
-numPadTitle.TextSize = 18
-numPadTitle.Font = Enum.Font.GothamBold
-numPadTitle.BackgroundTransparency = 1
-numPadTitle.Size = UDim2.new(1, 0, 0, 30)
-numPadTitle.Position = UDim2.new(0, 0, 0, 5)
-numPadTitle.Parent = numPadFrame
-
--- Mode indicator
-local modeIndicator = Instance.new("TextLabel")
-modeIndicator.Name = "ModeIndicator"
-modeIndicator.Text = "MODE 1: BASIC CHAOS"
-modeIndicator.TextColor3 = Color3.fromRGB(255, 0, 0)
-modeIndicator.TextSize = 14
-modeIndicator.Font = Enum.Font.GothamBold
-modeIndicator.BackgroundTransparency = 1
-modeIndicator.Size = UDim2.new(1, 0, 0, 25)
-modeIndicator.Position = UDim2.new(0, 0, 0, 35)
-modeIndicator.Parent = numPadFrame
-
--- Status indicator
-local numPadStatus = Instance.new("TextLabel")
-numPadStatus.Name = "NumPadStatus"
-numPadStatus.Text = "STATUS: ACTIVE"
-numPadStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
-numPadStatus.TextSize = 12
-numPadStatus.Font = Enum.Font.Gotham
-numPadStatus.BackgroundTransparency = 1
-numPadStatus.Size = UDim2.new(1, 0, 0, 20)
-numPadStatus.Position = UDim2.new(0, 0, 0, 60)
-numPadStatus.Parent = numPadFrame
-
--- Key layout grid
-local numPadGrid = Instance.new("Frame")
-numPadGrid.Name = "NumPadGrid"
-numPadGrid.Size = UDim2.new(1, -20, 0, 130)
-numPadGrid.Position = UDim2.new(0, 10, 0, 85)
-numPadGrid.BackgroundTransparency = 1
-numPadGrid.Parent = numPadFrame
-
--- Create 3x3 grid
-local keyPositions = {
-    ["NumPad7"] = {0, 0}, ["NumPad8"] = {1, 0}, ["NumPad9"] = {2, 0},
-    ["NumPad4"] = {0, 1}, ["NumPad5"] = {1, 1}, ["NumPad6"] = {2, 1},
-    ["NumPad1"] = {0, 2}, ["NumPad2"] = {1, 2}, ["NumPad3"] = {2, 2}
-}
-
-local keyFrames = {}
-for key, pos in pairs(keyPositions) do
-    local keyFrame = Instance.new("Frame")
-    keyFrame.Size = UDim2.new(0.32, 0, 0.32, 0)
-    keyFrame.Position = UDim2.new(pos[1] * 0.33, 0, pos[2] * 0.33, 0)
-    keyFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    keyFrame.BackgroundTransparency = 0.5
-    keyFrame.Name = key
-    keyFrame.Parent = numPadGrid
-    
-    local keyCorner = Instance.new("UICorner")
-    keyCorner.CornerRadius = UDim.new(0, 4)
-    keyCorner.Parent = keyFrame
-    
-    local keyLabel = Instance.new("TextLabel")
-    keyLabel.Text = key:gsub("NumPad", "")
-    keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    keyLabel.TextSize = 12
-    keyLabel.Font = Enum.Font.GothamBold
-    keyLabel.BackgroundTransparency = 1
-    keyLabel.Size = UDim2.new(1, 0, 0.4, 0)
-    keyLabel.Position = UDim2.new(0, 0, 0, 5)
-    keyLabel.Parent = keyFrame
-    
-    local abilityLabel = Instance.new("TextLabel")
-    abilityLabel.Name = "AbilityName"
-    abilityLabel.Text = ""
-    abilityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    abilityLabel.TextSize = 8
-    abilityLabel.Font = Enum.Font.Gotham
-    abilityLabel.BackgroundTransparency = 1
-    abilityLabel.Size = UDim2.new(1, 0, 0.6, 0)
-    abilityLabel.Position = UDim2.new(0, 0, 0.4, 0)
-    abilityLabel.TextWrapped = true
-    abilityLabel.Parent = keyFrame
-    
-    table.insert(keyFrames, keyFrame)
-end
-
--- Function to update NUM PAD display
-local function updateNumPadDisplay()
-    local modeData = modeAbilities[numPadMode]
-    modeIndicator.Text = "MODE " .. numPadMode .. ": " .. modeData.Name
-    modeIndicator.TextColor3 = modeData.Color
-    
-    numPadStatus.Text = "STATUS: " .. (numPadActive and "ACTIVE" or "INACTIVE")
-    numPadStatus.TextColor3 = numPadActive and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-    
-    -- Update key labels
-    for _, keyFrame in pairs(keyFrames) do
-        local keyName = keyFrame.Name
-        local abilityLabel = keyFrame:FindFirstChild("AbilityName")
-        
-        if modeData.Abilities[keyName] then
-            local abilityName = modeData.Abilities[keyName]:gsub("activate", "")
-            abilityName = abilityName:gsub("([A-Z])", " %1"):gsub("^%s+", "")
-            abilityLabel.Text = abilityName
-            keyFrame.BackgroundColor3 = modeData.Color
-            keyFrame.BackgroundTransparency = 0.3
-        else
-            abilityLabel.Text = ""
-            keyFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-            keyFrame.BackgroundTransparency = 0.5
-        end
-    end
-end
-
--- Make draggable
-local function makeNumPadDraggable()
-    local isDragging = false
-    local dragStart, frameStart
-    
-    numPadFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-            dragStart = input.Position
-            frameStart = numPadFrame.Position
-        end
-    end)
-    
-    numPadFrame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging then
-            local delta = input.Position - dragStart
-            numPadFrame.Position = UDim2.new(
-                frameStart.X.Scale, 
-                frameStart.X.Offset + delta.X,
-                frameStart.Y.Scale, 
-                frameStart.Y.Offset + delta.Y
-            )
-        end
-    end)
-    
-    numPadFrame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-end
-
-makeNumPadDraggable()
-numPadGUI.Parent = player:WaitForChild("PlayerGui")
-
--- Initialize NUM PAD display
-updateNumPadDisplay()
-
--- Character respawn handling
-connections.characterAdded = player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    humanoid = character:WaitForChild("Humanoid")
-    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    
-    isInvisible = false
-    isSprinting = false
-    isInhibitorActive = false
-    chaosSnapActive = false
-    telekinesisTarget = nil
-    isCtrlHeld = false
-    
-    -- Reset all cooldowns
-    for key in pairs(abilityCooldowns) do
-        abilityCooldowns[key] = false
-    end
-    
-    for key in pairs(sorceryCooldowns) do
-        sorceryCooldowns[key] = false
-    end
-    
-    for key in pairs(combatCooldowns) do
-        combatCooldowns[key] = false
-    end
-    
-    for key in pairs(utilityCooldowns) do
-        utilityCooldowns[key] = false
-    end
-    
-    chaosSpearCooldown = false
-    chaosBlastCooldown = false
-    
-    collectVisibleParts()
-    createRocketEffects()
-    handEffects = createHandEffects()
-    
-    invisButton.Text = "Invisibility: OFF"
-    invisButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    inhibitorButton.Text = "Inhibitor Rings"
-    inhibitorButton.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
-    acrobaticsButton.Text = "Acrobatics: READY"
-    acrobaticsButton.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
-    sprintStatus.Text = "Sprint: READY"
-    sprintStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
-    speedIndicator.Text = "Speed: " .. math.floor(originalWalkSpeed)
-    
-    -- Cleanup acrobatics effect
-    if acrobaticsEffect then
-        acrobaticsEffect:Destroy()
-        acrobaticsEffect = nil
-    end
-end)
-
--- Store connections globally
-_G.ShadowConnections = connections
-
--- Show loading notification and play theme music
-showLoadingNotification()
-wait(0.5)
-local themeMusic = playThemeMusic()
-
--- Add NUM PAD help to final message
+-- Welcome message showing form system
 wait(1)
-local numPadHelp = Instance.new("ScreenGui")
-numPadHelp.Name = "NumPadHelp"
-numPadHelp.DisplayOrder = 5
-numPadHelp.ResetOnSpawn = false
+local welcomeGui = Instance.new("ScreenGui")
+welcomeGui.Name = "FormWelcome"
+welcomeGui.DisplayOrder = 998
 
-local helpFrame = Instance.new("Frame")
-helpFrame.Size = UDim2.new(0, 400, 0, 200)
-helpFrame.Position = UDim2.new(0.5, -200, 0.7, -100)
-helpFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-helpFrame.BackgroundTransparency = 0.7
-helpFrame.BorderSizePixel = 0
-helpFrame.Parent = numPadHelp
+local welcomeFrame = Instance.new("Frame")
+welcomeFrame.Size = UDim2.new(0, 500, 0, 300)
+welcomeFrame.Position = UDim2.new(0.5, -250, 0.4, -150)
+welcomeFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+welcomeFrame.BackgroundTransparency = 0.3
+welcomeFrame.BorderSizePixel = 0
+welcomeFrame.Parent = welcomeGui
 
-local helpText = [[🎮 NUM PAD CONTROLS ADDED 🎮
+local welcomeCorner = Instance.new("UICorner")
+welcomeCorner.CornerRadius = UDim.new(0, 12)
+welcomeCorner.Parent = welcomeFrame
 
-NUM 1-4: Switch Modes (Basic/Sorcery/Combat/Utility)
-NUM 5: Quick Teleport | NUM 6: Combo Mode
-NUM 7: Aerial Mode | NUM 8: Defense Mode
-NUM 9: Ultimate Mode | NUM 0: Toggle NUM PAD
-.: Emergency Escape | ENTER: Execute Mode
-+: Increase Power | -: Decrease Power
-*: Auto Ability | /: AI Mode
+local welcomeTitle = Instance.new("TextLabel")
+welcomeTitle.Text = "⚡ 4 FORMS TRANSFORMATION SYSTEM ⚡"
+welcomeTitle.TextColor3 = Color3.fromRGB(255, 255, 0)
+welcomeTitle.TextSize = 20
+welcomeTitle.Font = Enum.Font.GothamBold
+welcomeTitle.BackgroundTransparency = 1
+welcomeTitle.Size = UDim2.new(1, 0, 0, 40)
+welcomeTitle.Position = UDim2.new(0, 0, 0, 10)
+welcomeTitle.Parent = welcomeFrame
 
-Each mode changes NUM 1-9 abilities!
+local welcomeText = Instance.new("TextLabel")
+welcomeText.Text = [[
+NUM PAD CONTROLS:
+
+NUM 1-4: TRANSFORM INTO DIFFERENT FORMS
+• NUM 1 - CHAOS STRIKE FORM (Offensive Combat)
+• NUM 2 - SHADOW SORCERER FORM (Mystical Magic)
+• NUM 3 - SHADOW WARRIOR FORM (Martial Arts)
+• NUM 4 - SHADOW GOD FORM (Reality Warping)
+
+WHILE IN FORM:
+NUM 1-9: USE FORM-UNIQUE ABILITIES
+NUM 0: CANCEL CURRENT FORM
+
+EACH FORM HAS 9 COMPLETELY UNIQUE MOVES!
+TOTAL: 36 FORM-SPECIFIC ABILITIES + ORIGINAL MOVESET
 ]]
+welcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+welcomeText.TextSize = 14
+welcomeText.Font = Enum.Font.Gotham
+welcomeText.BackgroundTransparency = 1
+welcomeText.Size = UDim2.new(1, -20, 1, -60)
+welcomeText.Position = UDim2.new(0, 10, 0, 50)
+welcomeText.TextWrapped = true
+welcomeText.TextXAlignment = Enum.TextXAlignment.Left
+welcomeText.Parent = welcomeFrame
 
-local textLabel = Instance.new("TextLabel")
-textLabel.Text = helpText
-textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-textLabel.TextSize = 14
-textLabel.Font = Enum.Font.Gotham
-textLabel.BackgroundTransparency = 1
-textLabel.Size = UDim2.new(1, -20, 1, -20)
-textLabel.Position = UDim2.new(0, 10, 0, 10)
-textLabel.TextWrapped = true
-textLabel.Parent = helpFrame
+welcomeGui.Parent = player:WaitForChild("PlayerGui")
 
-numPadHelp.Parent = player:WaitForChild("PlayerGui")
-
--- Auto-close help
+-- Fade out welcome
 spawn(function()
-    wait(10)
+    wait(8)
     for i = 1, 20 do
-        helpFrame.BackgroundTransparency = 0.7 + (i * 0.015)
-        textLabel.TextTransparency = i * 0.05
+        welcomeFrame.BackgroundTransparency = 0.3 + (i * 0.035)
+        welcomeTitle.TextTransparency = i * 0.05
+        welcomeText.TextTransparency = i * 0.05
         wait(0.05)
     end
-    numPadHelp:Destroy()
+    welcomeGui:Destroy()
 end)
-
--- Ultimate notification
-wait(1)
-local ultimateGui = Instance.new("ScreenGui")
-ultimateGui.Name = "UltimateNotification"
-ultimateGui.DisplayOrder = 998
-ultimateGui.ResetOnSpawn = false
-
-local ultimateFrame = Instance.new("Frame")
-ultimateFrame.Size = UDim2.new(0, 600, 0, 180)
-ultimateFrame.Position = UDim2.new(0.5, -300, 0.3, -90)
-ultimateFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ultimateFrame.BackgroundTransparency = 0.7
-ultimateFrame.BorderSizePixel = 0
-ultimateFrame.Parent = ultimateGui
-
-local ultimateCorner = Instance.new("UICorner")
-ultimateCorner.CornerRadius = UDim.new(0, 12)
-ultimateCorner.Parent = ultimateFrame
-
-local ultimateText = Instance.new("TextLabel")
-ultimateText.Size = UDim2.new(1, -20, 1, -20)
-ultimateText.Position = UDim2.new(0, 10, 0, 10)
-ultimateText.Text = "CHAOS ARSENAL EXPANDED!\n4 PAGES • 41 ABILITIES • TOTAL DOMINANCE\nNETWORK CONTROL: ABSOLUTE\nSHADOW: ULTIMATE CHAOS FORM ACHIEVED!"
-ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
-ultimateText.TextSize = 24
-ultimateText.Font = Enum.Font.GothamBold
-ultimateText.BackgroundTransparency = 1
-ultimateText.TextWrapped = true
-ultimateText.TextYAlignment = Enum.TextYAlignment.Center
-ultimateText.Parent = ultimateFrame
-
-ultimateGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
-ultimateFrame.BackgroundTransparency = 1
-ultimateText.TextTransparency = 1
-
--- Animate with chaos energy
-for i = 1, 30 do
-    ultimateFrame.BackgroundTransparency = 1 - (i * 0.033)
-    ultimateText.TextTransparency = 1 - (i * 0.033)
-    
-    -- Chaos energy pulse
-    if i % 3 == 0 then
-        ultimateText.TextColor3 = Color3.fromRGB(255, 255, 0)
-    elseif i % 3 == 1 then
-        ultimateText.TextColor3 = Color3.fromRGB(255, 100, 0)
-    else
-        ultimateText.TextColor3 = Color3.fromRGB(255, 0, 100)
-    end
-    
-    wait(0.05)
-end
-
-wait(5)
-
-for i = 1, 30 do
-    ultimateFrame.BackgroundTransparency = 0.3 + (i * 0.023)
-    ultimateText.TextTransparency = i * 0.033
-    wait(0.05)
-end
 
 ultimateGui:Destroy()
 
 print("==================================================================================")
 print("⚡ SHADOW THE HEDGEHOG - COMPLETE CHAOS ARSENAL WITH 4 PAGES ⚡")
 print("==================================================================================")
-print("")
-print("TOTAL ABILITIES: 41")
 print("")
 print("PAGE 1: BASIC ABILITIES (23 abilities)")
 print("Z - Chaos Snap (Telekinetic control)")
@@ -5601,6 +5889,12 @@ print("Alt+F6 - Slow Field (Slows time)")
 print("Alt+F7 - Speed Boost (Team speed)")
 print("Alt+F8 - Chaos Portal (Two-way portal)")
 print("")
-print("Network control: MAXIMUM")
-print("Total pages: 4")
+print("FORM 1: CHAOS STRIKE - 9 UNIQUE OFFENSIVE ABILITIES")
+print("FORM 2: SHADOW SORCERY - 9 UNIQUE MAGIC ABILITIES") 
+print("FORM 3: SHADOW WARRIOR - 9 UNIQUE MARTIAL ARTS ABILITIES")
+print("FORM 4: SHADOW GOD - 9 UNIQUE REALITY WARPING ABILITIES")
+print("")
+print("TOTAL FORM-SPECIFIC ABILITIES: 36")
+print("PLUS ORIGINAL MOVESET: 23 ABILITIES")
+print("GRAND TOTAL: 59 ABILITIES")
 print("==================================================================================")
