@@ -5319,10 +5319,9 @@ local function updateFormDisplay()
 end
 
 -- ============================================================================
--- NEW NUM PAD INPUT HANDLER FOR FORMS
+-- NUM PAD INPUT HANDLER FOR FORMS
 -- ============================================================================
 
--- Replace the existing NUM PAD input section with this:
 local function handleNumPadInput(key)
     if not isFormActive then
         -- If no form active, NUM PAD switches forms
@@ -5467,6 +5466,21 @@ local function makeFormDraggable()
 end
 
 makeFormDraggable()
+
+-- Function to update NUM PAD display
+local function updateNumPadDisplay()
+    -- Update any UI elements showing NUM PAD status
+    if not numPadActive then
+        -- Could update a GUI element here if needed
+        return
+    end
+    
+    -- Update the abilities panel based on current mode
+    local modeData = modeAbilities[numPadMode]
+    if modeData and panelTitle then
+        panelTitle.Text = "⚡ " .. modeData.Name .. " ⚡"
+    end
+end
 
 -- ============================================================================
 -- INPUT HANDLING FOR ALL ABILITIES
