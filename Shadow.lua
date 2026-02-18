@@ -5840,7 +5840,7 @@ spawn(function()
     welcomeGui:Destroy()
 end)
 
-ultimateGui:Destroy()
+-- ultimateGui:Destroy()
 
 print("==================================================================================")
 print("⚡ SHADOW THE HEDGEHOG - COMPLETE CHAOS ARSENAL WITH 4 PAGES ⚡")
