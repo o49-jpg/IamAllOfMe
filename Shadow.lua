@@ -1,21 +1,14 @@
 -- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
--- Place this at the VERY TOP of your script (before any other code)
-local function loadCustomAudio()
-    -- Check if file exists and is readable
-    local success, assetId = pcall(function()
-        -- This MUST be called BEFORE any other getcustomasset calls
-        return getcustomasset("allofme.mp3", true) -- true = wait for download
-    end)
-    
-    if not success then
-        warn("Failed to load custom audio file. Using Roblox audio instead.")
-        return false
-    end
-    
-    return true
-end
+-- COMPLETELY FIXED VERSION
 
--- Then in your playThemeMusic function:
+-- ============================================================================
+-- AUDIO SYSTEM WITH CONFIGURABLE FILENAME
+-- ============================================================================
+
+-- Change this to your desired filename
+local AUDIO_FILENAME = "allofme.mp3" -- You can change this to any .mp3 file
+local AUDIO_PATH = "Sonic/" .. AUDIO_FILENAME
+
 local function playThemeMusic()
     if _G.ShadowMusic then
         _G.ShadowMusic:Stop()
@@ -26,24 +19,185 @@ local function playThemeMusic()
     local sound = Instance.new("Sound")
     sound.Name = "ShadowTheme"
     
-    -- Try to load custom audio
-    local audioLoaded = pcall(function()
-        sound.SoundId = getcustomasset("allofme.mp3")
+    -- Try to load custom audio from specified path
+    local customAudioLoaded = false
+    
+    -- Attempt to load custom audio with getcustomasset
+    local success, assetId = pcall(function()
+        -- Try to get the custom asset (waits for download if needed)
+        print("Attempting to load audio from: " .. AUDIO_PATH)
+        return getcustomasset(AUDIO_PATH, true)
     end)
     
-    -- Fallback if custom audio fails
-    if not audioLoaded then
-        sound.SoundId = "rbxassetid://1837600489" -- Fallback to Roblox audio
-        warn("Using fallback audio (custom file not found)")
+    if success then
+        -- Try to play the custom audio
+        local playSuccess = pcall(function()
+            sound.SoundId = assetId
+            sound:Play()
+        end)
+        
+        if playSuccess then
+            customAudioLoaded = true
+            print("✅ Custom audio loaded successfully from: " .. AUDIO_PATH)
+        end
+    else
+        warn("❌ Failed to load custom audio: " .. AUDIO_PATH)
     end
     
-    sound.Volume = 0.5
-    sound.Looped = true
-    sound.Parent = workspace
-    sound:Play()
+    -- Fallback to Roblox audio IDs if custom audio fails
+    if not customAudioLoaded then
+        warn("Using Roblox fallback audio.")
+        
+        -- Multiple reliable Roblox audio IDs
+        local audioSources = {
+            "rbxassetid://1837600489", -- Epic orchestral
+            "rbxassetid://1841840586", -- Rock theme
+            "rbxassetid://9049846523", -- Action theme
+            "rbxassetid://1835572846"  -- Alternative
+        }
+        
+        -- Try each source until one works
+        for _, sourceId in ipairs(audioSources) do
+            local success = pcall(function()
+                sound.SoundId = sourceId
+                sound:Play()
+            end)
+            
+            if success then
+                customAudioLoaded = true
+                print("✅ Roblox audio loaded successfully:", sourceId)
+                break
+            end
+        end
+    end
     
--- Animations
+    if not customAudioLoaded then
+        warn("❌ All audio sources failed. Creating silent controls.")
+        sound:Destroy()
+        sound = nil
+    end
+    
+    if sound then
+        sound.Volume = 0.5
+        sound.Looped = true
+        sound.Parent = workspace
+    end
+    
+    -- Create GUI (your existing GUI code here)
+    local musicGui = Instance.new("ScreenGui")
+    musicGui.Name = "ShadowMusicGUI"
+    musicGui.DisplayOrder = 5
+    musicGui.ResetOnSpawn = false
+    
+    local musicFrame = Instance.new("Frame")
+    musicFrame.Size = UDim2.new(0, 200, 0, 40)
+    musicFrame.Position = UDim2.new(1, -210, 0, 10)
+    musicFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
+    musicFrame.BackgroundTransparency = 0.3
+    musicFrame.BorderSizePixel = 0
+    musicFrame.Parent = musicGui
+    
+    local musicCorner = Instance.new("UICorner")
+    musicCorner.CornerRadius = UDim.new(0, 8)
+    musicCorner.Parent = musicFrame
+    
+    local musicTitle = Instance.new("TextLabel")
+    musicTitle.Text = "🎵 CHAOS THEME"
+    musicTitle.TextColor3 = Color3.fromRGB(0, 255, 255)
+    musicTitle.TextSize = 12
+    musicTitle.Font = Enum.Font.GothamBold
+    musicTitle.BackgroundTransparency = 1
+    musicTitle.Size = UDim2.new(0.7, 0, 1, 0)
+    musicTitle.Position = UDim2.new(0, 5, 0, 0)
+    musicTitle.TextXAlignment = Enum.TextXAlignment.Left
+    musicTitle.Parent = musicFrame
+    
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 40, 0, 30)
+    toggleButton.Position = UDim2.new(0.75, 0, 0.125, 0)
+    toggleButton.Text = "⏸"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.TextSize = 14
+    toggleButton.Parent = musicFrame
+    
+    local volumeSlider = Instance.new("Frame")
+    volumeSlider.Name = "VolumeSlider"
+    volumeSlider.Size = UDim2.new(0.7, 0, 0, 4)
+    volumeSlider.Position = UDim2.new(0.05, 0, 0.8, 0)
+    volumeSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    volumeSlider.BorderSizePixel = 0
+    volumeSlider.Parent = musicFrame
+    
+    local volumeFill = Instance.new("Frame")
+    volumeFill.Name = "VolumeFill"
+    volumeFill.Size = UDim2.new(0.5, 0, 1, 0)
+    volumeFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    volumeFill.BorderSizePixel = 0
+    volumeFill.Parent = volumeSlider
+    
+    local volumeCorner = Instance.new("UICorner")
+    volumeCorner.CornerRadius = UDim.new(0, 2)
+    volumeCorner.Parent = volumeFill
+    
+    local isDraggingVolume = false
+    volumeFill.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingVolume = true
+        end
+    end)
+    
+    volumeFill.InputChanged:Connect(function(input)
+        if isDraggingVolume and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+            local relativeX = math.clamp(mouse.X - volumeSlider.AbsolutePosition.X, 0, volumeSlider.AbsoluteSize.X)
+            local percentage = relativeX / volumeSlider.AbsoluteSize.X
+            
+            volumeFill.Size = UDim2.new(percentage, 0, 1, 0)
+            if sound then
+                sound.Volume = percentage * 0.5
+            end
+        end
+    end)
+    
+    volumeFill.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDraggingVolume = false
+        end
+    end)
+    
+    local isMuted = false
+    local originalVolume = sound and sound.Volume or 0.5
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        isMuted = not isMuted
+        
+        if sound then
+            if isMuted then
+                sound.Volume = 0
+                toggleButton.Text = "🔈"
+                toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            else
+                sound.Volume = originalVolume
+                toggleButton.Text = "🔊"
+                toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            end
+        end
+    end)
+    
+    musicGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    
+    _G.ShadowMusic = sound
+    _G.ShadowMusicGUI = musicGui
+    
+    return sound
+end
 
+-- Call the audio function
+playThemeMusic()
+
+-- Animations
 local DASH_IDS = {
     Backward = 17487011138,
     Forward = 17487127966,
@@ -59,8 +213,15 @@ local BASE_ANIMS = {
     Sprint = 132536459271202
 }
 
--- Animator6D
-loadstring(game:HttpGet("https://raw.githubusercontent.com/gObl00x/Stuff/refs/heads/main/Animator6D.lua"))()
+-- Animator6D with proper loading
+print("Loading Animator6D...")
+local animatorLoadSuccess, animatorError = pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/gObl00x/Stuff/refs/heads/main/Animator6D.lua"))()
+end)
+
+if not animatorLoadSuccess then
+    warn("Failed to load Animator6D:", animatorError)
+end
 
 wait(1.5)
 
@@ -147,114 +308,8 @@ local function showLoadingNotification()
     screenGui:Destroy()
 end
 
--- Theme system!!
-    
-    local musicGui = Instance.new("ScreenGui")
-    musicGui.Name = "ShadowMusicGUI"
-    musicGui.DisplayOrder = 5
-    musicGui.ResetOnSpawn = false
-    
-    local musicFrame = Instance.new("Frame")
-    musicFrame.Size = UDim2.new(0, 200, 0, 40)
-    musicFrame.Position = UDim2.new(1, -210, 0, 10)
-    musicFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
-    musicFrame.BackgroundTransparency = 0.3
-    musicFrame.BorderSizePixel = 0
-    musicFrame.Parent = musicGui
-    
-    local musicCorner = Instance.new("UICorner")
-    musicCorner.CornerRadius = UDim.new(0, 8)
-    musicCorner.Parent = musicFrame
-    
-    local musicTitle = Instance.new("TextLabel")
-    musicTitle.Text = "🎵 CHAOS THEME"
-    musicTitle.TextColor3 = Color3.fromRGB(0, 255, 255)
-    musicTitle.TextSize = 12
-    musicTitle.Font = Enum.Font.GothamBold
-    musicTitle.BackgroundTransparency = 1
-    musicTitle.Size = UDim2.new(0.7, 0, 1, 0)
-    musicTitle.Position = UDim2.new(0, 5, 0, 0)
-    musicTitle.TextXAlignment = Enum.TextXAlignment.Left
-    musicTitle.Parent = musicFrame
-    
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(0, 40, 0, 30)
-    toggleButton.Position = UDim2.new(0.75, 0, 0.125, 0)
-    toggleButton.Text = "⏸"
-    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.Font = Enum.Font.GothamBold
-    toggleButton.TextSize = 14
-    toggleButton.Parent = musicFrame
-    
-    local volumeSlider = Instance.new("Frame")
-    volumeSlider.Name = "VolumeSlider"
-    volumeSlider.Size = UDim2.new(0.7, 0, 0, 4)
-    volumeSlider.Position = UDim2.new(0.05, 0, 0.8, 0)
-    volumeSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    volumeSlider.BorderSizePixel = 0
-    volumeSlider.Parent = musicFrame
-    
-    local volumeFill = Instance.new("Frame")
-    volumeFill.Name = "VolumeFill"
-    volumeFill.Size = UDim2.new(0.5, 0, 1, 0)
-    volumeFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    volumeFill.BorderSizePixel = 0
-    volumeFill.Parent = volumeSlider
-    
-    local volumeCorner = Instance.new("UICorner")
-    volumeCorner.CornerRadius = UDim.new(0, 2)
-    volumeCorner.Parent = volumeFill
-    
-    local isDraggingVolume = false
-    volumeFill.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDraggingVolume = true
-        end
-    end)
-    
-    volumeFill.InputChanged:Connect(function(input)
-        if isDraggingVolume and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mouse = game:GetService("Players").LocalPlayer:GetMouse()
-            local relativeX = math.clamp(mouse.X - volumeSlider.AbsolutePosition.X, 0, volumeSlider.AbsoluteSize.X)
-            local percentage = relativeX / volumeSlider.AbsoluteSize.X
-            
-            volumeFill.Size = UDim2.new(percentage, 0, 1, 0)
-            sound.Volume = percentage * 0.5
-        end
-    end)
-    
-    volumeFill.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDraggingVolume = false
-        end
-    end)
-    
-    local isMuted = false
-    local originalVolume = sound.Volume
-    
-    toggleButton.MouseButton1Click:Connect(function()
-        isMuted = not isMuted
-        
-        if isMuted then
-            sound.Volume = 0
-            toggleButton.Text = "🔈"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-        else
-            sound.Volume = originalVolume
-            toggleButton.Text = "🔊"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        end
-    end)
-    
-    sound.Parent = game:GetService("Workspace")
-    musicGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-    
-    _G.ShadowMusic = sound
-    _G.ShadowMusicGUI = musicGui
-    
-    return sound
-end
+-- Call the audio function
+playThemeMusic()
 
 -- Cleanup previous instances
 if _G.ShadowConnections then
@@ -272,37 +327,73 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Animator6D Animation Control
+-- ============================================================================
+-- ANIMATOR6D ANIMATION CONTROL (FIXED)
+-- ============================================================================
+
 local currentAnimation = nil
 local animTrackInstance = nil
+local animatorReady = false
 
-local ANIMATIONS = {
-    Idle = 18691887203,        -- Your idle animation ID
-    Walk = 18692101922,        -- Your walk animation ID  
-    Jump = 18713038822,        -- Your jump animation ID
-    Fall = 18713036728,        -- Your fall animation ID
-    Sprint = 132536459271202   -- Your sprint animation ID
-}
-
--- Function to play animations with Animator6D
-local function playAnimIfChanged(animId, looped)
-    if currentAnimation == animId then return end
-    
-    -- Stop current animation
-    if animTrackInstance then
-        getgenv().Animator6D(0, 1, true) -- Stop animation
-        animTrackInstance = nil
+-- Function to wait for Animator6D to be ready
+local function waitForAnimator()
+    print("Waiting for Animator6D to load...")
+    local startTime = tick()
+    while (not getgenv().Animator6D or type(getgenv().Animator6D) ~= "function") and tick() - startTime < 10 do
+        task.wait(0.1)
     end
     
-    -- Play new animation
-    currentAnimation = animId
-    animTrackInstance = getgenv().Animator6D(animId, 1, looped ~= false)
+    if getgenv().Animator6D and type(getgenv().Animator6D) == "function" then
+        print("Animator6D loaded successfully!")
+        animatorReady = true
+        return true
+    else
+        warn("Animator6D failed to load after 10 seconds. Animations will be disabled.")
+        return false
+    end
 end
+
+local ANIMATIONS = {
+    Idle = 18691887203,
+    Walk = 18692101922,
+    Jump = 18713038822,
+    Fall = 18713036728,
+    Sprint = 132536459271202
+}
+
+-- Safe animation function
+local function playAnimIfChanged(animId, looped)
+    if not animatorReady then return end
+    if currentAnimation == animId then return end
+    
+    -- Stop current animation safely
+    local success, err = pcall(function()
+        if animTrackInstance then
+            getgenv().Animator6D(0, 1, true)
+            animTrackInstance = nil
+        end
+        
+        -- Play new animation
+        currentAnimation = animId
+        animTrackInstance = getgenv().Animator6D(animId, 1, looped ~= false)
+    end)
+    
+    if not success then
+        warn("Animation error:", err)
+        animatorReady = false
+    end
+end
+
+-- Call this after loading Animator6D
+waitForAnimator()
 
 -- Function to stop current animation
 local function stopCurrentAnimation()
+    if not animatorReady then return end
     if animTrackInstance then
-        getgenv().Animator6D(0, 1, true)
+        pcall(function()
+            getgenv().Animator6D(0, 1, true)
+        end)
         animTrackInstance = nil
     end
     currentAnimation = nil
@@ -5028,8 +5119,7 @@ local form1Abilities = {
             game:GetService("Debris"):AddItem(crater, 10)
         end,
         icon = "💢", color = Color3.fromRGB(255, 50, 0), cooldown = 10
-    },
-    -- Add more Form 1 unique abilities for NumPad6-9...
+    }
 }
 
 -- FORM 2: SHADOW SORCERER FORM (Magic/Spell Form)
@@ -5111,8 +5201,7 @@ local form2Abilities = {
             rift:Destroy()
         end,
         icon = "🌀", color = Color3.fromRGB(100, 0, 200), cooldown = 12
-    },
-    -- Add more Form 2 unique abilities...
+    }
 }
 
 -- FORM 3: SHADOW WARRIOR FORM (Martial Arts Form)
@@ -5154,8 +5243,7 @@ local form3Abilities = {
             end
         end,
         icon = "🥋", color = Color3.fromRGB(255, 200, 0), cooldown = 6
-    },
-    -- Add more Form 3 unique abilities...
+    }
 }
 
 -- FORM 4: SHADOW GOD FORM (Ultimate Reality Warping Form)
@@ -5182,8 +5270,7 @@ local form4Abilities = {
             end
         end,
         icon = "👑", color = Color3.fromRGB(255, 255, 255), cooldown = 15
-    },
-    -- Add more Form 4 unique abilities...
+    }
 }
 
 -- All forms combined
@@ -5866,8 +5953,6 @@ spawn(function()
     end
     welcomeGui:Destroy()
 end)
-
--- ultimateGui:Destroy()
 
 print("==================================================================================")
 print("⚡ SHADOW THE HEDGEHOG - COMPLETE CHAOS ARSENAL WITH 4 PAGES ⚡")
