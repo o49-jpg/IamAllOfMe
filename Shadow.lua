@@ -1,5 +1,47 @@
 -- Shadow the Hedgehog - Complete Chaos Arsenal with Acrobatics
+-- Place this at the VERY TOP of your script (before any other code)
+local function loadCustomAudio()
+    -- Check if file exists and is readable
+    local success, assetId = pcall(function()
+        -- This MUST be called BEFORE any other getcustomasset calls
+        return getcustomasset("allofme.mp3", true) -- true = wait for download
+    end)
+    
+    if not success then
+        warn("Failed to load custom audio file. Using Roblox audio instead.")
+        return false
+    end
+    
+    return true
+end
 
+-- Then in your playThemeMusic function:
+local function playThemeMusic()
+    if _G.ShadowMusic then
+        _G.ShadowMusic:Stop()
+        _G.ShadowMusic:Destroy()
+        _G.ShadowMusic = nil
+    end
+    
+    local sound = Instance.new("Sound")
+    sound.Name = "ShadowTheme"
+    
+    -- Try to load custom audio
+    local audioLoaded = pcall(function()
+        sound.SoundId = getcustomasset("allofme.mp3")
+    end)
+    
+    -- Fallback if custom audio fails
+    if not audioLoaded then
+        sound.SoundId = "rbxassetid://1837600489" -- Fallback to Roblox audio
+        warn("Using fallback audio (custom file not found)")
+    end
+    
+    sound.Volume = 0.5
+    sound.Looped = true
+    sound.Parent = workspace
+    sound:Play()
+    
 -- Animations
 
 local DASH_IDS = {
@@ -105,22 +147,7 @@ local function showLoadingNotification()
     screenGui:Destroy()
 end
 
--- Theme Music System
-local function playThemeMusic()
-    if _G.ShadowMusic then
-        _G.ShadowMusic:Stop()
-        _G.ShadowMusic:Destroy()
-        _G.ShadowMusic = nil
-    end
-    
-    local sound = Instance.new("Sound")
-sound.Name = "ShadowTheme"
-local asset_id = getcustomasset("allofme.mp3") -- Replace with your actual file path
-sound.SoundId = asset_id
-sound.Volume = 0.5
-sound.Looped = true
-sound.Parent = workspace
-sound:Play()   
+-- Theme system!!
     
     local musicGui = Instance.new("ScreenGui")
     musicGui.Name = "ShadowMusicGUI"
