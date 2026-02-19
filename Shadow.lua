@@ -6,7 +6,7 @@
 -- ============================================================================
 
 -- Change this to your desired filename
-local AUDIO_FILENAME = "allofme.mp3" -- You can change this to any .mp3 file
+local AUDIO_FILENAME = "FYF.mp3" -- You can change this to any .mp3 file
 local AUDIO_PATH = "Sonic/" .. AUDIO_FILENAME
 
 local function playThemeMusic()
@@ -79,6 +79,7 @@ local function playThemeMusic()
     
     if sound then
         sound.Volume = 0.5
+        sound.PlaybackSpeed = 1.0
         sound.Looped = true
         sound.Parent = workspace
     end
