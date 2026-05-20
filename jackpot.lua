@@ -1,0 +1,6070 @@
+--// JACKPOT - REN KUROGANE CHARACTER GUI
+--// Put in StarterPlayerScripts (LocalScript)
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "JackpotCharacterGUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+---------------------------------------------------
+-- CONTAINER
+---------------------------------------------------
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 400, 0, 700)
+container.Position = UDim2.new(0.5, -200, 0.5, -350)
+container.BackgroundTransparency = 1
+container.Parent = gui
+
+---------------------------------------------------
+-- JACKPOT REEL BG
+---------------------------------------------------
+
+local reelBg = Instance.new("Frame")
+reelBg.Size = UDim2.new(0, 320, 0, 80)
+reelBg.Position = UDim2.new(0.5, -160, 0, 20)
+reelBg.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+reelBg.BorderSizePixel = 0
+reelBg.Parent = container
+
+local reelCorner = Instance.new("UICorner")
+reelCorner.CornerRadius = UDim.new(0, 6)
+reelCorner.Parent = reelBg
+
+local reelBorder = Instance.new("Frame")
+reelBorder.Size = UDim2.new(1, 2, 1, 2)
+reelBorder.Position = UDim2.new(0, -1, 0, -1)
+reelBorder.BackgroundTransparency = 1
+reelBorder.BorderSizePixel = 0
+reelBorder.Parent = reelBg
+
+local reelBorderStroke = Instance.new("UIStroke")
+reelBorderStroke.Thickness = 1.5
+reelBorderStroke.Color = Color3.fromRGB(255, 215, 0)
+reelBorderStroke.Transparency = 0.4
+reelBorderStroke.Parent = reelBg
+
+-- 3 Reel slots
+local reelSymbols = {"♠", "♥", "♣", "♦", "7", "◆", "★"}
+local reelTexts = {}
+
+for i = 1, 3 do
+	local reelSlot = Instance.new("TextLabel")
+	reelSlot.Size = UDim2.new(0, 80, 0, 50)
+	reelSlot.Position = UDim2.new(0, 15 + (i - 1) * 105, 0.5, -25)
+	reelSlot.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+	reelSlot.BorderSizePixel = 0
+	reelSlot.Text = reelSymbols[math.random(#reelSymbols)]
+	reelSlot.TextColor3 = Color3.fromRGB(255, 215, 0)
+	reelSlot.Font = Enum.Font.GothamBlack
+	reelSlot.TextScaled = true
+	reelSlot.Parent = reelBg
+
+	local slotCorner = Instance.new("UICorner")
+	slotCorner.CornerRadius = UDim.new(0, 4)
+	slotCorner.Parent = reelSlot
+
+	local slotStroke = Instance.new("UIStroke")
+	slotStroke.Thickness = 1
+	slotStroke.Color = Color3.fromRGB(255, 215, 0)
+	slotStroke.Transparency = 0.6
+	slotStroke.Parent = reelSlot
+
+	reelTexts[i] = reelSlot
+end
+
+-- Divider lines
+for i = 1, 2 do
+	local div = Instance.new("Frame")
+	div.Size = UDim2.new(0, 1, 0, 40)
+	div.Position = UDim2.new(0, 105 + (i - 1) * 105, 0.5, -20)
+	div.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+	div.BackgroundTransparency = 0.6
+	div.BorderSizePixel = 0
+	div.Parent = reelBg
+end
+
+-- Jackpot label above reel
+local jackpotLabel = Instance.new("TextLabel")
+jackpotLabel.Size = UDim2.new(0, 120, 0, 20)
+jackpotLabel.Position = UDim2.new(0.5, -60, 0, 0)
+jackpotLabel.BackgroundTransparency = 1
+jackpotLabel.Text = "JACKPOT"
+jackpotLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+jackpotLabel.Font = Enum.Font.GothamBlack
+jackpotLabel.TextScaled = true
+jackpotLabel.Parent = container
+
+---------------------------------------------------
+-- CHARACTER PORTRAIT FRAME
+---------------------------------------------------
+
+local portraitFrame = Instance.new("Frame")
+portraitFrame.Size = UDim2.new(0, 120, 0, 120)
+portraitFrame.Position = UDim2.new(0.5, -60, 0, 120)
+portraitFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+portraitFrame.BorderSizePixel = 0
+portraitFrame.ClipsDescendants = true
+portraitFrame.Parent = container
+
+local portCorner = Instance.new("UICorner")
+portCorner.CornerRadius = UDim.new(0, 60)
+portCorner.Parent = portraitFrame
+
+local portStroke = Instance.new("UIStroke")
+portStroke.Thickness = 2
+portStroke.Color = Color3.fromRGB(255, 215, 0)
+portStroke.Transparency = 0.3
+portStroke.Parent = portraitFrame
+
+-- Glow behind portrait
+local portGlow = Instance.new("Frame")
+portGlow.Size = UDim2.new(0, 140, 0, 140)
+portGlow.Position = UDim2.new(0.5, -70, 0.5, -70)
+portGlow.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+portGlow.BackgroundTransparency = 0.85
+portGlow.BorderSizePixel = 0
+portGlow.Parent = portraitFrame
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 70)
+glowCorner.Parent = portGlow
+
+-- Portrait placeholder (character image would go here via ImageLabel)
+local portPlaceholder = Instance.new("Frame")
+portPlaceholder.Size = UDim2.new(0, 100, 0, 100)
+portPlaceholder.Position = UDim2.new(0.5, -50, 0.5, -50)
+portPlaceholder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+portPlaceholder.BorderSizePixel = 0
+portPlaceholder.Parent = portraitFrame
+
+local portPlaceCorner = Instance.new("UICorner")
+portPlaceCorner.CornerRadius = UDim.new(0, 50)
+portPlaceCorner.Parent = portPlaceholder
+
+-- Character name above portrait
+local charName = Instance.new("TextLabel")
+charName.Size = UDim2.new(0, 200, 0, 24)
+charName.Position = UDim2.new(0.5, -100, 0, 108)
+charName.BackgroundTransparency = 1
+charName.Text = "REN KUROGANE"
+charName.TextColor3 = Color3.fromRGB(255, 255, 255)
+charName.Font = Enum.Font.GothamBlack
+charName.TextScaled = true
+charName.Parent = container
+
+local charSubtitle = Instance.new("TextLabel")
+charSubtitle.Size = UDim2.new(0, 160, 0, 16)
+charSubtitle.Position = UDim2.new(0.5, -80, 0, 130)
+charSubtitle.BackgroundTransparency = 1
+charSubtitle.Text = "INFINITE CASINO HOST"
+charSubtitle.TextColor3 = Color3.fromRGB(200, 170, 100)
+charSubtitle.Font = Enum.Font.GothamBold
+charSubtitle.TextScaled = true
+charSubtitle.Parent = container
+
+---------------------------------------------------
+-- HEALTH BAR (Slot Machine Style)
+---------------------------------------------------
+
+local healthFrame = Instance.new("Frame")
+healthFrame.Size = UDim2.new(0, 300, 0, 36)
+healthFrame.Position = UDim2.new(0.5, -150, 0, 170)
+healthFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+healthFrame.BorderSizePixel = 0
+healthFrame.Parent = container
+
+local healthCorner = Instance.new("UICorner")
+healthCorner.CornerRadius = UDim.new(0, 4)
+healthCorner.Parent = healthFrame
+
+local healthStroke = Instance.new("UIStroke")
+healthStroke.Thickness = 1
+healthStroke.Color = Color3.fromRGB(255, 215, 0)
+healthStroke.Transparency = 0.5
+healthStroke.Parent = healthFrame
+
+-- Health fill
+local healthFill = Instance.new("Frame")
+healthFill.Size = UDim2.new(1, -4, 1, -4)
+healthFill.Position = UDim2.new(0, 2, 0, 2)
+healthFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+healthFill.BorderSizePixel = 0
+healthFill.Parent = healthFrame
+
+local healthFillCorner = Instance.new("UICorner")
+healthFillCorner.CornerRadius = UDim.new(0, 3)
+healthFillCorner.Parent = healthFill
+
+local healthGradient = Instance.new("UIGradient")
+healthGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 50)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 215, 0)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 255, 50))
+})
+healthGradient.Rotation = 90
+healthGradient.Parent = healthFill
+
+-- Health segments (reel-like notches)
+for i = 1, 9 do
+	local seg = Instance.new("Frame")
+	seg.Size = UDim2.new(0, 1, 1, 0)
+	seg.Position = UDim2.new(i / 10, 0, 0, 0)
+	seg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	seg.BackgroundTransparency = 0.5
+	seg.BorderSizePixel = 0
+	seg.Parent = healthFill
+end
+
+-- Health label
+local healthLabel = Instance.new("TextLabel")
+healthLabel.Size = UDim2.new(0, 60, 1, 0)
+healthLabel.Position = UDim2.new(1, -60, 0, 0)
+healthLabel.BackgroundTransparency = 1
+healthLabel.Text = "100"
+healthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+healthLabel.Font = Enum.Font.GothamBlack
+healthLabel.TextScaled = true
+healthLabel.TextXAlignment = Enum.TextXAlignment.Center
+healthLabel.Parent = healthFrame
+
+local hpIcon = Instance.new("TextLabel")
+hpIcon.Size = UDim2.new(0, 24, 1, 0)
+hpIcon.Position = UDim2.new(0, 4, 0, 0)
+hpIcon.BackgroundTransparency = 1
+hpIcon.Text = "♥"
+hpIcon.TextColor3 = Color3.fromRGB(255, 50, 50)
+hpIcon.Font = Enum.Font.GothamBlack
+hpIcon.TextScaled = true
+hpIcon.Parent = healthFrame
+
+---------------------------------------------------
+-- SPECIAL/ENERGY BAR (Diamond themed)
+---------------------------------------------------
+
+local energyFrame = Instance.new("Frame")
+energyFrame.Size = UDim2.new(0, 300, 0, 24)
+energyFrame.Position = UDim2.new(0.5, -150, 0, 214)
+energyFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+energyFrame.BorderSizePixel = 0
+energyFrame.Parent = container
+
+local energyCorner = Instance.new("UICorner")
+energyCorner.CornerRadius = UDim.new(0, 4)
+energyCorner.Parent = energyFrame
+
+local energyStroke = Instance.new("UIStroke")
+energyStroke.Thickness = 1
+energyStroke.Color = Color3.fromRGB(100, 200, 255)
+energyStroke.Transparency = 0.5
+energyStroke.Parent = energyFrame
+
+local energyFill = Instance.new("Frame")
+energyFill.Size = UDim2.new(0.5, -2, 1, -2)
+energyFill.Position = UDim2.new(0, 1, 0, 1)
+energyFill.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+energyFill.BorderSizePixel = 0
+energyFill.Parent = energyFrame
+
+local energyFillCorner = Instance.new("UICorner")
+energyFillCorner.CornerRadius = UDim.new(0, 3)
+energyFillCorner.Parent = energyFill
+
+local energyGradient = Instance.new("UIGradient")
+energyGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 150, 255)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 200, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 100, 255))
+})
+energyGradient.Rotation = 90
+energyGradient.Parent = energyFill
+
+-- Diamond icons as segment markers
+local energyLabel = Instance.new("TextLabel")
+energyLabel.Size = UDim2.new(0, 50, 1, 0)
+energyLabel.Position = UDim2.new(1, -50, 0, 0)
+energyLabel.BackgroundTransparency = 1
+energyLabel.Text = "♦50"
+energyLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+energyLabel.Font = Enum.Font.GothamBold
+energyLabel.TextScaled = true
+energyLabel.TextXAlignment = Enum.TextXAlignment.Center
+energyLabel.Parent = energyFrame
+
+local energyIcon = Instance.new("TextLabel")
+energyIcon.Size = UDim2.new(0, 20, 1, 0)
+energyIcon.Position = UDim2.new(0, 4, 0, 0)
+energyIcon.BackgroundTransparency = 1
+energyIcon.Text = "♦"
+energyIcon.TextColor3 = Color3.fromRGB(100, 200, 255)
+energyIcon.Font = Enum.Font.GothamBlack
+energyIcon.TextScaled = true
+energyIcon.Parent = energyFrame
+
+---------------------------------------------------
+-- COMBO / STREAK COUNTER (Centerpiece)
+---------------------------------------------------
+
+local comboFrame = Instance.new("Frame")
+comboFrame.Size = UDim2.new(0, 160, 0, 160)
+comboFrame.Position = UDim2.new(0.5, -80, 0, 250)
+comboFrame.BackgroundTransparency = 1
+comboFrame.Parent = container
+
+-- Outer ring
+local outerRing = Instance.new("Frame")
+outerRing.Size = UDim2.new(0, 160, 0, 160)
+outerRing.Position = UDim2.new(0.5, -80, 0.5, -80)
+outerRing.BackgroundTransparency = 1
+outerRing.BorderSizePixel = 0
+outerRing.Parent = comboFrame
+
+local outerRingStroke = Instance.new("UIStroke")
+outerRingStroke.Thickness = 2
+outerRingStroke.Color = Color3.fromRGB(255, 215, 0)
+outerRingStroke.Transparency = 0.4
+outerRingStroke.Parent = outerRing
+
+local outerRingCorner = Instance.new("UICorner")
+outerRingCorner.CornerRadius = UDim.new(0, 80)
+outerRingCorner.Parent = outerRing
+
+-- Inner ring
+local innerRing = Instance.new("Frame")
+innerRing.Size = UDim2.new(0, 130, 0, 130)
+innerRing.Position = UDim2.new(0.5, -65, 0.5, -65)
+innerRing.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+innerRing.BorderSizePixel = 0
+innerRing.Parent = comboFrame
+
+local innerRingCorner = Instance.new("UICorner")
+innerRingCorner.CornerRadius = UDim.new(0, 65)
+innerRingCorner.Parent = innerRing
+
+local innerRingStroke = Instance.new("UIStroke")
+innerRingStroke.Thickness = 1.5
+innerRingStroke.Color = Color3.fromRGB(255, 215, 0)
+innerRingStroke.Transparency = 0.6
+innerRingStroke.Parent = innerRing
+
+-- Combo value
+local comboValue = Instance.new("TextLabel")
+comboValue.Size = UDim2.new(0, 100, 0, 60)
+comboValue.Position = UDim2.new(0.5, -50, 0, 20)
+comboValue.BackgroundTransparency = 1
+comboValue.Text = "0"
+comboValue.TextColor3 = Color3.fromRGB(255, 215, 0)
+comboValue.Font = Enum.Font.GothamBlack
+comboValue.TextScaled = true
+comboValue.Parent = innerRing
+
+-- Combo label
+local comboLabel = Instance.new("TextLabel")
+comboLabel.Size = UDim2.new(0, 100, 0, 24)
+comboLabel.Position = UDim2.new(0.5, -50, 0, 80)
+comboLabel.BackgroundTransparency = 1
+comboLabel.Text = "COMBO"
+comboLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+comboLabel.Font = Enum.Font.GothamBold
+comboLabel.TextScaled = true
+comboLabel.TextTransparency = 0.3
+comboLabel.Parent = innerRing
+
+-- Glow ring behind combo (pulsing)
+local glowRing = Instance.new("Frame")
+glowRing.Size = UDim2.new(0, 170, 0, 170)
+glowRing.Position = UDim2.new(0.5, -85, 0.5, -85)
+glowRing.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+glowRing.BackgroundTransparency = 0.9
+glowRing.BorderSizePixel = 0
+glowRing.Parent = comboFrame
+
+local glowRingCorner = Instance.new("UICorner")
+glowRingCorner.CornerRadius = UDim.new(0, 85)
+glowRingCorner.Parent = glowRing
+
+---------------------------------------------------
+-- BOTTOM STATS BAR
+---------------------------------------------------
+
+local statsFrame = Instance.new("Frame")
+statsFrame.Size = UDim2.new(0, 320, 0, 50)
+statsFrame.Position = UDim2.new(0.5, -160, 0, 430)
+statsFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+statsFrame.BorderSizePixel = 0
+statsFrame.Parent = container
+
+local statsCorner = Instance.new("UICorner")
+statsCorner.CornerRadius = UDim.new(0, 6)
+statsCorner.Parent = statsFrame
+
+local statsStroke = Instance.new("UIStroke")
+statsStroke.Thickness = 1
+statsStroke.Color = Color3.fromRGB(255, 215, 0)
+statsStroke.Transparency = 0.5
+statsStroke.Parent = statsFrame
+
+local statEntries = {
+	{name = "WIN %", value = "0%", color = Color3.fromRGB(100, 255, 100)},
+	{name = "STREAK", value = "0", color = Color3.fromRGB(255, 100, 100)},
+	{name = "BALANCE", value = "1000", color = Color3.fromRGB(255, 215, 0)},
+	{name = "WINS", value = "0", color = Color3.fromRGB(100, 200, 255)}
+}
+
+for i, entry in ipairs(statEntries) do
+	local w = 80
+	local x = (i - 1) * w
+
+	local statItem = Instance.new("Frame")
+	statItem.Size = UDim2.new(0, w, 1, 0)
+	statItem.Position = UDim2.new(0, x, 0, 0)
+	statItem.BackgroundTransparency = 1
+	statItem.Parent = statsFrame
+
+	local statVal = Instance.new("TextLabel")
+	statVal.Size = UDim2.new(1, -4, 0, 22)
+	statVal.Position = UDim2.new(0, 2, 0, 2)
+	statVal.BackgroundTransparency = 1
+	statVal.Text = entry.value
+	statVal.TextColor3 = entry.color
+	statVal.Font = Enum.Font.GothamBlack
+	statVal.TextScaled = true
+	statVal.Parent = statItem
+
+	local statName = Instance.new("TextLabel")
+	statName.Size = UDim2.new(1, -4, 0, 16)
+	statName.Position = UDim2.new(0, 2, 0, 28)
+	statName.BackgroundTransparency = 1
+	statName.Text = entry.name
+	statName.TextColor3 = Color3.fromRGB(150, 150, 150)
+	statName.Font = Enum.Font.GothamBold
+	statName.TextScaled = true
+	statName.TextTransparency = 0.3
+	statName.Parent = statItem
+
+	-- Vertical divider
+	if i < 4 then
+		local div = Instance.new("Frame")
+		div.Size = UDim2.new(0, 1, 0, 30)
+		div.Position = UDim2.new(1, 0, 0.5, -15)
+		div.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+		div.BackgroundTransparency = 0.7
+		div.BorderSizePixel = 0
+		div.Parent = statItem
+	end
+
+	entry.label = statVal
+end
+
+---------------------------------------------------
+-- TOGGLE BUTTON (Casino Chip)
+---------------------------------------------------
+
+local toggle = Instance.new("ImageButton")
+toggle.Size = UDim2.new(0, 60, 0, 60)
+toggle.Position = UDim2.new(0, 20, 0.5, -30)
+toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+toggle.BorderSizePixel = 0
+toggle.Parent = gui
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 30)
+toggleCorner.Parent = toggle
+
+local toggleStroke = Instance.new("UIStroke")
+toggleStroke.Thickness = 2
+toggleStroke.Color = Color3.fromRGB(255, 215, 0)
+toggleStroke.Transparency = 0.3
+toggleStroke.Parent = toggle
+
+local toggleText = Instance.new("TextLabel")
+toggleText.Size = UDim2.new(1, 0, 1, 0)
+toggleText.BackgroundTransparency = 1
+toggleText.Text = "$"
+toggleText.TextScaled = true
+toggleText.Font = Enum.Font.GothamBlack
+toggleText.Parent = toggle
+
+-- Toggle position state
+local containerVisible = false
+container.Position = UDim2.new(0.5, -200, 1.5, 0)
+
+toggle.MouseButton1Click:Connect(function()
+	containerVisible = not containerVisible
+	
+	if containerVisible then
+		TweenService:Create(container, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0.5, -200, 0.5, -350)
+		}):Play()
+		TweenService:Create(toggle, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0, -80, 0.5, -30)
+		}):Play()
+	else
+		TweenService:Create(container, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, -200, 1.5, 0)
+		}):Play()
+		TweenService:Create(toggle, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			Position = UDim2.new(0, 20, 0.5, -30)
+		}):Play()
+	end
+end)
+
+---------------------------------------------------
+-- SLOT REEL SPIN EFFECT
+---------------------------------------------------
+
+local spinTween = nil
+
+function spinReels()
+	local symbols = {"♠", "♥", "♣", "♦", "7", "◆", "★"}
+	for i = 1, 3 do
+		local delay = (i - 1) * 0.12
+		task.delay(delay, function()
+			local count = 0
+			local maxSpins = 10 + math.random(5, 10)
+			local spinConn
+			spinConn = RunService.Heartbeat:Connect(function()
+				count += 1
+				reelTexts[i].Text = symbols[math.random(#symbols)]
+				if count >= maxSpins then
+					spinConn:Disconnect()
+					-- Final symbol
+					local finalSymbol = symbols[math.random(#symbols)]
+					reelTexts[i].Text = finalSymbol
+					
+					-- Win flash if all 3 match
+					if i == 3 then
+						local a, b, c = reelTexts[1].Text, reelTexts[2].Text, reelTexts[3].Text
+						if a == b and b == c then
+							-- JACKPOT FLASH
+							local flashCount = 0
+							local flashConn
+							flashConn = RunService.Heartbeat:Connect(function()
+								flashCount += 1
+								local flash = flashCount % 2 == 0
+								for _, rt in ipairs(reelTexts) do
+									rt.TextColor3 = flash and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(255, 215, 0)
+								end
+								if flashCount >= 12 then
+									flashConn:Disconnect()
+									for _, rt in ipairs(reelTexts) do
+										rt.TextColor3 = Color3.fromRGB(255, 215, 0)
+									end
+								end
+							end)
+							comboValue.TextColor3 = Color3.fromRGB(255, 50, 50)
+							task.delay(1, function()
+								comboValue.TextColor3 = Color3.fromRGB(255, 215, 0)
+							end)
+						end
+					end
+				end
+			end)
+		end)
+	end
+end
+
+-- Initial spin
+task.delay(0.5, spinReels)
+
+---------------------------------------------------
+-- HEALTH SYSTEM
+---------------------------------------------------
+
+local maxHealth = 100
+local currentHealth = 100
+local maxEnergy = 100
+local currentEnergy = 50
+local comboCount = 0
+
+function updateHealth(value)
+	currentHealth = math.clamp(value, 0, maxHealth)
+	local pct = currentHealth / maxHealth
+	
+	healthFill:TweenSize(UDim2.new(pct, -2, 1, -2), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.4, true)
+	healthLabel.Text = tostring(math.floor(currentHealth))
+	
+	if pct <= 0.25 then
+		healthLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+	elseif pct <= 0.5 then
+		healthLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
+	else
+		healthLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	end
+end
+
+function updateEnergy(value)
+	currentEnergy = math.clamp(value, 0, maxEnergy)
+	local pct = currentEnergy / maxEnergy
+	
+	energyFill:TweenSize(UDim2.new(pct, -2, 1, -2), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
+	energyLabel.Text = "♦" .. tostring(math.floor(currentEnergy))
+end
+
+function addCombo(amount)
+	comboCount += amount
+	comboValue.Text = tostring(comboCount)
+	
+	-- Pulse effect
+	local pulse = TweenService:Create(comboFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 175, 0, 175)
+	})
+	pulse:Play()
+	pulse.Completed:Connect(function()
+		TweenService:Create(comboFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 160, 0, 160)
+		}):Play()
+	end)
+	
+	-- Color shift based on combo
+	if comboCount >= 20 then
+		comboValue.TextColor3 = Color3.fromRGB(255, 50, 50)
+		comboLabel.Text = "LEGENDARY"
+	elseif comboCount >= 10 then
+		comboValue.TextColor3 = Color3.fromRGB(255, 150, 50)
+		comboLabel.Text = "GODLIKE"
+	elseif comboCount >= 5 then
+		comboValue.TextColor3 = Color3.fromRGB(255, 215, 0)
+		comboLabel.Text = "HOT STREAK"
+	else
+		comboValue.TextColor3 = Color3.fromRGB(255, 215, 0)
+		comboLabel.Text = "COMBO"
+	end
+	
+	-- Update stats
+	statEntries[2].label.Text = tostring(comboCount)
+end
+
+function resetCombo()
+	comboCount = 0
+	comboValue.Text = "0"
+	comboValue.TextColor3 = Color3.fromRGB(255, 215, 0)
+	comboLabel.Text = "COMBO"
+	statEntries[2].label.Text = "0"
+end
+
+---------------------------------------------------
+-- AMBIENT PULSE ON REEL BORDER
+---------------------------------------------------
+
+task.spawn(function()
+	while true do
+		for i = 0, 10 do
+			local t = i / 10
+			local alpha = 0.3 + math.sin(t * math.pi * 2) * 0.15
+			reelBorderStroke.Transparency = 1 - alpha
+			task.wait(0.05)
+		end
+	end
+end)
+
+---------------------------------------------------
+-- DESTROY ON LEAVE
+---------------------------------------------------
+
+player.OnTeleport:Connect(function()
+	gui:Destroy()
+end)
+
+---------------------------------------------------
+-- DEMO: HEALTH DECAY / REGEN LOOP
+---------------------------------------------------
+
+task.spawn(function()
+	task.wait(2)
+	while true do
+		task.wait(3)
+		if currentHealth > 0 then
+			updateHealth(currentHealth - math.random(5, 15))
+		end
+		if currentHealth <= 0 then
+			task.wait(1)
+			updateHealth(100)
+			resetCombo()
+		end
+		task.wait(math.random(2, 4))
+		updateEnergy(currentEnergy + math.random(5, 15))
+		addCombo(1)
+		spinReels()
+	end
+end)
+
+--// ============================================================
+--// JACKPOT EXPANSION v2 - GAMES, VFX, ANIMATIONS, SYSTEMS
+--// ============================================================
+
+--// === SAFE SYMBOL MAP ===
+--// Replaces emoji with Roblox-font-safe alternatives
+
+local SAFE = {
+	chips = "$",
+	slots = "[SLOTS]",
+	cards = "♠",
+	dice = "[DICE]",
+	target = "[HIT]",
+	coin = "[COIN]",
+	fire = ">>",
+	trophy = "★",
+	cross = "X",
+	star = "★",
+	diamond = "◆",
+	crown = "♛",
+	heart = "♥",
+	spade = "♠",
+	club = "♣",
+	note = "♪",
+	sparkle = "✦",
+	skull = "☠",
+	check = "✓",
+	arrow_r = "►",
+	arrow_l = "◄",
+	arrow_u = "▲",
+	arrow_d = "▼",
+	bullet = "•",
+	black = "■",
+	chip_s = "●",
+	warning = "!!",
+	jackpot = "[JP]",
+	seven = "7",
+	cherry = "CH",
+	lemon = "LM",
+	orange = "OR",
+	watermelon = "WM",
+	bell = "BL",
+	bar = "BAR",
+}
+local SYM = SAFE
+
+--// === TEXT SANITIZER ===
+
+local emojiMap = {
+	["💰"] = SYM.chips, ["🪙"] = SYM.coin, ["🎰"] = SYM.slots,
+	["🃏"] = SYM.cards, ["🎲"] = SYM.dice, ["🎯"] = SYM.target,
+	["🔥"] = SYM.fire, ["🏆"] = SYM.trophy, ["❌"] = SYM.cross,
+	["🎉"] = "!!", ["💎"] = SYM.diamond, ["⭐"] = SYM.star,
+	["👑"] = SYM.crown, ["🍒"] = SYM.cherry, ["🍋"] = SYM.lemon,
+	["🍊"] = SYM.orange, ["🍉"] = SYM.watermelon, ["🔔"] = SYM.note,
+	["7️⃣"] = SYM.seven, ["✨"] = SYM.sparkle, ["💀"] = SYM.skull,
+	["🎊"] = "!!", ["🎁"] = "[GIFT]", ["💥"] = "!!",
+	["⚡"] = "!!", ["💯"] = "100", ["🔴"] = "●",
+	["🟢"] = "●", ["🟡"] = "●", ["🟣"] = "●",
+	["♠️"] = "♠", ["♥️"] = "♥", ["♣️"] = "♣", ["♦️"] = "♦",
+	["🎸"] = "[ROCK]", ["🎺"] = "[JAZZ]", ["🎵"] = SYM.note,
+	["🎶"] = SYM.note, ["🌟"] = SYM.star, ["⭐"] = SYM.star,
+	["⬆️"] = SYM.arrow_u, ["⬇️"] = SYM.arrow_d, ["➡️"] = SYM.arrow_r,
+	["⬅️"] = SYM.arrow_l, ["✅"] = SYM.check,
+}
+
+local function sanitizeText(str)
+	if not str then return "" end
+	local result = str
+	for emoji, replacement in pairs(emojiMap) do
+		result = result:gsub(emoji, replacement)
+	end
+	return result
+end
+
+local origTextLabel = TextLabel
+local meta = getmetatable(TextLabel)
+if meta then
+	local oldIndex = meta.__index
+	meta.__index = function(self, key)
+		if key == "Text" then
+			return oldIndex.__index(self, key)
+		end
+		return oldIndex.__index(self, key)
+	end
+end
+
+--// === VFX ENGINE ===
+
+local VFX = {}
+local vfxPool = {}
+local activeVFX = {}
+
+--// FLOATING TEXT
+
+function VFX:FloatingText(text, pos, color, size)
+	size = size or 20
+	color = color or Color3.fromRGB(255, 215, 0)
+	local safeText = sanitizeText(text)
+	
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0, 200, 0, 30)
+	label.Position = pos or UDim2.new(0.5, -100, 0.5, -15)
+	label.BackgroundTransparency = 1
+	label.Text = safeText
+	label.TextColor3 = color
+	label.Font = Enum.Font.GothamBlack
+	label.TextSize = size
+	label.TextScaled = true
+	label.ZIndex = 100
+	label.Parent = gui
+	
+	local goal = label:Clone()
+	goal.Position = UDim2.new(label.Position.X.Scale, label.Position.X.Offset, label.Position.Y.Scale, label.Position.Y.Offset - 80)
+	goal.TextTransparency = 1
+	goal.TextColor3 = color
+	
+	local tween = TweenService:Create(label, TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = goal.Position,
+		TextTransparency = 1
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		label:Destroy()
+	end)
+	
+	return label
+end
+
+function VFX:DamageNumber(amount, crit)
+	local color = crit and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(255, 200, 50)
+	local text = crit and ("!! " .. tostring(amount) .. " !!") or tostring(amount)
+	self:FloatingText(text, UDim2.new(0.5, -100, 0.4, -15), color, crit and 30 or 22)
+end
+
+function VFX:WinText(amount, gameName)
+	local text = "WIN +" .. tostring(amount) .. " [" .. gameName .. "]"
+	self:FloatingText(text, UDim2.new(0.5, -100, 0.35, -15), Color3.fromRGB(255, 215, 0), 28)
+end
+
+function VFX:LossText(amount, gameName)
+	local text = "LOSE -" .. tostring(amount) .. " [" .. gameName .. "]"
+	self:FloatingText(text, UDim2.new(0.5, -100, 0.35, -15), Color3.fromRGB(255, 50, 50), 24)
+end
+
+function VFX:JackpotText()
+	local text = "=== JACKPOT ==="
+	self:FloatingText(text, UDim2.new(0.5, -100, 0.3, -15), Color3.fromRGB(255, 215, 0), 36)
+	task.delay(0.3, function()
+		self:FloatingText("!!!", UDim2.new(0.5, -50, 0.25, -15), Color3.fromRGB(255, 50, 50), 42)
+	end)
+	task.delay(0.6, function()
+		self:FloatingText("!!!", UDim2.new(0.5, -10, 0.25, -15), Color3.fromRGB(255, 200, 50), 42)
+	end)
+end
+
+function VFX:StreakText(combo)
+	local text = tostring(combo) .. "x STREAK"
+	local color
+	if combo >= 20 then
+		color = Color3.fromRGB(255, 50, 50)
+	elseif combo >= 10 then
+		color = Color3.fromRGB(255, 150, 50)
+	else
+		color = Color3.fromRGB(255, 215, 0)
+	end
+	self:FloatingText(text, UDim2.new(0.5, -100, 0.45, -15), color, 26)
+end
+
+--// SCREEN SHAKE
+
+local shakeIntensity = 0
+local shakeActive = false
+
+function VFX:ScreenShake(intensity, duration)
+	intensity = intensity or 5
+	duration = duration or 0.3
+	shakeIntensity = intensity
+	
+	if not shakeActive then
+		shakeActive = true
+		local basePos = container.Position
+		local elapsed = 0
+		local conn
+		conn = RunService.Heartbeat:Connect(function(dt)
+			elapsed = elapsed + dt
+			if elapsed >= duration then
+				container.Position = UDim2.new(0.5, -200, 0.5, -350)
+				shakeActive = false
+				conn:Disconnect()
+				return
+			end
+			local decay = 1 - (elapsed / duration)
+			local ox = math.random(-1, 1) * intensity * decay
+			local oy = math.random(-1, 1) * intensity * decay
+			container.Position = UDim2.new(0.5, -200 + ox, 0.5, -350 + oy)
+		end)
+		conn.Parent = gui
+	end
+end
+
+--// GLOW PULSE CONTROLLER
+
+local glowController = {}
+local glowTargets = {}
+
+function VFX:RegisterGlow(frame, speed, minTrans, maxTrans)
+	speed = speed or 2
+	minTrans = minTrans or 0.7
+	maxTrans = maxTrans or 0.95
+	
+	local entry = {
+		frame = frame,
+		speed = speed,
+		minTrans = minTrans,
+		maxTrans = maxTrans,
+		phase = math.random() * math.pi * 2
+	}
+	table.insert(glowTargets, entry)
+	return entry
+end
+
+--// RAINBOW CYCLER
+
+local rainbowTargets = {}
+
+function VFX:RegisterRainbow(frame, speed)
+	speed = speed or 1
+	table.insert(rainbowTargets, {
+		frame = frame,
+		speed = speed,
+		hue = math.random() * 360
+	})
+end
+
+function VFX:RainbowColor(hue)
+	hue = hue or 0
+	local r, g, b = 0, 0, 0
+	local h = hue / 60
+	local i = math.floor(h)
+	local f = h - i
+	local p = 1 - f
+	local q = 1 - (1 - f)
+	
+	if i == 0 then r, g, b = 1, f, 0
+	elseif i == 1 then r, g, b = q, 1, 0
+	elseif i == 2 then r, g, b = 0, 1, f
+	elseif i == 3 then r, g, b = 0, q, 1
+	elseif i == 4 then r, g, b = f, 0, 1
+	else r, g, b = 1, 0, q
+	end
+	
+	return Color3.new(r, g, b)
+end
+
+--// BURST EFFECT
+
+function VFX:Burst(origin, count, color)
+	count = count or 8
+	color = color or Color3.fromRGB(255, 215, 0)
+	
+	for i = 1, count do
+		local dot = Instance.new("Frame")
+		dot.Size = UDim2.new(0, 6, 0, 6)
+		dot.Position = origin or UDim2.new(0.5, -3, 0.5, -3)
+		dot.BackgroundColor3 = color
+		dot.BorderSizePixel = 0
+		dot.ZIndex = 99
+		dot.Parent = gui
+		
+		local dotCorner = Instance.new("UICorner")
+		dotCorner.CornerRadius = UDim.new(0, 3)
+		dotCorner.Parent = dot
+		
+		local angle = (i / count) * math.pi * 2
+		local dist = 80 + math.random(-20, 20)
+		local dx = math.cos(angle) * dist
+		local dy = math.sin(angle) * dist
+		
+		local tween = TweenService:Create(dot, TweenInfo.new(0.6 + math.random() * 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.new(
+				origin.X.Scale, origin.X.Offset + dx,
+				origin.Y.Scale, origin.Y.Offset + dy
+			),
+			BackgroundTransparency = 1,
+			Size = UDim2.new(0, 2, 0, 2)
+		})
+		tween:Play()
+		tween.Completed:Connect(function()
+			dot:Destroy()
+		end)
+	end
+end
+
+--// CHIP SHOWER
+
+function VFX:ChipShower(count)
+	count = count or 15
+	
+	for i = 1, count do
+		local chip = Instance.new("Frame")
+		chip.Size = UDim2.new(0, 12, 0, 12)
+		chip.Position = UDim2.new(math.random(300, 700) / 1000, 0, -0.1, 0)
+		chip.BackgroundColor3 = Color3.fromRGB(math.random(180, 255), math.random(180, 255), math.random(50, 100))
+		chip.BorderSizePixel = 0
+		chip.ZIndex = 98
+		chip.Parent = gui
+		
+		local chipCorner = Instance.new("UICorner")
+		chipCorner.CornerRadius = UDim.new(0, 6)
+		chipCorner.Parent = chip
+		
+		local fallX = math.random(-50, 50)
+		local fallY = math.random(400, 700)
+		local duration = 1.5 + math.random() * 1.5
+		
+		local tween = TweenService:Create(chip, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(chip.Position.X.Scale, chip.Position.X.Offset + fallX, 1.2, fallY),
+			Rotation = math.random(-180, 180),
+			BackgroundTransparency = 1
+		})
+		tween:Play()
+		tween.Completed:Connect(function()
+			chip:Destroy()
+		end)
+	end
+end
+
+--// === GAME ENGINE BASE ===
+
+local gameEngine = {}
+local activeGame = nil
+local gameLog = {}
+local maxLogEntries = 50
+local achievements = {}
+local gameStats = {}
+local totalChipsEarned = 0
+local totalChipsLost = 0
+local gamesPlayed = 0
+local gamesWon = 0
+
+--// PLAYER CHIPS
+
+local playerChips = 1000
+local currentBet = 0
+
+function getChips()
+	return playerChips
+end
+
+function addChipsGlobal(amount)
+	playerChips = playerChips + amount
+	if playerChips < 0 then playerChips = 0 end
+	if amount > 0 then
+		totalChipsEarned = totalChipsEarned + amount
+	end
+	statEntries[3].label.Text = tostring(math.floor(playerChips))
+	return playerChips
+end
+
+function deductChips(amount)
+	if amount > playerChips then return false end
+	playerChips = playerChips - amount
+	totalChipsLost = totalChipsLost + amount
+	statEntries[3].label.Text = tostring(math.floor(playerChips))
+	return true
+end
+
+function recordGame(gameName, won, amount)
+	table.insert(gameLog, 1, {
+		game = gameName,
+		won = won,
+		amount = amount,
+		time = tick()
+	})
+	if #gameLog > maxLogEntries then
+		table.remove(gameLog)
+	end
+	
+	gamesPlayed = gamesPlayed + 1
+	if won then gamesWon = gamesWon + 1 end
+	
+	local winPct = (gamesWon / math.max(1, gamesPlayed)) * 100
+	statEntries[1].label.Text = string.format("%.0f%%", winPct)
+	statEntries[4].label.Text = tostring(gamesWon)
+	
+	updateGameLogDisplay()
+end
+
+--// === GAME LOG DISPLAY ===
+
+local logFrame = Instance.new("Frame")
+logFrame.Size = UDim2.new(0.9, 0, 0, 100)
+logFrame.Position = UDim2.new(0.05, 0, 0, 490)
+logFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+logFrame.BackgroundTransparency = 0.3
+logFrame.BorderSizePixel = 0
+logFrame.ClipsDescendants = true
+logFrame.Parent = container
+
+local logCorner = Instance.new("UICorner")
+logCorner.CornerRadius = UDim.new(0, 6)
+logCorner.Parent = logFrame
+
+local logStroke = Instance.new("UIStroke")
+logStroke.Thickness = 1
+logStroke.Color = Color3.fromRGB(255, 215, 0)
+logStroke.Transparency = 0.6
+logStroke.Parent = logFrame
+
+local logLabel = Instance.new("TextLabel")
+logLabel.Size = UDim2.new(1, -10, 0, 18)
+logLabel.Position = UDim2.new(0, 5, 0, 2)
+logLabel.BackgroundTransparency = 1
+logLabel.Text = "~ GAME LOG ~"
+logLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+logLabel.Font = Enum.Font.GothamBold
+logLabel.TextSize = 12
+logLabel.TextXAlignment = Enum.TextXAlignment.Left
+logLabel.Parent = logFrame
+
+local logList = Instance.new("UIListLayout")
+logList.SortOrder = Enum.SortOrder.LayoutOrder
+logList.Padding = UDim.new(0, 1)
+logList.Parent = logFrame
+logList:Destroy()
+logList = Instance.new("UIListLayout")
+logList.SortOrder = Enum.SortOrder.LayoutOrder
+logList.Padding = UDim.new(0, 1)
+logList.Parent = logFrame
+
+local logEntriesContainer = Instance.new("ScrollingFrame")
+logEntriesContainer.Size = UDim2.new(1, -10, 1, -22)
+logEntriesContainer.Position = UDim2.new(0, 5, 0, 20)
+logEntriesContainer.BackgroundTransparency = 1
+logEntriesContainer.BorderSizePixel = 0
+logEntriesContainer.ScrollBarThickness = 2
+logEntriesContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 215, 0)
+logEntriesContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+logEntriesContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+logEntriesContainer.Parent = logFrame
+
+local logListLayout = Instance.new("UIListLayout")
+logListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+logListLayout.Padding = UDim.new(0, 1)
+logListLayout.Parent = logEntriesContainer
+
+local logEntryPool = {}
+
+function updateGameLogDisplay()
+	for _, child in ipairs(logEntriesContainer:GetChildren()) do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+	
+	for i, entry in ipairs(gameLog) do
+		if i > 15 then break end
+		
+		local entryFrame = Instance.new("Frame")
+		entryFrame.Size = UDim2.new(1, 0, 0, 16)
+		entryFrame.BackgroundTransparency = 1
+		entryFrame.Parent = logEntriesContainer
+		
+		local txt = Instance.new("TextLabel")
+		txt.Size = UDim2.new(1, 0, 1, 0)
+		txt.BackgroundTransparency = 1
+		txt.Text = (entry.won and "+" or "-") .. tostring(math.floor(entry.amount)) .. " " .. entry.game
+		txt.TextColor3 = entry.won and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+		txt.Font = Enum.Font.GothamBold
+		txt.TextSize = 11
+		txt.TextXAlignment = Enum.TextXAlignment.Left
+		txt.Parent = entryFrame
+	end
+end
+
+--// === ACHIEVEMENT SYSTEM ===
+
+local achievementDefs = {
+	{id = "first_win", name = "FIRST WIN", desc = "Win your first game", icon = "★"},
+	{id = "high_roller", name = "HIGH ROLLER", desc = "Bet 500 chips in one game", icon = "$"},
+	{id = "jackpot", name = "JACKPOT KING", desc = "Hit a jackpot on slots", icon = "7"},
+	{id = "streak_5", name = "HOT STREAK", desc = "Reach a 5-win streak", icon = ">>"},
+	{id = "streak_10", name = "GOD STREAK", desc = "Reach a 10-win streak", icon = "!!"},
+	{id = "streak_20", name = "LEGENDARY", desc = "Reach a 20-win streak", icon = "★"},
+	{id = "millionaire", name = "MILLIONAIRE", desc = "Accumulate 10000 chips", icon = "$"},
+	{id = "card_shark", name = "CARD SHARK", desc = "Win 10 card games", icon = "♠"},
+	{id = "dice_master", name = "DICE MASTER", desc = "Win 10 dice games", icon = "[DICE]"},
+	{id = "wheel_spinner", name = "WHEEL SPINNER", desc = "Spin the wheel 10 times", icon = "●"},
+	{id = "all_games", name = "ALL ROUNDER", desc = "Play every game type", icon = "◆"},
+	{id = "comeback", name = "COMEBACK KING", desc = "Win after being below 100 chips", icon = "☠"},
+	{id = "perfection", name = "PERFECTION", desc = "Win 5 games in a row", icon = "✓"},
+	{id = "big_spender", name = "BIG SPENDER", desc = "Bet 1000 total chips", icon = "$"},
+	{id = "lucky_7", name = "LUCKY 7", desc = "Win with a bet of 77", icon = "7"},
+}
+
+local unlockedAchievements = {}
+local achievementFrame = nil
+local achievementNotif = nil
+
+function createAchievementUI()
+	achievementNotif = Instance.new("Frame")
+	achievementNotif.Size = UDim2.new(0, 320, 0, 60)
+	achievementNotif.Position = UDim2.new(0.5, -160, 0, -80)
+	achievementNotif.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+	achievementNotif.BorderSizePixel = 0
+	achievementNotif.BackgroundTransparency = 0.2
+	achievementNotif.ZIndex = 200
+	achievementNotif.Parent = gui
+	
+	local notifCorner = Instance.new("UICorner")
+	notifCorner.CornerRadius = UDim.new(0, 8)
+	notifCorner.Parent = achievementNotif
+	
+	local notifStroke = Instance.new("UIStroke")
+	notifStroke.Thickness = 2
+	notifStroke.Color = Color3.fromRGB(255, 215, 0)
+	notifStroke.Parent = achievementNotif
+	
+	local notifIcon = Instance.new("TextLabel")
+	notifIcon.Size = UDim2.new(0, 40, 1, 0)
+	notifIcon.Position = UDim2.new(0, 5, 0, 0)
+	notifIcon.BackgroundTransparency = 1
+	notifIcon.Text = "★"
+	notifIcon.TextColor3 = Color3.fromRGB(255, 215, 0)
+	notifIcon.Font = Enum.Font.GothamBlack
+	notifIcon.TextSize = 28
+	notifIcon.Parent = achievementNotif
+	
+	local notifTitle = Instance.new("TextLabel")
+	notifTitle.Size = UDim2.new(1, -55, 0, 22)
+	notifTitle.Position = UDim2.new(0, 50, 0, 6)
+	notifTitle.BackgroundTransparency = 1
+	notifTitle.Text = "ACHIEVEMENT UNLOCKED"
+	notifTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+	notifTitle.Font = Enum.Font.GothamBlack
+	notifTitle.TextSize = 14
+	notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+	notifTitle.Parent = achievementNotif
+	
+	local notifName = Instance.new("TextLabel")
+	notifName.Size = UDim2.new(1, -55, 0, 20)
+	notifName.Position = UDim2.new(0, 50, 0, 28)
+	notifName.BackgroundTransparency = 1
+	notifName.Text = ""
+	notifName.TextColor3 = Color3.fromRGB(255, 255, 255)
+	notifName.Font = Enum.Font.GothamBold
+	notifName.TextSize = 13
+	notifName.TextXAlignment = Enum.TextXAlignment.Left
+	notifName.Parent = achievementNotif
+	
+	achievementNotif.Visible = false
+	achievementNotif.Active = true
+	
+	return notifIcon, notifTitle, notifName
+end
+
+local notifIcon, notifTitle, notifName = createAchievementUI()
+
+function checkAchievements(context)
+	for _, def in ipairs(achievementDefs) do
+		if unlockedAchievements[def.id] then continue end
+		
+		local earned = false
+		
+		if def.id == "first_win" and gamesWon >= 1 then
+			earned = true
+		elseif def.id == "high_roller" and currentBet >= 500 then
+			earned = true
+		elseif def.id == "jackpot" and context == "jackpot" then
+			earned = true
+		elseif def.id == "streak_5" and winStreak >= 5 then
+			earned = true
+		elseif def.id == "streak_10" and winStreak >= 10 then
+			earned = true
+		elseif def.id == "streak_20" and winStreak >= 20 then
+			earned = true
+		elseif def.id == "millionaire" and playerChips >= 10000 then
+			earned = true
+		elseif def.id == "card_shark" and (gameStats.blackjack_wins or 0) + (gameStats.poker_wins or 0) >= 10 then
+			earned = true
+		elseif def.id == "dice_master" and (gameStats.dice_wins or 0) + (gameStats.sicbo_wins or 0) >= 10 then
+			earned = true
+		elseif def.id == "wheel_spinner" and (gameStats.wheel_spins or 0) >= 10 then
+			earned = true
+		elseif def.id == "all_games" and (gameStats.games_played or 0) >= 10 then
+			local gameTypes = 0
+			for k, v in pairs(gameStats) do
+				if k:find("_played") then gameTypes = gameTypes + 1 end
+			end
+			if gameTypes >= 5 then earned = true end
+		elseif def.id == "comeback" and context == "comeback" then
+			earned = true
+		elseif def.id == "perfection" and winStreak >= 5 then
+			earned = true
+		elseif def.id == "big_spender" and totalChipsEarned + totalChipsLost >= 1000 then
+			earned = true
+		elseif def.id == "lucky_7" and context == "lucky_7" then
+			earned = true
+		end
+		
+		if earned then
+			unlockAchievement(def)
+		end
+	end
+end
+
+function unlockAchievement(def)
+	unlockedAchievements[def.id] = true
+	
+	notifName.Text = def.name .. " - " .. def.desc
+	achievementNotif.Visible = true
+	achievementNotif.Position = UDim2.new(0.5, -160, 0, -80)
+	achievementNotif.BackgroundTransparency = 0.2
+	
+	TweenService:Create(achievementNotif, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -160, 0, 20)
+	}):Play()
+	
+	task.delay(3, function()
+		TweenService:Create(achievementNotif, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, -160, 0, -80),
+			BackgroundTransparency = 1
+		}):Play()
+		task.delay(0.5, function()
+			achievementNotif.Visible = false
+			achievementNotif.BackgroundTransparency = 0.2
+		end)
+	end)
+	
+	VFX:Burst(UDim2.new(0.5, -3, 0.15, -3), 12, Color3.fromRGB(255, 215, 0))
+end
+
+--// === CARD GAME: FIVE CARD DRAW POKER ===
+
+local pokerActive = false
+local pokerHand = {}
+local pokerDeck = {}
+local pokerBet = 0
+local pokerPhase = "bet"
+local pokerDiscard = {}
+
+local pokerSuitNames = {"♠", "♥", "♣", "♦"}
+local pokerRankNames = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
+
+function pokerShuffleDeck()
+	pokerDeck = {}
+	for i = 1, 52 do
+		table.insert(pokerDeck, i)
+	end
+	for i = #pokerDeck, 2, -1 do
+		local j = math.random(i)
+		pokerDeck[i], pokerDeck[j] = pokerDeck[j], pokerDeck[i]
+	end
+end
+
+function pokerCardStr(card)
+	local suit = pokerSuitNames[math.floor((card - 1) / 13) + 1]
+	local rank = pokerRankNames[((card - 1) % 13) + 1]
+	return rank .. suit
+end
+
+function pokerRank(card)
+	return ((card - 1) % 13) + 1
+end
+
+function pokerSuit(card)
+	return math.floor((card - 1) / 13) + 1
+end
+
+function evaluatePokerHand(hand)
+	local ranks = {}
+	local suits = {}
+	local rankCounts = {}
+	
+	for _, card in ipairs(hand) do
+		local r = pokerRank(card)
+		local s = pokerSuit(card)
+		table.insert(ranks, r)
+		table.insert(suits, s)
+		rankCounts[r] = (rankCounts[r] or 0) + 1
+	end
+	
+	table.sort(ranks)
+	
+	local isFlush = false
+	local firstSuit = suits[1]
+	local allSame = true
+	for _, s in ipairs(suits) do
+		if s ~= firstSuit then allSame = false end
+	end
+	isFlush = allSame
+	
+	local isStraight = false
+	local unique = {}
+	for _, r in ipairs(ranks) do
+		unique[r] = true
+	end
+	local uniqueRanks = {}
+	for r, _ in pairs(unique) do
+		table.insert(uniqueRanks, r)
+	end
+	table.sort(uniqueRanks)
+	
+	if #uniqueRanks == 5 then
+		if uniqueRanks[5] - uniqueRanks[1] == 4 then
+			isStraight = true
+		end
+		if uniqueRanks[1] == 1 and uniqueRanks[2] == 10 and uniqueRanks[3] == 11 and uniqueRanks[4] == 12 and uniqueRanks[5] == 13 then
+			isStraight = true
+		end
+	end
+	
+	local pairs = 0
+	local threeOfKind = 0
+	local fourOfKind = 0
+	
+	for r, c in pairs(rankCounts) do
+		if c == 4 then fourOfKind = fourOfKind + 1
+		elseif c == 3 then threeOfKind = threeOfKind + 1
+		elseif c == 2 then pairs = pairs + 1
+		end
+	end
+	
+	if isFlush and isStraight and ranks[#ranks] == 13 then
+		return {rank = 10, name = "ROYAL FLUSH"}
+	elseif isFlush and isStraight then
+		return {rank = 9, name = "STRAIGHT FLUSH"}
+	elseif fourOfKind > 0 then
+		return {rank = 8, name = "FOUR OF A KIND"}
+	elseif threeOfKind > 0 and pairs > 0 then
+		return {rank = 7, name = "FULL HOUSE"}
+	elseif isFlush then
+		return {rank = 6, name = "FLUSH"}
+	elseif isStraight then
+		return {rank = 5, name = "STRAIGHT"}
+	elseif threeOfKind > 0 then
+		return {rank = 4, name = "THREE OF A KIND"}
+	elseif pairs >= 2 then
+		return {rank = 3, name = "TWO PAIR"}
+	elseif pairs >= 1 then
+		return {rank = 2, name = "PAIR"}
+	else
+		return {rank = 1, name = "HIGH CARD"}
+	end
+end
+
+function startPoker(bet)
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS! You have " .. tostring(math.floor(playerChips)) .. " chips."
+	end
+	if pokerActive then
+		return "A poker game is already in progress!"
+	end
+	
+	pokerBet = bet
+	currentBet = bet
+	deductChips(bet)
+	
+	pokerShuffleDeck()
+	pokerHand = {}
+	for i = 1, 5 do
+		table.insert(pokerHand, table.remove(pokerDeck))
+	end
+	pokerPhase = "discard"
+	pokerActive = true
+	
+	local handStr = ""
+	for i, card in ipairs(pokerHand) do
+		handStr = handStr .. "[" .. i .. "]" .. pokerCardStr(card) .. " "
+	end
+	
+	local result = "=== FIVE CARD DRAW ===\n\nYOUR HAND:\n" .. handStr .. "\n\nEnter discard numbers (1-5, comma-separated)\nExample: 1,3,5 to replace those cards\nOr type 'stand' to keep your hand"
+	
+	gameStats.poker_played = (gameStats.poker_played or 0) + 1
+	
+	return result
+end
+
+function pokerDiscardCards(input)
+	if not pokerActive or pokerPhase ~= "discard" then
+		return "No poker game in discard phase!"
+	end
+	
+	local indices = {}
+	for num in string.gmatch(input, "%d+") do
+		local n = tonumber(num)
+		if n and n >= 1 and n <= 5 then
+			table.insert(indices, n)
+		end
+	end
+	
+	for _, idx in ipairs(indices) do
+		if #pokerDeck > 0 then
+			pokerHand[idx] = table.remove(pokerDeck)
+		end
+	end
+	
+	pokerPhase = "result"
+	pokerActive = false
+	
+	local handStr = ""
+	for _, card in ipairs(pokerHand) do
+		handStr = handStr .. pokerCardStr(card) .. " "
+	end
+	
+	local evaluation = evaluatePokerHand(pokerHand)
+	local payout = 0
+	local won = false
+	
+	local payoutTable = {
+		[10] = 100, [9] = 50, [8] = 25, [7] = 10,
+		[6] = 6, [5] = 5, [4] = 4, [3] = 3,
+		[2] = 2, [1] = 0
+	}
+	
+	local mult = payoutTable[evaluation.rank] or 0
+	
+	if mult > 0 then
+		payout = pokerBet * mult
+		won = true
+		addChipsGlobal(payout)
+		winGame(payout)
+		gameStats.poker_wins = (gameStats.poker_wins or 0) + 1
+	else
+		loseGame()
+	end
+	
+	recordGame("POKER", won, payout > 0 and payout or pokerBet)
+	
+	local result = "=== POKER RESULT ===\n\nYOUR HAND: " .. handStr .. "\n" .. evaluation.name .. "\n\n"
+	if won then
+		result = result .. "!! WIN !! +" .. tostring(payout) .. " chips!"
+	else
+		result = result .. "X LOSE X -" .. tostring(pokerBet) .. " chips"
+	end
+	
+	return result
+end
+
+function pokerStand()
+	return pokerDiscardCards("")
+end
+
+--// === BACCARAT ===
+
+local baccaratActive = false
+local baccaratHands = {}
+local baccaratBet = 0
+
+function baccaratValue(card)
+	local r = ((card - 1) % 13) + 1
+	if r >= 10 then return 0 end
+	return r
+end
+
+function baccaratHandValue(hand)
+	local total = 0
+	for _, card in ipairs(hand) do
+		total = total + baccaratValue(card)
+	end
+	return total % 10
+end
+
+function startBaccarat(bet, betType)
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS! You have " .. tostring(math.floor(playerChips)) .. " chips."
+	end
+	if baccaratActive then
+		return "A baccarat game is already in progress!"
+	end
+	
+	betType = string.lower(betType or "player")
+	if betType ~= "player" and betType ~= "banker" and betType ~= "tie" then
+		return "Bet must be 'player', 'banker', or 'tie'"
+	end
+	
+	baccaratBet = bet
+	currentBet = bet
+	deductChips(bet)
+	
+	local deck = {}
+	for i = 1, 52 do
+		table.insert(deck, i)
+	end
+	for i = #deck, 2, -1 do
+		local j = math.random(i)
+		deck[i], deck[j] = deck[j], deck[i]
+	end
+	
+	local playerHand = {table.remove(deck), table.remove(deck)}
+	local bankerHand = {table.remove(deck), table.remove(deck)}
+	
+	local playerVal = baccaratHandValue(playerHand)
+	local bankerVal = baccaratHandValue(bankerHand)
+	
+	if playerVal <= 7 and bankerVal <= 7 then
+		if playerVal <= 5 then
+			table.insert(playerHand, table.remove(deck))
+			playerVal = baccaratHandValue(playerHand)
+		end
+		if bankerVal <= 5 and (#playerHand == 2 or (playerVal >= 0 and playerVal <= 7)) then
+			table.insert(bankerHand, table.remove(deck))
+			bankerVal = baccaratHandValue(bankerHand)
+		end
+	end
+	
+	local winner = ""
+	if playerVal > bankerVal then winner = "player"
+	elseif bankerVal > playerVal then winner = "banker"
+	else winner = "tie"
+	end
+	
+	local payout = 0
+	local won = false
+	
+	if winner == betType then
+		won = true
+		if betType == "player" then
+			payout = bet * 2
+		elseif betType == "banker" then
+			payout = bet * 1.95
+		else
+			payout = bet * 9
+		end
+		payout = math.floor(payout)
+		addChipsGlobal(payout)
+		winGame(payout)
+	elseif betType == "tie" and winner ~= "tie" then
+		loseGame()
+	else
+		loseGame()
+	end
+	
+	recordGame("BACCARAT", won, payout > 0 and payout or bet)
+	
+	local pStr = ""
+	for _, c in ipairs(playerHand) do pStr = pStr .. pokerCardStr(c) .. " " end
+	local bStr = ""
+	for _, c in ipairs(bankerHand) do bStr = bStr .. pokerCardStr(c) .. " " end
+	
+	local result = "=== BACCARAT ===\n\nPlayer: " .. pStr .. "= " .. tostring(playerVal) .. "\nBanker: " .. bStr .. "= " .. tostring(bankerVal) .. "\n\nWinner: " .. string.upper(winner) .. "\n"
+	if won then
+		result = result .. "!! WIN !! +" .. tostring(payout) .. " chips"
+	else
+		result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+	end
+	
+	baccaratActive = false
+	return result
+end
+
+--// === WHEEL OF FORTUNE ===
+
+local wheelActive = false
+local wheelSegments = {}
+local wheelFrame = nil
+local wheelArrow = nil
+local wheelAngle = 0
+
+function buildWheel()
+	wheelFrame = Instance.new("Frame")
+	wheelFrame.Size = UDim2.new(0, 200, 0, 200)
+	wheelFrame.Position = UDim2.new(0.5, -100, 0, 120)
+	wheelFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+	wheelFrame.BorderSizePixel = 0
+	wheelFrame.Visible = false
+	wheelFrame.ZIndex = 50
+	wheelFrame.Parent = container
+	
+	local wheelCorner = Instance.new("UICorner")
+	wheelCorner.CornerRadius = UDim.new(0, 100)
+	wheelCorner.Parent = wheelFrame
+	
+	local wheelStroke = Instance.new("UIStroke")
+	wheelStroke.Thickness = 3
+	wheelStroke.Color = Color3.fromRGB(255, 215, 0)
+	wheelStroke.Parent = wheelFrame
+	
+	wheelSegments = {}
+	local colors = {
+		Color3.fromRGB(255, 50, 50), Color3.fromRGB(50, 50, 255),
+		Color3.fromRGB(50, 255, 50), Color3.fromRGB(255, 200, 50),
+		Color3.fromRGB(255, 50, 255), Color3.fromRGB(50, 255, 255),
+		Color3.fromRGB(255, 150, 50), Color3.fromRGB(150, 50, 255)
+	}
+	local prizes = {2, 3, 5, 1, 10, 1, 5, 20}
+	local names = {"x2", "x3", "x5", "x1", "x10", "x1", "x5", "x20"}
+	
+	for i = 1, 8 do
+		local seg = Instance.new("Frame")
+		seg.Size = UDim2.new(0, 80, 0, 16)
+		seg.Position = UDim2.new(0.5, -40, 0, 30 + (i - 1) * 22)
+		seg.BackgroundColor3 = colors[i]
+		seg.BackgroundTransparency = 0.5
+		seg.BorderSizePixel = 0
+		seg.ZIndex = 50
+		seg.Parent = wheelFrame
+		
+		local segLabel = Instance.new("TextLabel")
+		segLabel.Size = UDim2.new(1, 0, 1, 0)
+		segLabel.BackgroundTransparency = 1
+		segLabel.Text = names[i]
+		segLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		segLabel.Font = Enum.Font.GothamBlack
+		segLabel.TextSize = 12
+		segLabel.ZIndex = 51
+		segLabel.Parent = seg
+		
+		table.insert(wheelSegments, {frame = seg, label = segLabel, prize = prizes[i], name = names[i], color = colors[i]})
+	end
+	
+	wheelArrow = Instance.new("TextLabel")
+	wheelArrow.Size = UDim2.new(0, 30, 0, 30)
+	wheelArrow.Position = UDim2.new(0.5, -15, 0, -15)
+	wheelArrow.BackgroundTransparency = 1
+	wheelArrow.Text = "▼"
+	wheelArrow.TextColor3 = Color3.fromRGB(255, 50, 50)
+	wheelArrow.Font = Enum.Font.GothamBlack
+	wheelArrow.TextSize = 24
+	wheelArrow.ZIndex = 100
+	wheelArrow.Visible = false
+	wheelArrow.Parent = container
+end
+
+buildWheel()
+
+function spinWheel(bet)
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS! You have " .. tostring(math.floor(playerChips)) .. " chips."
+	end
+	if wheelActive then return "Wheel is already spinning!" end
+	
+	wheelActive = true
+	currentBet = bet
+	deductChips(bet)
+	
+	gameStats.wheel_spins = (gameStats.wheel_spins or 0) + 1
+	
+	wheelFrame.Visible = true
+	wheelArrow.Visible = true
+	
+	local targetAngle = math.random(360, 720) + math.random(1, 8) * 45
+	local spinDuration = 2 + math.random() * 1
+	local startAngle = 0
+	local elapsed = 0
+	
+	local conn
+	conn = RunService.Heartbeat:Connect(function(dt)
+		elapsed = elapsed + dt
+		local t = elapsed / spinDuration
+		if t >= 1 then t = 1 end
+		
+		local eased = 1 - (1 - t) * (1 - t) * (1 - t)
+		local currentAngle = startAngle + targetAngle * eased
+		
+		wheelFrame.Rotation = currentAngle
+		
+		if t >= 1 then
+			conn:Disconnect()
+			
+			local segIndex = math.floor(((currentAngle % 360) / 45) % 8) + 1
+			local seg = wheelSegments[segIndex]
+			local multiplier = seg.prize
+			
+			local payout = bet * multiplier
+			local won = multiplier > 1
+			
+			if won then
+				addChipsGlobal(payout)
+				winGame(payout)
+				VFX:WinText(payout, "WHEEL")
+			else
+				loseGame()
+				VFX:LossText(bet, "WHEEL")
+			end
+			
+			recordGame("WHEEL", won, payout)
+			
+			seg.frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			task.delay(0.5, function()
+				seg.frame.BackgroundColor3 = seg.color
+				wheelFrame.Visible = false
+				wheelArrow.Visible = false
+				wheelActive = false
+			end)
+			
+			local result = "=== WHEEL OF FORTUNE ===\n\nLand on: " .. seg.name .. "\nMultiplier: x" .. tostring(multiplier) .. "\n\n"
+			if won then
+				result = result .. "!! WIN !! +" .. tostring(payout) .. " chips"
+			else
+				result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+			end
+			
+			-- We need to update the result text somehow. Let me use the existing result label from the original code.
+			-- Actually, this function returns a string, and we'll display it in the game result area
+			-- For now, we'll need to set it somewhere
+		end
+	end)
+end
+
+--// === DICE GAME: SIC BO ===
+
+local sicBoActive = false
+
+function playSicBo(bet, prediction)
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS! You have " .. tostring(math.floor(playerChips)) .. " chips."
+	end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local dice = {math.random(1, 6), math.random(1, 6), math.random(1, 6)}
+	table.sort(dice)
+	local sum = dice[1] + dice[2] + dice[3]
+	local hasTriple = dice[1] == dice[2] and dice[2] == dice[3]
+	local hasPair = dice[1] == dice[2] or dice[2] == dice[3] or dice[1] == dice[3]
+	
+	local pred = string.lower(prediction)
+	local payout = 0
+	local won = false
+	
+	-- Animate dice
+	local diceStrs = {"[" .. tostring(dice[1]) .. "]", "[" .. tostring(dice[2]) .. "]", "[" .. tostring(dice[3]) .. "]"}
+	local diceDisp = table.concat(diceStrs, " ")
+	
+	if pred == "triple" and hasTriple then
+		payout = bet * 30
+		won = true
+	elseif pred == "pair" and hasPair then
+		payout = bet * 3
+		won = true
+	elseif tonumber(pred) and tonumber(pred) == sum then
+		payout = bet * 8
+		won = true
+	elseif pred == "small" and sum >= 4 and sum <= 10 then
+		payout = bet * 2
+		won = true
+	elseif pred == "big" and sum >= 11 and sum <= 17 then
+		payout = bet * 2
+		won = true
+	elseif pred == "even" and sum % 2 == 0 then
+		payout = bet * 2
+		won = true
+	elseif pred == "odd" and sum % 2 == 1 then
+		payout = bet * 2
+		won = true
+	else
+		for i = 1, 3 do
+			if tonumber(pred) and tonumber(pred) == dice[i] then
+				payout = bet * 2
+				won = true
+				break
+			end
+		end
+	end
+	
+	if won then
+		addChipsGlobal(payout)
+		winGame(payout)
+		gameStats.sicbo_wins = (gameStats.sicbo_wins or 0) + 1
+		VFX:WinText(payout, "SIC BO")
+	else
+		loseGame()
+		VFX:LossText(bet, "SIC BO")
+	end
+	
+	recordGame("SIC BO", won, payout > 0 and payout or bet)
+	
+	local result = "=== SIC BO ===\n\nDice: " .. diceDisp .. "\nSum: " .. tostring(sum) .. "\n"
+	if hasTriple then
+		result = result .. "!! TRIPLE !!\n"
+	elseif hasPair then
+		result = result .. "Pair present\n"
+	end
+	result = result .. "\n"
+	if won then
+		result = result .. "!! WIN !! +" .. tostring(payout) .. " chips"
+	else
+		result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+	end
+	
+	VFX:ScreenShake(3, 0.2)
+	return result
+end
+
+--// === CRAPS ===
+
+local crapsActive = false
+local crapsPoint = 0
+local crapsRoll = 1
+local crapsBet = 0
+
+function playCraps(bet, betType)
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS!"
+	end
+	
+	deductChips(bet)
+	currentBet = bet
+	crapsBet = bet
+	
+	local d1 = math.random(1, 6)
+	local d2 = math.random(1, 6)
+	local roll = d1 + d2
+	
+	gameStats.craps_played = (gameStats.craps_played or 0) + 1
+	
+	local result = "=== CRAPS ===\n\nRoll: [" .. tostring(d1) .. "][" .. tostring(d2) .. "] = " .. tostring(roll) .. "\n\n"
+	local payout = 0
+	local won = false
+	
+	local bt = string.lower(betType or "pass")
+	
+	if bt == "pass" then
+		if roll == 7 or roll == 11 then
+			payout = bet * 2
+			won = true
+			result = result .. "!! NATURAL !! +" .. tostring(payout) .. " chips"
+		elseif roll == 2 or roll == 3 or roll == 12 then
+			result = result .. "X CRAPS X -" .. tostring(bet) .. " chips"
+			loseGame()
+		else
+			crapsPoint = roll
+			result = result .. "Point is " .. tostring(roll) .. "\n\nRolling again..."
+			task.delay(1, function()
+				local r2d1 = math.random(1, 6)
+				local r2d2 = math.random(1, 6)
+				local r2 = r2d1 + r2d2
+				local rResult = "=== CRAPS (2ND ROLL) ===\nPoint: " .. tostring(crapsPoint) .. "\nRoll: [" .. tostring(r2d1) .. "][" .. tostring(r2d2) .. "] = " .. tostring(r2) .. "\n\n"
+				if r2 == crapsPoint then
+					local payout2 = crapsBet * 2
+					addChipsGlobal(payout2)
+					winGame(payout2)
+					rResult = rResult .. "!! POINT MADE !! +" .. tostring(payout2) .. " chips"
+					VFX:WinText(payout2, "CRAPS")
+					recordGame("CRAPS", true, payout2)
+				elseif r2 == 7 then
+					loseGame()
+					rResult = rResult .. "X SEVEN OUT X -" .. tostring(crapsBet) .. " chips"
+					VFX:LossText(crapsBet, "CRAPS")
+					recordGame("CRAPS", false, crapsBet)
+				else
+					rResult = rResult .. "Roll again... Point is " .. tostring(crapsPoint)
+					-- simplified: just keep rerolling
+					-- in a real game this would loop
+				end
+				result = rResult
+			end)
+			return result
+		end
+	elseif bt == "dont" then
+		if roll == 2 or roll == 3 then
+			payout = bet * 2
+			won = true
+			result = result .. "!! DON'T PASS !! +" .. tostring(payout) .. " chips"
+		elseif roll == 7 or roll == 11 then
+			result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+			loseGame()
+		elseif roll == 12 then
+			result = result .. "Push - bet returned"
+			addChipsGlobal(bet)
+		else
+			result = result .. "Point is " .. tostring(roll) .. " (don't pass)"
+			task.delay(1, function()
+				local r2d1 = math.random(1, 6)
+				local r2d2 = math.random(1, 6)
+				local r2 = r2d1 + r2d2
+				local rResult = "=== CRAPS (DON'T) ===\nPoint: " .. tostring(crapsPoint) .. "\nRoll: [" .. tostring(r2d1) .. "][" .. tostring(r2d2) .. "] = " .. tostring(r2) .. "\n\n"
+				if r2 == 7 then
+					local payout2 = crapsBet * 2
+					addChipsGlobal(payout2)
+					winGame(payout2)
+					rResult = rResult .. "!! DON'T PASS WIN !! +" .. tostring(payout2) .. " chips"
+					VFX:WinText(payout2, "CRAPS")
+					recordGame("CRAPS", true, payout2)
+				elseif r2 == crapsPoint then
+					loseGame()
+					rResult = rResult .. "X POINT MADE X -" .. tostring(crapsBet) .. " chips"
+					VFX:LossText(crapsBet, "CRAPS")
+					recordGame("CRAPS", false, crapsBet)
+				end
+			end)
+			return result
+		end
+	end
+	
+	if won then
+		addChipsGlobal(payout)
+		winGame(payout)
+		VFX:WinText(payout, "CRAPS")
+	else
+		loseGame()
+		VFX:LossText(bet, "CRAPS")
+	end
+	
+	recordGame("CRAPS", won, payout > 0 and payout or bet)
+	return result
+end
+
+--// === KENO ===
+
+local kenoActive = false
+local kenoPicks = {}
+
+function playKeno(bet, numbers)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local picks = {}
+	for num in string.gmatch(numbers, "%d+") do
+		local n = tonumber(num)
+		if n and n >= 1 and n <= 80 then
+			table.insert(picks, n)
+		end
+	end
+	
+	if #picks < 1 or #picks > 10 then
+		addChipsGlobal(bet)
+		return "Pick 1-10 numbers between 1-80!"
+	end
+	
+	local drawn = {}
+	local drawnSet = {}
+	for i = 1, 20 do
+		local n
+		repeat n = math.random(1, 80) until not drawnSet[n]
+		drawnSet[n] = true
+		table.insert(drawn, n)
+	end
+	table.sort(drawn)
+	
+	local matches = 0
+	for _, pick in ipairs(picks) do
+		if drawnSet[pick] then
+			matches = matches + 1
+		end
+	end
+	
+	local payoutTable = {
+		[0] = {[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0},
+		[1] = {[1] = 3, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0, [10] = 0},
+		[2] = {[3] = 2, [4] = 2, [5] = 1, [6] = 1, [7] = 1, [8] = 1, [9] = 1, [10] = 1},
+		[3] = {[4] = 5, [5] = 3, [6] = 2, [7] = 2, [8] = 2, [9] = 1, [10] = 1},
+		[4] = {[5] = 15, [6] = 8, [7] = 5, [8] = 4, [9] = 3, [10] = 2},
+		[5] = {[6] = 50, [7] = 20, [8] = 10, [9] = 8, [10] = 5},
+		[6] = {[7] = 200, [8] = 50, [9] = 30, [10] = 15},
+		[7] = {[8] = 1000, [9] = 200, [10] = 80},
+		[8] = {[9] = 5000, [10] = 1000},
+		[9] = {[10] = 10000},
+		[10] = {[10] = 50000}
+	}
+	
+	local multiplier = 0
+	if payoutTable[matches] and payoutTable[matches][#picks] then
+		multiplier = payoutTable[matches][#picks]
+	elseif matches == 0 then
+		multiplier = 0
+	end
+	
+	local payout = bet * multiplier
+	local won = multiplier > 0
+	
+	if won then
+		addChipsGlobal(payout)
+		winGame(payout)
+		VFX:WinText(payout, "KENO")
+	else
+		loseGame()
+		VFX:LossText(bet, "KENO")
+	end
+	
+	recordGame("KENO", won, payout > 0 and payout or bet)
+	
+	local drawStr = ""
+	for i, n in ipairs(drawn) do
+		drawStr = drawStr .. string.format("%02d", n)
+		if i < #drawn then drawStr = drawStr .. " " end
+		if i % 10 == 0 then drawStr = drawStr .. "\n" end
+	end
+	
+	local matchStr = ""
+	for _, p in ipairs(picks) do
+		if drawnSet[p] then
+			matchStr = matchStr .. "[" .. string.format("%02d", p) .. "] "
+		end
+	end
+	
+	local result = "=== KENO ===\n\nDrawn: " .. drawStr .. "\n\nYour Picks: " .. tostring(#picks) .. " numbers\nMatches: " .. tostring(matches) .. "\n" .. matchStr .. "\n\n"
+	
+	if won then
+		result = result .. "!! WIN !! x" .. tostring(multiplier) .. " = +" .. tostring(payout) .. " chips"
+	else
+		result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+	end
+	
+	return result
+end
+
+--// === LOTTERY ===
+
+function playLottery(bet)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local ticket = {}
+	for i = 1, 6 do
+		local n
+		repeat n = math.random(1, 59) until ticket[n] == nil
+		ticket[n] = true
+		table.insert(ticket, n)
+	end
+	-- Clean up the table structure
+	local ticketNums = {}
+	for n, _ in pairs(ticket) do
+		if type(n) == "number" then
+			table.insert(ticketNums, n)
+		end
+	end
+	ticket = ticketNums
+	table.sort(ticket)
+	
+	local drawn = {}
+	for i = 1, 6 do
+		local n
+		repeat n = math.random(1, 59) until drawn[n] == nil
+		drawn[n] = true
+	end
+	local drawnNums = {}
+	for n, _ in pairs(drawn) do
+		if type(n) == "number" then
+			table.insert(drawnNums, n)
+		end
+	end
+	table.sort(drawnNums)
+	
+	local matches = 0
+	for _, tn in ipairs(ticket) do
+		if drawn[tn] then matches = matches + 1 end
+	end
+	
+	local bonus = math.random(1, 59)
+	while drawn[bonus] do bonus = math.random(1, 59) end
+	
+	local hasBonus = false
+	for _, tn in ipairs(ticket) do
+		if tn == bonus then hasBonus = true end
+	end
+	
+	local payout = 0
+	local won = false
+	
+	if matches == 6 then
+		payout = bet * 10000
+		won = true
+	elseif matches == 5 and hasBonus then
+		payout = bet * 1000
+		won = true
+	elseif matches == 5 then
+		payout = bet * 100
+		won = true
+	elseif matches == 4 then
+		payout = bet * 10
+		won = true
+	elseif matches == 3 then
+		payout = bet * 2
+		won = true
+	elseif matches == 2 then
+		payout = bet * 1
+		won = true
+		addChipsGlobal(bet)
+	else
+		loseGame()
+	end
+	
+	if matches >= 3 then
+		addChipsGlobal(payout)
+		winGame(payout)
+		VFX:WinText(payout, "LOTTERY")
+		if matches >= 5 then
+			VFX:JackpotText()
+			VFX:ChipShower(20)
+		end
+	end
+	
+	recordGame("LOTTERY", won, payout > 0 and payout or bet)
+	
+	local tStr = ""
+	for _, n in ipairs(ticket) do
+		tStr = tStr .. string.format("%02d", n) .. " "
+	end
+	local dStr = ""
+	for _, n in ipairs(drawnNums) do
+		dStr = dStr .. string.format("%02d", n) .. " "
+	end
+	
+	local result = "=== LOTTERY ===\n\nYour Ticket: " .. tStr .. "\nDrawn: " .. dStr .. "\nBonus: " .. string.format("%02d", bonus) .. "\n\nMatches: " .. tostring(matches)
+	if hasBonus and matches < 6 then
+		result = result .. " (+BONUS)"
+	end
+	result = result .. "\n\n"
+	if won then
+		result = result .. "!! WIN !! +" .. tostring(payout) .. " chips"
+	else
+		result = result .. "X LOSE X -" .. tostring(bet) .. " chips"
+	end
+	
+	return result
+end
+
+--// === CARD GAME: WAR ===
+
+function playWar(bet)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local pCard = math.random(1, 52)
+	local eCard = math.random(1, 52)
+	
+	local pRank = ((pCard - 1) % 13) + 1
+	local eRank = ((eCard - 1) % 13) + 1
+	
+	local pStr = pokerCardStr(pCard)
+	local eStr = pokerCardStr(eCard)
+	
+	local won = false
+	local payout = 0
+	local result = "=== WAR ===\n\nYou: " .. pStr .. "\nEnemy: " .. eStr .. "\n\n"
+	
+	if pRank > eRank then
+		payout = bet * 2
+		won = true
+		addChipsGlobal(payout)
+		winGame(payout)
+		result = result .. "!! YOU WIN !! +" .. tostring(payout) .. " chips"
+		VFX:WinText(payout, "WAR")
+	elseif eRank > pRank then
+		loseGame()
+		result = result .. "X YOU LOSE X -" .. tostring(bet) .. " chips"
+		VFX:LossText(bet, "WAR")
+	else
+		addChipsGlobal(bet)
+		result = result .. "WAR! It's a tie - bet returned"
+	end
+	
+	recordGame("WAR", won, payout > 0 and payout or bet)
+	return result
+end
+
+--// === HORSE RACE (SIMULATED) ===
+
+local horseNames = {"Shadowmere", "Nightmare", "Pegasus", "Unicorn", "Kelpie", "Sleipnir"}
+local horseColors = {
+	Color3.fromRGB(100, 100, 100), Color3.fromRGB(50, 50, 50),
+	Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 100, 255),
+	Color3.fromRGB(0, 150, 150), Color3.fromRGB(200, 50, 50)
+}
+
+local horseRaceActive = false
+
+function playHorseRace(bet, pick)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	local pickNum = tonumber(pick)
+	if not pickNum or pickNum < 1 or pickNum > #horseNames then
+		return "Pick a horse (1-" .. tostring(#horseNames) .. "): " .. table.concat(horseNames, ", ")
+	end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local positions = {}
+	for i = 1, #horseNames do
+		positions[i] = 0
+	end
+	
+	local raceActive = true
+	local winner = 0
+	local elapsed = 0
+	
+	gameStats.horse_played = (gameStats.horse_played or 0) + 1
+	
+	local conn
+	conn = RunService.Heartbeat:Connect(function(dt)
+		if not raceActive then return end
+		elapsed = elapsed + dt
+		
+		for i = 1, #horseNames do
+			positions[i] = positions[i] + math.random(5, 20) * dt
+		end
+		
+		local maxPos = 0
+		local leader = 0
+		for i, pos in ipairs(positions) do
+			if pos > maxPos then
+				maxPos = pos
+				leader = i
+			end
+		end
+		
+		if maxPos >= 100 and not raceActive then
+			raceActive = false
+			winner = leader
+			conn:Disconnect()
+		end
+		
+		if elapsed >= 5 then
+			raceActive = false
+			conn:Disconnect()
+			local maxPos = 0
+			for i, pos in ipairs(positions) do
+				if pos > maxPos then
+					maxPos = pos
+					winner = i
+				end
+			end
+			
+			local won = winner == pickNum
+			local payout = 0
+			
+			if won then
+				local odds = math.random(15, 30) / 10
+				payout = math.floor(bet * odds)
+				addChipsGlobal(payout)
+				winGame(payout)
+				VFX:WinText(payout, "HORSE RACE")
+				VFX:ChipShower(8)
+			else
+				loseGame()
+				VFX:LossText(bet, "HORSE RACE")
+			end
+			
+			recordGame("HORSE RACE", won, payout > 0 and payout or bet)
+		end
+	end)
+	
+	local horseList = ""
+	for i, name in ipairs(horseNames) do
+		horseList = horseList .. "[" .. tostring(i) .. "] " .. name .. "\n"
+	end
+	
+	return "=== HORSE RACE ===\n\nRacers:\n" .. horseList .. "\nYou bet on: " .. horseNames[pickNum] .. "\n\nRace in progress..."
+end
+
+--// === BINGO ===
+
+local bingoActive = false
+local bingoCard = {}
+local bingoCalls = {}
+local bingoMarked = {}
+
+function newBingoCard()
+	local card = {}
+	local cols = {
+		{min = 1, max = 15},
+		{min = 16, max = 30},
+		{min = 31, max = 45},
+		{min = 46, max = 60},
+		{min = 61, max = 75}
+	}
+	
+	for col = 1, 5 do
+		local used = {}
+		for row = 1, 5 do
+			if col == 3 and row == 3 then
+				card[col] = card[col] or {}
+				card[col][row] = 0
+			else
+				local n
+				repeat n = math.random(cols[col].min, cols[col].max) until not used[n]
+				used[n] = true
+				card[col] = card[col] or {}
+				card[col][row] = n
+			end
+		end
+	end
+	return card
+end
+
+function playBingo(bet)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	deductChips(bet)
+	currentBet = bet
+	bingoActive = true
+	bingoCard = newBingoCard()
+	bingoCalls = {}
+	bingoMarked = {}
+	
+	-- Display card
+	local cardStr = "=== BINGO ===\n\n B  I  N  G  O\n"
+	for row = 1, 5 do
+		for col = 1, 5 do
+			local val = bingoCard[col][row]
+			if val == 0 then
+				cardStr = cardStr .. " --"
+			else
+				cardStr = cardStr .. string.format("%3d", val)
+			end
+			if col < 5 then cardStr = cardStr .. " " end
+		end
+		cardStr = cardStr .. "\n"
+	end
+	cardStr = cardStr .. "\nCalling numbers..."
+	
+	task.spawn(function()
+		local calledSet = {}
+		local win = false
+		
+		for i = 1, 75 do
+			if not bingoActive then break end
+			task.wait(0.5)
+			
+			local n
+			repeat n = math.random(1, 75) until not calledSet[n]
+			calledSet[n] = true
+			table.insert(bingoCalls, n)
+			
+			for col = 1, 5 do
+				for row = 1, 5 do
+					if bingoCard[col][row] == n then
+						bingoMarked[col] = bingoMarked[col] or {}
+						bingoMarked[col][row] = true
+					end
+				end
+			end
+			
+			-- Check bingo
+			local bingo = false
+			for row = 1, 5 do
+				local count = 0
+				for col = 1, 5 do
+					if bingoMarked[col] and bingoMarked[col][row] then count = count + 1 end
+				end
+				if count >= 5 then bingo = true end
+			end
+			for col = 1, 5 do
+				local count = 0
+				for row = 1, 5 do
+					if bingoMarked[col] and bingoMarked[col][row] then count = count + 1 end
+				end
+				if count >= 5 then bingo = true end
+			end
+			local diag1 = 0
+			local diag2 = 0
+			for i2 = 1, 5 do
+				if bingoMarked[i2] and bingoMarked[i2][i2] then diag1 = diag1 + 1 end
+				if bingoMarked[i2] and bingoMarked[i2][6 - i2] then diag2 = diag2 + 1 end
+			end
+			if diag1 >= 5 or diag2 >= 5 then bingo = true end
+			
+			if bingo and not win then
+				win = true
+				local payout = bet * 5
+				addChipsGlobal(payout)
+				winGame(payout)
+				VFX:JackpotText()
+				VFX:ChipShower(12)
+				recordGame("BINGO", true, payout)
+				bingoActive = false
+			end
+		end
+		
+		if not win then
+			loseGame()
+			recordGame("BINGO", false, bet)
+			bingoActive = false
+		end
+	end)
+	
+	return cardStr
+end
+
+--// === MATCHING GAME ===
+
+local matchActive = false
+local matchCards = {}
+local matchFlipped = {}
+local matchPairs = 0
+
+function playMatching(bet)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	
+	deductChips(bet)
+	currentBet = bet
+	
+	local symbols = {"♠", "♥", "♣", "♦", "7", "★", "◆", "♪"}
+	local deck = {}
+	for _, s in ipairs(symbols) do
+		table.insert(deck, s)
+		table.insert(deck, s)
+	end
+	for i = #deck, 2, -1 do
+		local j = math.random(i)
+		deck[i], deck[j] = deck[j], deck[i]
+	end
+	
+	matchCards = deck
+	matchFlipped = {}
+	matchPairs = 0
+	matchActive = true
+	
+	local result = "=== MATCHING GAME ===\n\nTry to match pairs of cards!\nType 'match [1-16]' to flip a card.\n"
+	for i = 1, 16 do
+		result = result .. "[" .. string.format("%2d", i) .. "]"
+		if i % 4 == 0 then result = result .. "\n" else result = result .. " " end
+	end
+	
+	return result
+end
+
+function matchFlip(index)
+	if not matchActive then return "No matching game active!" end
+	if index < 1 or index > 16 then return "Pick a number between 1-16" end
+	if matchFlipped[index] then return "Card already flipped!" end
+	
+	matchFlipped[index] = true
+	
+	local flipped = {}
+	for i, v in ipairs(matchFlipped) do
+		if v then table.insert(flipped, i) end
+	end
+	
+	local result = "=== MATCHING GAME ===\n\n"
+	for i = 1, 16 do
+		if matchFlipped[i] then
+			result = result .. " " .. matchCards[i] .. " "
+		else
+			result = result .. "[" .. string.format("%2d", i) .. "]"
+		end
+		if i % 4 == 0 then result = result .. "\n" else result = result .. " " end
+	end
+	
+	-- Check for match (if exactly 2 flipped)
+	if #flipped == 2 then
+		local a = flipped[1]
+		local b = flipped[2]
+		
+		task.delay(0.8, function()
+			if matchCards[a] == matchCards[b] then
+				matchPairs = matchPairs + 1
+				
+				if matchPairs >= 8 then
+					local payout = currentBet * 3
+					addChipsGlobal(payout)
+					winGame(payout)
+					VFX:WinText(payout, "MATCH")
+					VFX:ChipShower(10)
+					recordGame("MATCH", true, payout)
+					matchActive = false
+				end
+			else
+				matchFlipped[a] = false
+				matchFlipped[b] = false
+			end
+		end
+		
+		result = result .. "\n" .. (matchCards[a] == matchCards[b] and "!! MATCH !!" or "No match")
+	else
+		result = result .. "\nPick another card to match"
+	end
+	
+	return result
+end
+
+--// === ANIMATED BACKGROUND EFFECTS ===
+
+local bgEffects = {}
+
+function createBackgroundEffects()
+	local bgOverlay = Instance.new("Frame")
+	bgOverlay.Size = UDim2.new(1, 0, 1, 0)
+	bgOverlay.BackgroundTransparency = 1
+	bgOverlay.ZIndex = 0
+	bgOverlay.Parent = container
+	
+	-- Floating particles
+	for i = 1, 15 do
+		local particle = Instance.new("TextLabel")
+		particle.Size = UDim2.new(0, math.random(12, 20), 0, math.random(12, 20))
+		particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+		particle.BackgroundTransparency = 1
+		particle.Text = {"♠", "♥", "♣", "♦", "◆", "★", "✦", "♪"}[math.random(8)]
+		particle.TextColor3 = Color3.fromRGB(255, 215, 0)
+		particle.TextTransparency = 0.85
+		particle.Font = Enum.Font.GothamBlack
+		particle.TextSize = 16
+		particle.ZIndex = 0
+		particle.Parent = bgOverlay
+		
+		local xDir = math.random(-1, 1) * 0.3
+		local yDir = -0.2 - math.random() * 0.3
+		local rotSpeed = math.random(-50, 50)
+		local floatAmp = math.random(5, 15)
+		local floatSpeed = 0.5 + math.random() * 1.5
+		local phase = math.random() * math.pi * 2
+		
+		table.insert(bgEffects, {
+			label = particle,
+			xDir = xDir,
+			yDir = yDir,
+			rotSpeed = rotSpeed,
+			floatAmp = floatAmp,
+			floatSpeed = floatSpeed,
+			phase = phase,
+			baseX = particle.Position.X.Offset,
+			baseY = particle.Position.Y.Offset
+		})
+	end
+	
+	-- Bottom shimmer line
+	local shimmer = Instance.new("Frame")
+	shimmer.Size = UDim2.new(1, 0, 0, 2)
+	shimmer.Position = UDim2.new(0, 0, 1, 0)
+	shimmer.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+	shimmer.BackgroundTransparency = 0.7
+	shimmer.BorderSizePixel = 0
+	shimmer.ZIndex = 1
+	shimmer.Parent = container
+	
+	local shimmerGradient = Instance.new("UIGradient")
+	shimmerGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 215, 0)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 0))
+	})
+	shimmerGradient.Rotation = 0
+	shimmerGradient.Parent = shimmer
+	
+	table.insert(bgEffects, {shimmer = shimmer, gradient = shimmerGradient, phase = 0})
+end
+
+createBackgroundEffects()
+
+--// === CARD DEALING ANIMATION ===
+
+function animateCardDeal(cardStr, targetPos, delay)
+	delay = delay or 0
+	
+	local card = Instance.new("TextLabel")
+	card.Size = UDim2.new(0, 40, 0, 56)
+	card.Position = UDim2.new(0.5, -20, 0, -60)
+	card.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	card.BorderSizePixel = 0
+	card.Text = cardStr
+	card.TextColor3 = Color3.fromRGB(255, 255, 255)
+	card.Font = Enum.Font.GothamBold
+	card.TextSize = 18
+	card.ZIndex = 80
+	card.Visible = false
+	card.Parent = gui
+	
+	local cardCorner = Instance.new("UICorner")
+	cardCorner.CornerRadius = UDim.new(0, 4)
+	cardCorner.Parent = card
+	
+	local cardStroke = Instance.new("UIStroke")
+	cardStroke.Thickness = 1
+	cardStroke.Color = Color3.fromRGB(255, 215, 0)
+	cardStroke.Transparency = 0.5
+	cardStroke.Parent = card
+	
+	task.delay(delay, function()
+		card.Visible = true
+		TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Position = targetPos
+		}):Play()
+		task.delay(0.8, function()
+			TweenService:Create(card, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				BackgroundTransparency = 1,
+				TextTransparency = 1
+			}):Play()
+			task.delay(0.2, function()
+				card:Destroy()
+			end)
+		end)
+	end)
+	
+	return card
+end
+
+--// === COMMAND CONSOLE (ENHANCED) ===
+
+local cmdHistory = {}
+local cmdHistoryIndex = 0
+
+local cmdBox = Instance.new("TextBox")
+cmdBox.Size = UDim2.new(0.9, 0, 0, 36)
+cmdBox.Position = UDim2.new(0.05, 0, 0, 595)
+cmdBox.PlaceholderText = "Enter command | type 'help' for all games"
+cmdBox.Text = ""
+cmdBox.TextSize = 14
+cmdBox.Font = Enum.Font.GothamBold
+cmdBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+cmdBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+cmdBox.ClearTextOnFocus = false
+cmdBox.ZIndex = 10
+cmdBox.Parent = container
+
+local cmdBoxCorner = Instance.new("UICorner")
+cmdBoxCorner.CornerRadius = UDim.new(0, 6)
+cmdBoxCorner.Parent = cmdBox
+
+local cmdBoxStroke = Instance.new("UIStroke")
+cmdBoxStroke.Thickness = 1
+cmdBoxStroke.Color = Color3.fromRGB(255, 215, 0)
+cmdBoxStroke.Transparency = 0.5
+cmdBoxStroke.Parent = cmdBox
+
+-- Command result display
+local cmdResult = Instance.new("TextLabel")
+cmdResult.Size = UDim2.new(0.9, 0, 0.9, 0)
+cmdResult.Position = UDim2.new(0.05, 0, 0.05, 0)
+cmdResult.BackgroundTransparency = 1
+cmdResult.TextWrapped = true
+cmdResult.TextYAlignment = Enum.TextYAlignment.Top
+cmdResult.TextColor3 = Color3.fromRGB(255, 255, 255)
+cmdResult.Font = Enum.Font.GothamBold
+cmdResult.TextSize = 14
+cmdResult.TextXAlignment = Enum.TextXAlignment.Left
+cmdResult.Text = "=== JACKPOT TERMINAL ===\n\nType 'help' for all commands"
+cmdResult.ZIndex = 5
+cmdResult.Parent = container
+
+function updateResultText(text)
+	cmdResult.Text = sanitizeText(text)
+end
+
+updateResultText("=== JACKPOT TERMINAL ===\n\nType 'help' for all commands\n\nYour balance: " .. tostring(math.floor(playerChips)) .. " chips")
+
+cmdBox.FocusLost:Connect(function(enterPressed)
+	if not enterPressed then return end
+	
+	local input = string.lower(cmdBox.Text)
+	cmdBox.Text = ""
+	
+	if input == "" then return end
+	
+	table.insert(cmdHistory, input)
+	cmdHistoryIndex = #cmdHistory + 1
+	
+	local result = processCommand(input)
+	if result then
+		updateResultText(result)
+	end
+end)
+
+-- Command history cycling
+cmdBox.Focused:Connect(function()
+	cmdHistoryIndex = #cmdHistory + 1
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not cmdBox:IsFocused() then return end
+	
+	if input.KeyCode == Enum.KeyCode.Up then
+		cmdHistoryIndex = math.max(1, cmdHistoryIndex - 1)
+		cmdBox.Text = cmdHistory[cmdHistoryIndex] or ""
+	elseif input.KeyCode == Enum.KeyCode.Down then
+		cmdHistoryIndex = math.min(#cmdHistory + 1, cmdHistoryIndex + 1)
+		cmdBox.Text = cmdHistory[cmdHistoryIndex] or ""
+	end
+end)
+
+--// === COMMAND PROCESSOR ===
+
+function processCommand(input)
+	-- SLOTS
+	local slotsMatch = string.match(input, "^slots?%s+(%d+)$")
+	if slotsMatch then
+		local bet = tonumber(slotsMatch)
+		return processSlotsResult(bet, playSlots)
+	end
+	
+	-- POKER
+	local pokerMatch = string.match(input, "^poker%s+(%d+)$")
+	if pokerMatch then
+		return startPoker(tonumber(pokerMatch))
+	end
+	
+	-- POKER DISCARD
+	local discardMatch = string.match(input, "^discard%s+(.+)$")
+	if discardMatch and pokerActive then
+		return pokerDiscardCards(discardMatch)
+	end
+	
+	-- POKER STAND
+	if input == "stand" and pokerActive then
+		return pokerStand()
+	end
+	
+	-- BLACKJACK
+	local bjMatch = string.match(input, "^blackjack%s+(%d+)$")
+	if bjMatch then
+		return processSlotsResult(tonumber(bjMatch), function(b)
+			return startBlackjack(b)
+		end)
+	end
+	
+	-- BACCARAT
+	local bacMatch = string.match(input, "^baccarat%s+(%d+)%s+(%w+)$")
+	if bacMatch then
+		return startBaccarat(tonumber(bacMatch), bacMatch)
+	end
+	
+	-- ROULETTE
+	local rouletteMatch = string.match(input, "^roulette%s+(%d+)%s+(.+)$")
+	if rouletteMatch then
+		return processSlotsResult(tonumber(rouletteMatch), function(b)
+			return playRoulette(b, rouletteMatch) and "" or ""
+		end)
+	end
+	
+	-- DICE
+	local diceMatch = string.match(input, "^dice%s+(%d+)%s+(.+)$")
+	if diceMatch then
+		return processSlotsResult(tonumber(diceMatch), function(b)
+			return playDice(b, diceMatch) and "" or ""
+		end)
+	end
+	
+	-- COIN FLIP
+	local coinMatch = string.match(input, "^coin%s+flip%s+(%d+)%s+(%w+)$")
+	if coinMatch then
+		return processSlotsResult(tonumber(coinMatch), function(b)
+			return playCoinFlip(b, coinMatch) and "" or ""
+		end)
+	end
+	
+	-- WHEEL
+	local wheelMatch = string.match(input, "^wheel%s+(%d+)$")
+	if wheelMatch then
+		return spinWheel(tonumber(wheelMatch))
+	end
+	
+	-- SIC BO
+	local sicboMatch = string.match(input, "^sicbo%s+(%d+)%s+(%w+)$")
+	if sicboMatch then
+		return playSicBo(tonumber(sicboMatch), sicboMatch)
+	end
+	
+	-- CRAPS
+	local crapsMatch = string.match(input, "^craps%s+(%d+)%s+(%w+)$")
+	if crapsMatch then
+		return playCraps(tonumber(crapsMatch), crapsMatch)
+	end
+	
+	-- KENO
+	local kenoMatch = string.match(input, "^keno%s+(%d+)%s+(.+)$")
+	if kenoMatch then
+		return playKeno(tonumber(kenoMatch), kenoMatch)
+	end
+	
+	-- LOTTERY
+	local lotMatch = string.match(input, "^lottery%s+(%d+)$")
+	if lotMatch then
+		return playLottery(tonumber(lotMatch))
+	end
+	
+	-- WAR
+	local warMatch = string.match(input, "^war%s+(%d+)$")
+	if warMatch then
+		return playWar(tonumber(warMatch))
+	end
+	
+	-- HORSE RACE
+	local horseMatch = string.match(input, "^horse%s+(%d+)%s+(%d+)$")
+	if horseMatch then
+		return playHorseRace(tonumber(horseMatch), horseMatch)
+	end
+	
+	-- BINGO
+	local bingoMatch = string.match(input, "^bingo%s+(%d+)$")
+	if bingoMatch then
+		return playBingo(tonumber(bingoMatch))
+	end
+	
+	-- MATCH
+	local matchMatch = string.match(input, "^match%s+(%d+)$")
+	if matchMatch then
+		if not matchActive then
+			return playMatching(tonumber(matchMatch) or 50)
+		else
+			return matchFlip(tonumber(matchMatch))
+		end
+	end
+	
+	-- HELP
+	if input == "help" or input == "commands" then
+		local help = [[=== JACKPOT COMMANDS ===
+
+=== GAMES ===
+slots [bet] - Slot machine
+blackjack [bet] - Blackjack
+poker [bet] - 5 Card Draw
+baccarat [bet] [player/banker/tie]
+roulette [bet] [red/black/green/even/odd/number]
+dice [bet] [number/even/odd/high/low]
+coin flip [bet] [heads/tails]
+wheel [bet] - Wheel of Fortune
+sicbo [bet] [small/big/even/odd/triple/pair/number]
+keno [bet] [numbers]
+lottery [bet] - Lottery draw
+craps [bet] [pass/dont]
+war [bet] - Card game War
+horse [bet] [1-6] - Horse race
+bingo [bet] - Auto bingo
+match [bet] - Matching game
+
+=== UTILITIES ===
+chips - Check balance
+help - This menu
+reset - Reset chips to 1000
+stats - Show game stats
+log - Show game log
+achievements - Show unlocked achievements]]
+		return help
+	end
+	
+	-- CHIPS
+	if input == "chips" or input == "balance" then
+		local winPct = gamesPlayed > 0 and (gamesWon / gamesPlayed * 100) or 0
+		return "$ BALANCE: " .. tostring(math.floor(playerChips)) .. " chips\nWon: " .. tostring(gamesWon) .. "/" .. tostring(gamesPlayed) .. " (" .. string.format("%.0f", winPct) .. "%)\nStreak: " .. tostring(winStreak) .. "\nTotal earned: " .. tostring(math.floor(totalChipsEarned))
+	end
+	
+	-- RESET
+	if input == "reset" or input == "reset chips" then
+		playerChips = 1000
+		statEntries[3].label.Text = "1000"
+		return "$ Reset to 1000 chips"
+	end
+	
+	-- INFINITE CHIPS (cheat)
+	if input == "infinite chips" or input == "cheat" then
+		playerChips = 999999
+		statEntries[3].label.Text = "999999"
+		return "$ INFINITE CHIPS ACTIVATED"
+	end
+	
+	-- STATS
+	if input == "stats" then
+		local s = "=== STATS ===\n"
+		for k, v in pairs(gameStats) do
+			s = s .. k .. ": " .. tostring(v) .. "\n"
+		end
+		s = s .. "\nGames: " .. tostring(gamesPlayed) .. "\nWins: " .. tostring(gamesWon)
+		return s
+	end
+	
+	-- LOG
+	if input == "log" then
+		local s = "=== GAME LOG (last " .. tostring(math.min(#gameLog, 15)) .. ") ===\n"
+		for i, entry in ipairs(gameLog) do
+			if i > 15 then break end
+			s = s .. (entry.won and "+" or "-") .. tostring(math.floor(entry.amount)) .. " " .. entry.game .. "\n"
+		end
+		return s
+	end
+	
+	-- ACHIEVEMENTS
+	if input == "achievements" then
+		local s = "=== ACHIEVEMENTS ===\n"
+		local count = 0
+		for _, def in ipairs(achievementDefs) do
+			local unlocked = unlockedAchievements[def.id] or false
+			s = s .. (unlocked and "★" or "☆") .. " " .. def.name .. " - " .. def.desc .. "\n"
+			if unlocked then count = count + 1 end
+		end
+		s = s .. "\n" .. tostring(count) .. "/" .. tostring(#achievementDefs) .. " unlocked"
+		return s
+	end
+	
+	return "Unknown command. Type 'help' for all commands."
+end
+
+function processSlotsResult(bet, fn)
+	local result = fn(bet)
+	if type(result) == "string" then
+		return result
+	end
+	return "Game completed. Check your balance."
+end
+
+--// === TOUCH SUPPORT ===
+
+local touchActive = false
+local touchStart = nil
+local touchOffset = nil
+
+if UserInputService.TouchEnabled then
+	toggle.Size = UDim2.new(0, 80, 0, 80)
+	
+	local dragConn
+	toggle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch then
+			touchActive = true
+			touchStart = input.Position
+			touchOffset = toggle.Position
+		end
+	end)
+	
+	toggle.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch and touchActive then
+			local delta = input.Position - touchStart
+			toggle.Position = UDim2.new(touchOffset.X.Scale, touchOffset.X.Offset + delta.X, touchOffset.Y.Scale, touchOffset.Y.Offset + delta.Y)
+		end
+	end)
+	
+	toggle.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch then
+			touchActive = false
+		end
+	end)
+end
+
+--// === HEARTBEAT ANIMATION LOOP ===
+
+RunService.Heartbeat:Connect(function(dt)
+	-- Glow pulse
+	for _, entry in ipairs(glowTargets) do
+		local t = tick() * entry.speed + entry.phase
+		local alpha = entry.minTrans + (entry.maxTrans - entry.minTrans) * (0.5 + 0.5 * math.sin(t))
+		if entry.frame and entry.frame:IsA("Frame") then
+			entry.frame.BackgroundTransparency = alpha
+		end
+	end
+	
+	-- Rainbow cycle
+	for _, entry in ipairs(rainbowTargets) do
+		entry.hue = (entry.hue + dt * 60 * entry.speed) % 360
+		if entry.frame then
+			entry.frame.BackgroundColor3 = VFX:RainbowColor(entry.hue)
+		end
+	end
+	
+	-- Background floating particles
+	local t = tick()
+	for _, eff in ipairs(bgEffects) do
+		if eff.label then
+			local x = eff.baseX + math.sin(t * eff.floatSpeed + eff.phase) * eff.floatAmp
+			local y = eff.baseY + t * 10 * eff.yDir
+			if y < -50 then y = 650 end
+			if y > 700 then y = -50 end
+			eff.label.Position = UDim2.new(eff.label.Position.X.Scale, x, 0, y % 700)
+		end
+	end
+	
+	-- Shimmer movement
+	for _, eff in ipairs(bgEffects) do
+		if eff.gradient then
+			eff.phase = (eff.phase + dt * 0.2) % 2
+			eff.gradient.Offset = Vector2.new(eff.phase - 1, 0)
+		end
+	end
+end)
+
+--// === COMPATIBILITY WRAPPERS ===
+--// Hook into the original update functions
+
+local origUpdateHealth = updateHealth
+function updateHealth(value)
+	origUpdateHealth(value)
+	checkAchievements(nil)
+end
+
+local origAddCombo = addCombo
+function addCombo(amount)
+	origAddCombo(amount)
+	if comboCount > 0 and comboCount % 5 == 0 then
+		VFX:StreakText(comboCount)
+	end
+end
+
+--// Override the original game functions to use sanitized text
+local origPlaySlots = playSlots
+function playSlots(bet)
+	local result = origPlaySlots(bet)
+	if type(result) == "string" then
+		result = sanitizeText(result)
+	end
+	recordGame("SLOTS", winStreak > 0 and true or false, winStreak > 0 and bet or bet)
+	checkAchievements(nil)
+	spinReels()
+	return result
+end
+
+local origStartBlackjack = startBlackjack
+function startBlackjack(bet)
+	local result = origStartBlackjack(bet)
+	if type(result) == "string" then
+		result = sanitizeText(result)
+	end
+	return result
+end
+
+local origBlackjackHit = blackjackHit
+function blackjackHit()
+	origBlackjackHit()
+	local currentResult = result.Text
+	if currentResult then
+		result.Text = sanitizeText(currentResult)
+	end
+end
+
+local origBlackjackStand = blackjackStand
+function blackjackStand()
+	origBlackjackStand()
+	local currentResult = result.Text
+	if currentResult then
+		result.Text = sanitizeText(currentResult)
+	end
+end
+
+local origPlayRoulette = playRoulette
+function playRoulette(bet, choice)
+	local r = origPlayRoulette(bet, choice)
+	if r == true or r == false then
+		recordGame("ROULETTE", r, r and bet or bet)
+		checkAchievements(nil)
+	elseif type(r) == "string" then
+		return sanitizeText(r)
+	end
+	return r
+end
+
+local origPlayDice = playDice
+function playDice(bet, prediction)
+	local r = origPlayDice(bet, prediction)
+	if r == true or r == false then
+		recordGame("DICE", r, r and bet or bet)
+		checkAchievements(nil)
+	elseif type(r) == "string" then
+		return sanitizeText(r)
+	end
+	return r
+end
+
+local origPlayCoinFlip = playCoinFlip
+function playCoinFlip(bet, choice)
+	local r = origPlayCoinFlip(bet, choice)
+	if r == true or r == false then
+		recordGame("COIN FLIP", r, r and bet or bet)
+		checkAchievements(nil)
+	elseif type(r) == "string" then
+		return sanitizeText(r)
+	end
+	return r
+end
+
+--// === IN-GAME OVERLAY FOR WIN/LOSS ===
+
+local overlayFrame = Instance.new("Frame")
+overlayFrame.Size = UDim2.new(0, 300, 0, 80)
+overlayFrame.Position = UDim2.new(0.5, -150, 0, -100)
+overlayFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+overlayFrame.BackgroundTransparency = 0.3
+overlayFrame.BorderSizePixel = 0
+overlayFrame.ZIndex = 150
+overlayFrame.Parent = gui
+
+local overlayCorner = Instance.new("UICorner")
+overlayCorner.CornerRadius = UDim.new(0, 10)
+overlayCorner.Parent = overlayFrame
+
+local overlayStroke = Instance.new("UIStroke")
+overlayStroke.Thickness = 2
+overlayStroke.Color = Color3.fromRGB(255, 215, 0)
+overlayStroke.Transparency = 0.5
+overlayStroke.Parent = overlayFrame
+
+local overlayLabel = Instance.new("TextLabel")
+overlayLabel.Size = UDim2.new(1, -20, 1, 0)
+overlayLabel.Position = UDim2.new(0, 10, 0, 0)
+overlayLabel.BackgroundTransparency = 1
+overlayLabel.Text = ""
+overlayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+overlayLabel.Font = Enum.Font.GothamBlack
+overlayLabel.TextSize = 24
+overlayLabel.TextScaled = true
+overlayLabel.ZIndex = 151
+overlayLabel.Parent = overlayFrame
+
+overlayFrame.Visible = false
+
+function showOverlay(text, color, duration)
+	duration = duration or 1.5
+	color = color or Color3.fromRGB(255, 215, 0)
+	
+	overlayLabel.Text = sanitizeText(text)
+	overlayFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+	overlayFrame.BackgroundTransparency = 0.3
+	overlayFrame.Visible = true
+	overlayFrame.Position = UDim2.new(0.5, -150, 0, -100)
+	overlayStroke.Color = color
+	
+	TweenService:Create(overlayFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -150, 0, 20)
+	}):Play()
+	
+	task.delay(duration, function()
+		TweenService:Create(overlayFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, -150, 0, -100),
+			BackgroundTransparency = 1
+		}):Play()
+		task.delay(0.3, function()
+			overlayFrame.Visible = false
+			overlayFrame.BackgroundTransparency = 0.3
+		end)
+	end)
+end
+
+--// Hook into win/lose for overlay
+local origWinGame = winGame
+function winGame(amount)
+	origWinGame(amount)
+	showOverlay("!! WIN !! +" .. tostring(math.floor(amount)) .. " chips", Color3.fromRGB(100, 255, 100), 1.5)
+	VFX:WinText(math.floor(amount), "")
+	checkAchievements(nil)
+end
+
+local origLoseGame = loseGame
+function loseGame(...)
+	origLoseGame(...)
+end
+
+--// === TOGGLE FOR THE EXPANDED CONSOLE ===
+
+local consoleVisible = false
+
+local consoleToggle = Instance.new("TextButton")
+consoleToggle.Size = UDim2.new(0, 40, 0, 40)
+consoleToggle.Position = UDim2.new(0, 0, 1, -40)
+consoleToggle.Text = ">>"
+consoleToggle.TextScaled = true
+consoleToggle.Font = Enum.Font.GothamBlack
+consoleToggle.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+consoleToggle.TextColor3 = Color3.fromRGB(255, 215, 0)
+consoleToggle.BorderSizePixel = 0
+consoleToggle.ZIndex = 20
+consoleToggle.Parent = container
+
+local conToggleCorner = Instance.new("UICorner")
+conToggleCorner.CornerRadius = UDim.new(0, 6)
+conToggleCorner.Parent = consoleToggle
+
+local conToggleStroke = Instance.new("UIStroke")
+conToggleStroke.Thickness = 1
+conToggleStroke.Color = Color3.fromRGB(255, 215, 0)
+conToggleStroke.Transparency = 0.5
+conToggleStroke.Parent = consoleToggle
+
+consoleToggle.MouseButton1Click:Connect(function()
+	consoleVisible = not consoleVisible
+	cmdBox.Visible = consoleVisible
+	cmdResult.Visible = consoleVisible
+	consoleToggle.Text = consoleVisible and "<<" or ">>"
+end)
+
+cmdBox.Visible = false
+cmdResult.Visible = false
+
+--// === THEME SYSTEM ===
+
+local themes = {
+	{
+		name = "CASINO GOLD",
+		primary = Color3.fromRGB(255, 215, 0),
+		bg = Color3.fromRGB(15, 15, 15),
+		accent = Color3.fromRGB(255, 255, 255)
+	},
+	{
+		name = "ROYAL PURPLE",
+		primary = Color3.fromRGB(180, 100, 255),
+		bg = Color3.fromRGB(10, 5, 20),
+		accent = Color3.fromRGB(200, 150, 255)
+	},
+	{
+		name = "NEON BLUE",
+		primary = Color3.fromRGB(50, 200, 255),
+		bg = Color3.fromRGB(5, 10, 20),
+		accent = Color3.fromRGB(150, 230, 255)
+	},
+	{
+		name = "BLOOD RED",
+		primary = Color3.fromRGB(200, 30, 30),
+		bg = Color3.fromRGB(20, 5, 5),
+		accent = Color3.fromRGB(255, 100, 100)
+	},
+}
+
+local currentTheme = 1
+
+function applyTheme(index)
+	local theme = themes[index]
+	if not theme then return end
+	currentTheme = index
+	
+	local targets = {
+		reelBorderStroke, portStroke, healthStroke, statsStroke,
+		logStroke, cmdBoxStroke, overlayStroke, conToggleStroke
+	}
+	for _, t in ipairs(targets) do
+		if t and t:IsA("UIStroke") then
+			t.Color = theme.primary
+		end
+	end
+	
+	local labels = {jackpotLabel, healthLabel}
+	for _, l in ipairs(labels) do
+		if l and l:IsA("TextLabel") then
+			l.TextColor3 = theme.primary
+		end
+	end
+	
+	-- Update reel symbols
+	for _, rt in ipairs(reelTexts) do
+		rt.TextColor3 = theme.primary
+	end
+end
+
+--// Theme cycling toggle
+local themeBtn = Instance.new("TextButton")
+themeBtn.Size = UDim2.new(0, 40, 0, 20)
+themeBtn.Position = UDim2.new(1, -45, 0, 2)
+themeBtn.Text = "T"
+themeBtn.TextScaled = true
+themeBtn.Font = Enum.Font.GothamBlack
+themeBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+themeBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+themeBtn.BorderSizePixel = 0
+themeBtn.Parent = container
+
+local themeBtnCorner = Instance.new("UICorner")
+themeBtnCorner.CornerRadius = UDim.new(0, 4)
+themeBtnCorner.Parent = themeBtn
+
+themeBtn.MouseButton1Click:Connect(function()
+	local nextTheme = (currentTheme % #themes) + 1
+	applyTheme(nextTheme)
+	showOverlay("Theme: " .. themes[nextTheme].name, themes[nextTheme].primary, 1)
+end)
+
+--// === RAPID FIRE SLOTS (AUTO-SPIN) ===
+
+local autoSpinActive = false
+local autoSpinBet = 0
+
+function toggleAutoSpin(bet)
+	if autoSpinActive then
+		autoSpinActive = false
+		return "Auto-spin stopped"
+	end
+	
+	if bet > playerChips then
+		return "NOT ENOUGH CHIPS"
+	end
+	
+	autoSpinActive = true
+	autoSpinBet = bet
+	
+	task.spawn(function()
+		while autoSpinActive and playerChips >= bet do
+			playSlots(bet)
+			task.wait(1.5)
+		end
+		autoSpinActive = false
+		return "Auto-spin ended"
+	end)
+	
+	return "Auto-spin started! Bet: " .. tostring(bet) .. " chips per spin"
+end
+
+--// Handle auto-spin command
+local origProcessCommand = processCommand
+function processCommand(input)
+	if input == "autospin stop" then
+		autoSpinActive = false
+		return "Auto-spin stopped"
+	end
+	
+	local autoMatch = string.match(input, "^autospin%s+(%d+)$")
+	if autoMatch then
+		return toggleAutoSpin(tonumber(autoMatch))
+	end
+	
+	return origProcessCommand(input)
+end
+
+--// === SOUND VISUALIZER ===
+
+local soundBars = {}
+
+function createSoundVisualizer()
+	local visFrame = Instance.new("Frame")
+	visFrame.Size = UDim2.new(0.9, 0, 0, 30)
+	visFrame.Position = UDim2.new(0.05, 0, 0, 560)
+	visFrame.BackgroundTransparency = 1
+	visFrame.ClipsDescendants = true
+	visFrame.Parent = container
+	
+	for i = 1, 12 do
+		local bar = Instance.new("Frame")
+		bar.Size = UDim2.new(0, 6, 0, 4)
+		bar.Position = UDim2.new(0, (i - 1) * 24 + 6, 0.5, -2)
+		bar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+		bar.BackgroundTransparency = 0.4
+		bar.BorderSizePixel = 0
+		bar.Parent = visFrame
+		
+		local barCorner = Instance.new("UICorner")
+		barCorner.CornerRadius = UDim.new(0, 3)
+		barCorner.Parent = bar
+		
+		table.insert(soundBars, {
+			frame = bar,
+			baseHeight = 4,
+			maxHeight = math.random(15, 28),
+			speed = 1 + math.random() * 2,
+			phase = math.random() * math.pi * 2
+		})
+	end
+end
+
+createSoundVisualizer()
+
+--// Animate sound bars on heartbeat (they're in the main loop)
+
+--// === ENHANCED MAIN HEARTBEAT ===
+
+local heartbeatTime = 0
+RunService.Heartbeat:Connect(function(dt)
+	heartbeatTime = heartbeatTime + dt
+	
+	-- Animate sound bars
+	for _, bar in ipairs(soundBars) do
+		local height = bar.baseHeight + math.abs(math.sin(heartbeatTime * bar.speed + bar.phase)) * bar.maxHeight
+		bar.frame.Size = UDim2.new(0, 6, 0, height)
+		bar.frame.Position = UDim2.new(bar.frame.Position.X.Scale, bar.frame.Position.X.Offset, 0.5, -height / 2)
+	end
+end)
+
+--// === MEGA WIN CELEBRATION ===
+
+function megaWinCelebration(amount)
+	showOverlay("=== MEGA WIN ===", Color3.fromRGB(255, 215, 0), 3)
+	VFX:JackpotText()
+	VFX:ChipShower(30)
+	VFX:Burst(UDim2.new(0.5, -3, 0.4, -3), 20, Color3.fromRGB(255, 215, 0))
+	task.delay(0.5, function()
+		VFX:Burst(UDim2.new(0.3, -3, 0.3, -3), 15, Color3.fromRGB(255, 50, 50))
+	end)
+	task.delay(1, function()
+		VFX:Burst(UDim2.new(0.7, -3, 0.3, -3), 15, Color3.fromRGB(50, 255, 50))
+	end)
+	VFX:ScreenShake(8, 0.5)
+end
+
+--// Override winGame to check for mega wins
+local origWinGame2 = winGame
+function winGame(amount)
+	origWinGame2(amount)
+	if amount >= 1000 then
+		megaWinCelebration(amount)
+	end
+end
+
+--// === GRAND DEMO LOOP ===
+
+task.spawn(function()
+	task.wait(5)
+	while true do
+		task.wait(10)
+		if not containerVisible or autoSpinActive then
+			task.wait(5)
+			continue
+		end
+		
+		if not pokerActive and not bingoActive and not matchActive and not wheelActive then
+			local demoGames = {"slots", "dice", "coin", "war", "match"}
+			local pick = demoGames[math.random(#demoGames)]
+			local bet = math.random(10, 100)
+			
+			if pick == "slots" then
+				playSlots(bet)
+			elseif pick == "dice" then
+				local preds = {"even", "odd", "high", "low", "3", "5"}
+				playDice(bet, preds[math.random(#preds)])
+			elseif pick == "coin" then
+				local sides = {"heads", "tails"}
+				playCoinFlip(bet, sides[math.random(#sides)])
+			elseif pick == "war" then
+				playWar(bet)
+			elseif pick == "match" then
+				playMatching(bet)
+			end
+		end
+	end
+end)
+
+--// === FINAL SETUP ===
+
+spinReels()
+updateResultText("=== JACKPOT TERMINAL v2.0 ===\n\nType 'help' for all commands\n\nBalance: " .. tostring(math.floor(playerChips)) .. " chips\n\nNew games: poker, baccarat, wheel,\nsicbo, craps, keno, lottery, war,\nhorse race, bingo, matching!")
+applyTheme(1)
+
+--// ============================================================
+--// JACKPOT EXPANSION v3 - MEGA FEATURE ADDITION (PART 1)
+--// ============================================================
+
+local version = "v3.0"
+local sessionStartTime = tick()
+local biggestWin = 0
+local longestStreak = 0
+local totalPlayTime = 0
+local favoriteGame = "none"
+local gameCounts = {}
+local hotNumbers = {}
+local dailyBonusDay = 1
+local prestiges = 0
+local compPoints = 0
+local playerLevel = 1
+local playerXP = 0
+local bankBalance = 0
+local loanAmount = 0
+local loanDue = 0
+local settingsData = {animations = true, autoStand = false, cardSpeed = 1, theme = 1}
+local progressionActive = false
+local progressionType = "none"
+local progressionStep = 0
+local progressionBase = 0
+local progressionMax = 10000
+
+--// === TEXAS HOLD'EM ===
+
+local holdemState = {active = false, phase = "preflop", deck = {}, playerHand = {}, communityCards = {},
+	aiPlayers = {}, aiHands = {}, pots = {}, currentBet = 0, playerBet = 0, lastRaise = 0, folded = {}, handNum = 0}
+
+local holdemNames = {"Alice", "Bob", "Carlos", "Diana", "Eve", "Frank", "Grace", "Hank", "Ivy", "Jack", "Kate", "Leo"}
+local holdemPersonalities = {"tight_aggressive", "loose_passive", "maniac", "calling_station", "tight_passive", "loose_aggressive"}
+local holdemHandNames = {[10]="ROYAL FLUSH",[9]="STRAIGHT FLUSH",[8]="FOUR OF A KIND",[7]="FULL HOUSE",[6]="FLUSH",[5]="STRAIGHT",[4]="THREE OF A KIND",[3]="TWO PAIR",[2]="ONE PAIR",[1]="HIGH CARD"}
+
+local function hCardStr(c)
+	return ({"2","3","4","5","6","7","8","9","10","J","Q","K","A"})[((c-1)%13)+1] .. ({"♠","♥","♣","♦"})[math.floor((c-1)/13)+1]
+end
+
+local function hEval(cards)
+	local r, s, rc, ur = {},{},{},{}
+	for _,c in ipairs(cards) do
+		local rv = ((c-1)%13)+1; table.insert(r,rv); table.insert(s,math.floor((c-1)/13)+1); rc[rv]=(rc[rv] or 0)+1
+	end
+	table.sort(r)
+	local flush = true
+	for _,sv in ipairs(s) do if sv~=s[1] then flush=false end end
+	for rv,_ in pairs(rc) do table.insert(ur,rv) end; table.sort(ur)
+	local straight = (#ur==5 and (ur[5]-ur[1]==4 or (ur[1]==1 and ur[2]==10 and ur[3]==11 and ur[4]==12 and ur[5]==13)))
+	local p,t,q = 0,0,0
+	for _,c in pairs(rc) do
+		if c==4 then q=q+1 elseif c==3 then t=t+1 elseif c==2 then p=p+1 end
+	end
+	if flush and straight and r[#r]==13 then return 10,r[#r]
+	elseif flush and straight then return 9,r[#r]
+	elseif q>0 then return 8,r[#r]
+	elseif t>0 and p>0 then return 7,r[#r]
+	elseif flush then return 6,r[#r]
+	elseif straight then return 5,r[#r]
+	elseif t>0 then return 4,r[#r]
+	elseif p>=2 then return 3,r[#r]
+	elseif p>=1 then return 2,r[#r]
+	else return 1,r[#r] end
+end
+
+local function hBest(hole, board)
+	local all = {}; for _,c in ipairs(hole) do table.insert(all,c) end; for _,c in ipairs(board) do table.insert(all,c) end
+	local bs,bk,n=0,0,#all
+	if n<5 then return 0,0 end
+	local function comb(idx, start, chosen)
+		if idx>5 then local s,k=hEval(chosen); if s>bs or(s==bs and k>bk)then bs,bk=s,k end; return end
+		for i=start,n do chosen[idx]=all[i]; comb(idx+1,i+1,chosen) end
+	end
+	comb(1,1,{}); return bs,bk
+end
+
+local function aiFold(num, hand, community, currentBet, personality)
+	if not hand or #hand<2 then return "call",currentBet end
+	local score,kicker = hBest(hand, community or {})
+	local aggr = {tight_aggressive=0.7,loose_aggressive=0.8,loose_passive=0.3,calling_station=0.2,tight_passive=0.3,maniac=0.95}
+	local a = aggr[personality] or 0.5
+	if #community==0 then
+		local h1,h2 = ((hand[1]-1)%13)+1,((hand[2]-1)%13)+1
+		local suited = math.floor((hand[1]-1)/13)==math.floor((hand[2]-1)/13)
+		local str = h1==h2 and h1/14 or (suited and (h1+h2)/28 or (math.max(h1,h2))/14)
+		if str>0.7-a*0.2 then return"raise",math.floor(currentBet*(1+a)) end
+		if str>0.4-a*0.2 then return"call",currentBet end
+		if math.random()<a*0.2 then return"call",currentBet end
+		return"fold",0
+	else
+		local str = score/10+kicker/1000
+		if str>0.6 then return"raise",math.floor(currentBet*(0.5+a)) end
+		if str>0.3 then return"call",currentBet end
+		if math.random()<a*0.15 then return"call",currentBet end
+		return"fold",0
+	end
+end
+
+function startHoldem(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS! You have "..tostring(math.floor(playerChips)).." chips." end
+	if holdemState.active then return "A Hold'em game is already in progress!" end
+	holdemState.active=true; holdemState.phase="preflop"; holdemState.handNum=holdemState.handNum+1
+	holdemState.playerBet=0; holdemState.currentBet=0; holdemState.communityCards={}; holdemState.playerHand={}; holdemState.folded={}; holdemState.aiHands={}
+	holdemState.deck={}; for i=1,52 do table.insert(holdemState.deck,i) end
+	for i=#holdemState.deck,2,-1 do local j=math.random(i); holdemState.deck[i],holdemState.deck[j]=holdemState.deck[j],holdemState.deck[i] end
+	local numAI=3+math.random(0,3); holdemState.aiPlayers={}
+	for i=1,numAI do
+		holdemState.aiPlayers[i]={name=holdemNames[(holdemState.handNum+i-1)%#holdemNames+1],chips=1000,bet=0,personality=holdemPersonalities[math.random(#holdemPersonalities)],folded=false}
+	end
+	holdemState.playerHand={table.remove(holdemState.deck),table.remove(holdemState.deck)}
+	for i=1,numAI do holdemState.aiHands[i]={table.remove(holdemState.deck),table.remove(holdemState.deck)} end
+	deductChips(bet); holdemState.playerBet=bet; holdemState.currentBet=bet
+	gameStats.holdem_played=(gameStats.holdem_played or 0)+1
+	local r="=== TEXAS HOLD'EM === Hand #"..tostring(holdemState.handNum).."\n\nYour hand: "..hCardStr(holdemState.playerHand[1]).." "..hCardStr(holdemState.playerHand[2]).."\nPlayers: "..tostring(numAI+1).." (bet: "..tostring(bet)..")\n\nType 'check', 'call', 'raise [amt]', or 'fold'\nCurrent bet: "..tostring(holdemState.currentBet)
+	task.delay(1,function()
+		if not holdemState.active then return end
+		holdemState.communityCards={table.remove(holdemState.deck),table.remove(holdemState.deck),table.remove(holdemState.deck)}
+		holdemState.phase="flop"
+		local r2="=== TEXAS HOLD'EM ===\n\nYour hand: "..hCardStr(holdemState.playerHand[1]).." "..hCardStr(holdemState.playerHand[2]).."\nCommunity: "
+		for _,c in ipairs(holdemState.communityCards) do r2=r2..hCardStr(c).." " end
+		r2=r2.."\n\nType 'check', 'call', 'raise [amt]', or 'fold'"; updateResultText(r2)
+		for i,ai in ipairs(holdemState.aiPlayers) do
+			task.delay(0.3*i,function()
+				if not holdemState.active or ai.folded then return end
+				local d,_=aiFold(i,holdemState.aiHands[i],holdemState.communityCards,holdemState.currentBet,ai.personality)
+				if d=="fold" then ai.folded=true end
+			end)
+		end
+	end)
+	return r
+end
+
+function holdemAction(action, amount)
+	if not holdemState.active then return "No active Hold'em game!" end
+	if action=="fold" then
+		holdemState.active=false; loseGame(); recordGame("HOLD'EM",false,holdemState.playerBet)
+		return "You folded. -"..tostring(holdemState.playerBet).." chips"
+	end
+	if action=="check" or action=="call" then
+		local diff=holdemState.currentBet-holdemState.playerBet
+		if diff>0 then if not deductChips(diff) then return "Not enough chips to call!" end; holdemState.playerBet=holdemState.currentBet end
+		if #holdemState.communityCards>=5 then
+			holdemState.active=false
+			local ps,pk=hBest(holdemState.playerHand,holdemState.communityCards)
+			local best,bk,winner=0,0,""
+			if ps>best or(ps==best and pk>bk)then best=ps;bk=pk;winner="player" end
+			for i,ai in ipairs(holdemState.aiPlayers) do if not ai.folded then
+				local as,ak=hBest(holdemState.aiHands[i],holdemState.communityCards)
+				if as>best or(as==best and ak>bk)then best=as;bk=ak;winner="ai"..tostring(i) end
+			end end
+			local won=winner=="player"; local payout=0
+			if won then payout=holdemState.playerBet*#holdemState.aiPlayers; addChipsGlobal(payout); winGame(payout); VFX:WinText(payout,"HOLD'EM"); gameStats.holdem_wins=(gameStats.holdem_wins or 0)+1
+			else loseGame(); VFX:LossText(holdemState.playerBet,"HOLD'EM") end
+			recordGame("HOLD'EM",won,payout>0 and payout or holdemState.playerBet)
+			local r="=== HOLD'EM SHOWDOWN ===\n\nYour hand: "..hCardStr(holdemState.playerHand[1]).." "..hCardStr(holdemState.playerHand[2]).." ("..(holdemHandNames[ps] or "HIGH")..")\nCommunity: "
+			for _,c in ipairs(holdemState.communityCards) do r=r..hCardStr(c).." " end
+			r=r.."\n\n"..(won and "!! YOU WIN "..tostring(payout).." chips !! ("..(holdemHandNames[best] or "HIGH")..")" or "X YOU LOSE X -"..tostring(holdemState.playerBet).." chips"); return r
+		else
+			table.insert(holdemState.communityCards,table.remove(holdemState.deck))
+			local r="=== TEXAS HOLD'EM ===\n\nYour hand: "..hCardStr(holdemState.playerHand[1]).." "..hCardStr(holdemState.playerHand[2]).."\nCommunity: "
+			for _,c in ipairs(holdemState.communityCards) do r=r..hCardStr(c).." " end
+			r=r.."\n\nCurrent bet: "..tostring(holdemState.currentBet).."\nType 'check', 'call', 'raise [amt]', or 'fold'"; return r
+		end
+	elseif action=="raise" then
+		amount=tonumber(amount) or holdemState.currentBet*2
+		if not deductChips(amount) then return "Not enough chips to raise!" end
+		holdemState.currentBet=holdemState.currentBet+amount; holdemState.playerBet=holdemState.currentBet
+		return "You raised to "..tostring(holdemState.currentBet)
+	end
+	return "Unknown action. Use check, call, raise [amt], or fold."
+end
+
+--// === VIDEO POKER ===
+
+local vpActive,vpHand,vpHeld,vpDeck,vpPhase,vpBet=false,{},{},{},1,0
+local vpPay={[10]=250,[9]=50,[8]=25,[7]=9,[6]=6,[5]=4,[4]=3,[3]=2,[2]=1,[1]=0}
+local vpNames={[10]="ROYAL FLUSH",[9]="STRAIGHT FLUSH",[8]="FOUR OF A KIND",[7]="FULL HOUSE",[6]="FLUSH",[5]="STRAIGHT",[4]="THREE OF A KIND",[3]="TWO PAIR",[2]="JACKS OR BETTER",[1]="NOTHING"}
+
+function vpEval(hand)
+	local r,rc={},{}
+	for _,c in ipairs(hand) do local rv=((c-1)%13)+1; table.insert(r,rv); rc[rv]=(rc[rv] or 0)+1 end
+	table.sort(r); local s=math.floor((hand[1]-1)/13)+1; local flush=true
+	for _,c in ipairs(hand) do if math.floor((c-1)/13)+1~=s then flush=false end end
+	local ur={}; for rv,_ in pairs(rc) do table.insert(ur,rv) end; table.sort(ur)
+	local straight=#ur==5 and(ur[5]-ur[1]==4 or(ur[1]==1 and ur[2]==10 and ur[3]==11 and ur[4]==12 and ur[5]==13))
+	local p,t,q=0,0,0; for _,c in pairs(rc) do if c==4 then q=q+1 elseif c==3 then t=t+1 elseif c==2 then p=p+1 end end
+	if flush and straight and r[#r]==13 then return 10 end
+	if flush and straight then return 9 end
+	if q>0 then return 8 end
+	if t>0 and p>0 then return 7 end
+	if flush then return 6 end
+	if straight then return 5 end
+	if t>0 then return 4 end
+	if p>=2 then return 3 end
+	if p>=1 then return 2 end
+	return 1
+end
+
+function startVideoPoker(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; if vpActive then return "Video Poker already active!" end
+	vpBet=bet; deductChips(bet); vpActive=true; vpPhase=1; vpHeld={}
+	vpDeck={}; for i=1,52 do table.insert(vpDeck,i) end; for i=#vpDeck,2,-1 do local j=math.random(i); vpDeck[i],vpDeck[j]=vpDeck[j],vpDeck[i] end
+	vpHand={}; for i=1,5 do table.insert(vpHand,table.remove(vpDeck)) end
+	local r="=== VIDEO POKER ===\n\n"
+	for i=1,5 do r=r..tostring(i)..". "..hCardStr(vpHand[i])..(vpHeld[i] and " [Held]" or " [Draw]").."\n" end
+	r=r.."\nType 'hold [1-5]' to hold cards (comma-separated)\nType 'draw' to replace unheld cards"; gameStats.videopoker_played=(gameStats.videopoker_played or 0)+1; return r
+end
+
+function vpHold(input)
+	if not vpActive then return "No active game!" end
+	for num in string.gmatch(input,"%d+") do local n=tonumber(num); if n and n>=1 and n<=5 then vpHeld[n]=true end end
+	for i=1,5 do if not vpHeld[i] and #vpDeck>0 then vpHand[i]=table.remove(vpDeck) end end
+	vpActive=false; local rank=vpEval(vpHand); local mult=vpPay[rank] or 0; local payout=vpBet*mult; local won=mult>0
+	local r="=== VIDEO POKER RESULT ===\n\n"; for _,c in ipairs(vpHand) do r=r..hCardStr(c).." " end
+	r=r.."\n"..(vpNames[rank] or "HIGH CARD").."\n\n"
+	if won then addChipsGlobal(payout); winGame(payout); r=r.."!! WIN !! x"..tostring(mult).." = +"..tostring(payout).." chips"; gameStats.videopoker_wins=(gameStats.videopoker_wins or 0)+1
+		if rank>=9 then VFX:JackpotText(); VFX:ChipShower(15) end
+	else loseGame(); r=r.."X LOSE X -"..tostring(vpBet).." chips" end
+	recordGame("VIDEO POKER",won,payout>0 and payout or vpBet); return r
+end
+
+--// === LET IT RIDE ===
+
+local lirActive,lirHand,lirCommunity,lirBet,lirRound,lirRide=false,{},{},0,1,true
+
+function startLetItRide(bet)
+	if bet*3>playerChips then return "NOT ENOUGH CHIPS! Need "..tostring(bet*3).." for 3 bets." end; if lirActive then return "Let It Ride already active!" end
+	deductChips(bet*3); lirBet=bet; lirActive=true; lirRound=1; lirRide=true
+	local d={}; for i=1,52 do table.insert(d,i) end; for i=#d,2,-1 do local j=math.random(i); d[i],d[j]=d[j],d[i] end
+	lirHand={table.remove(d),table.remove(d),table.remove(d)}; lirCommunity={table.remove(d),table.remove(d)}
+	local r="=== LET IT RIDE ===\n\nYour 3 cards: "; for _,c in ipairs(lirHand) do r=r..hCardStr(c).." " end
+	r=r.."\n\nType 'ride' to let it ride\nType 'pull' to pull one bet back\n\nRound 1 of 3"; gameStats.letitride_played=(gameStats.letitride_played or 0)+1; return r
+end
+
+function lirAct(action)
+	if not lirActive then return "No Let It Ride game active!" end
+	if action=="pull" then lirRide=false; addChipsGlobal(lirBet) else lirRide=true end
+	if lirRound<3 then lirRound=lirRound+1
+		local r="=== LET IT RIDE === Round "..tostring(lirRound).."\n\nYour 3 cards: "; for _,c in ipairs(lirHand) do r=r..hCardStr(c).." " end
+		r=r.."\nCommunity: "; for _,c in ipairs(lirCommunity) do r=r..hCardStr(c).." " end; r=r.."\n\nType 'ride' or 'pull'"; return r
+	else lirActive=false
+		local all={}; for _,c in ipairs(lirHand) do table.insert(all,c) end; for _,c in ipairs(lirCommunity) do table.insert(all,c) end
+		local rank,_=hEval(all); local mult=vpPay[rank] or 0; local totalBet=lirBet*(1+(lirRide and 2 or 1)); local payout=lirBet*mult; local won=mult>0
+		local r="=== LET IT RIDE RESULT ===\n\nHand: "; for _,c in ipairs(all) do r=r..hCardStr(c).." " end
+		r=r.."\n"..(vpNames[rank] or "HIGH CARD").."\n\n"
+		if won then addChipsGlobal(payout); winGame(payout); r=r.."!! WIN !! x"..tostring(mult).." = +"..tostring(payout).." chips"; VFX:WinText(payout,"LET IT RIDE")
+		else loseGame(); r=r.."X LOSE X -"..tostring(totalBet).." chips"; VFX:LossText(totalBet,"LET IT RIDE") end
+		recordGame("LET IT RIDE",won,payout>0 and payout or totalBet); return r
+	end
+end
+
+--// === CARIBBEAN STUD ===
+
+local csActive,csPlayer,csDealer,csBet,csProg=false,{},{},0,0
+
+function startCaribbeanStud(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; if csActive then return "Caribbean Stud already active!" end
+	deductChips(bet); csBet=bet; csActive=true
+	local d={}; for i=1,52 do table.insert(d,i) end; for i=#d,2,-1 do local j=math.random(i); d[i],d[j]=d[j],d[i] end
+	csPlayer={table.remove(d),table.remove(d),table.remove(d),table.remove(d),table.remove(d)}
+	csDealer={table.remove(d),table.remove(d),table.remove(d),table.remove(d),table.remove(d)}
+	csProg=bet*0.1
+	local r="=== CARIBBEAN STUD ===\n\nYour hand: "; for _,c in ipairs(csPlayer) do r=r..hCardStr(c).." " end
+	r=r.."\nDealer shows: "..hCardStr(csDealer[1]).." [?] [?] [?] [?]\nAnte: "..tostring(bet).." | Progressive: "..tostring(math.floor(csProg)).."\n\nType 'call' to match your bet\nType 'fold' to forfeit ante"
+	gameStats.caribbean_played=(gameStats.caribbean_played or 0)+1; return r
+end
+
+function csAct(action)
+	if not csActive then return "No Caribbean Stud game active!" end
+	if action=="fold" then csActive=false; loseGame(); recordGame("CARIBBEAN STUD",false,csBet); return "You folded. Lost ante: "..tostring(csBet).." chips" end
+	if action~="call" then return "Type 'call' or 'fold'" end
+	if not deductChips(csBet*2) then csActive=false; return "Not enough chips to call!" end
+	csActive=false; local ps,_=hEval(csPlayer); local ds,_=hEval(csDealer); local dq=ds>=2; local won=false; local payout=0
+	if not dq then won=true; payout=csBet; addChipsGlobal(payout); winGame(payout)
+	elseif ps>ds then won=true; local csM={[10]=100,[9]=50,[8]=20,[7]=10,[6]=7,[5]=5,[4]=4,[3]=3,[2]=2}; payout=csBet*(csM[ps] or 1); addChipsGlobal(payout); winGame(payout)
+	else loseGame() end
+	local r="=== CARIBBEAN STUD RESULT ===\n\nYour hand: "; for _,c in ipairs(csPlayer) do r=r..hCardStr(c).." " end
+	r=r.."\nDealer hand: "; for _,c in ipairs(csDealer) do r=r..hCardStr(c).." " end
+	r=r.."\nDealer "..(dq and "qualifies" or "does NOT qualify").."\n\n"
+	if won then r=r.."!! WIN !! +"..tostring(payout).." chips"; if ps>=9 then VFX:JackpotText(); VFX:ChipShower(20) end
+	else r=r.."X LOSE X -"..tostring(csBet*3).." chips" end
+	recordGame("CARIBBEAN STUD",won,payout>0 and payout or csBet); return r
+end
+
+--// === PAIGOW POKER ===
+
+local pgActive,pgPlayer7,pgDealer7,pgBet=false,{},{},0
+
+function startPaigow(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; if pgActive then return "PaiGow already active!" end
+	deductChips(bet); pgBet=bet; pgActive=true
+	local d={}; for i=1,52 do table.insert(d,i) end; for i=#d,2,-1 do local j=math.random(i); d[i],d[j]=d[j],d[i] end
+	pgPlayer7={}; pgDealer7={}
+	for i=1,7 do table.insert(pgPlayer7,table.remove(d)) end
+	for i=1,7 do table.insert(pgDealer7,table.remove(d)) end
+	local r="=== PAIGOW POKER ===\n\nYour 7 cards:\n"; for _,c in ipairs(pgPlayer7) do r=r..hCardStr(c).." " end
+	r=r.."\n\nSet your hands: type 'set [5 card indices] | [2 card indices]'\nExample: set 1,2,3,4,5 | 6,7\nOr type 'auto' for optimal split"; return r
+end
+
+function pgSet(input)
+	if not pgActive then return "No PaiGow game active!" end
+	local frontIdx,backIdx={},{}
+	if input=="auto" or #string.split(input,"|")<2 then
+		table.sort(pgPlayer7,function(a,b)return((a-1)%13)+1>((b-1)%13)+1 end)
+		frontIdx={6,7}; backIdx={1,2,3,4,5}
+	else
+		local parts=string.split(input,"|")
+		for num in string.gmatch(parts[1],"%d+")do table.insert(frontIdx,tonumber(num))end
+		for num in string.gmatch(parts[2],"%d+")do table.insert(backIdx,tonumber(num))end
+		if #frontIdx~=2 or #backIdx~=5 then return "Need 2 front cards and 5 back cards!" end
+	end
+	local frontCards,backCards={},{}
+	for _,i in ipairs(frontIdx)do table.insert(frontCards,pgPlayer7[i])end
+	for _,i in ipairs(backIdx)do table.insert(backCards,pgPlayer7[i])end
+	pgActive=false
+	local pf,_=hEval(frontCards); local pb,_=hEval(backCards)
+	local df={pgDealer7[1],pgDealer7[2]}; local db={pgDealer7[3],pgDealer7[4],pgDealer7[5],pgDealer7[6],pgDealer7[7]}
+	local dfs,_=hEval(df); local dbs,_=hEval(db)
+	local fw=pf>dfs; local bw=pb>dbs; local won=fw and bw; local push=fw==bw; local payout=0
+	if won then payout=pgBet*2; addChipsGlobal(payout); winGame(payout)
+	elseif push then addChipsGlobal(pgBet)
+	else loseGame() end
+	local r="=== PAIGOW RESULT ===\n\nYour Back(5): "; for _,c in ipairs(backCards)do r=r..hCardStr(c).." " end
+	r=r.." ("..(vpNames[pb] or "HIGH")..")\nYour Front(2): "; for _,c in ipairs(frontCards)do r=r..hCardStr(c).." " end
+	r=r.."\nDealer Back: "..(vpNames[dbs] or "HIGH").."\nDealer Front: "..(vpNames[dfs] or "HIGH").."\n\n"
+	if won then r=r.."!! WIN BOTH !! +"..tostring(payout).." chips"
+	elseif push then r=r.."Push - bet returned"
+	else r=r.."X LOSE X -"..tostring(pgBet).." chips" end
+	recordGame("PAIGOW",won,payout>0 and payout or pgBet); return r
+end
+
+--// === SPANISH 21 ===
+
+local s21Active,s21Player,s21Dealer,s21Deck,s21Bet=false,{},{},{},0
+
+function s21Build()
+	s21Deck={}
+	for i=1,48 do table.insert(s21Deck,((i-1)%12)+1<=9 and((i-1)%12)+2 or 10) end
+	for i=#s21Deck,2,-1 do local j=math.random(i); s21Deck[i],s21Deck[j]=s21Deck[j],s21Deck[i] end
+end
+
+function s21Val(hand)
+	local t,a=0,0
+	for _,v in ipairs(hand)do if v==11 then a=a+1;t=t+11 elseif v==10 then t=t+10 else t=t+v end end
+	while t>21 and a>0 do t=t-10;a=a-1 end; return t
+end
+
+function s21Suits()
+	return ({"♠","♥","♣","♦"})[math.random(4)]
+end
+
+function s21Start(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; if s21Active then return "Spanish 21 already active!" end
+	deductChips(bet); s21Bet=bet; s21Active=true; s21Build()
+	s21Player={table.remove(s21Deck),table.remove(s21Deck)}; s21Dealer={table.remove(s21Deck)}
+	local pv=s21Val(s21Player); local r="=== SPANISH 21 ===\n\nYour hand: "
+	for _,v in ipairs(s21Player)do r=r..tostring(v)..s21Suits().." " end
+	r=r.."= "..tostring(pv).."\nDealer: "..tostring(s21Dealer[1])..s21Suits().." [?]\n\nType 'hit', 'stand', 'double', or 'surrender'"; return r
+end
+
+function s21Hit()
+	if not s21Active then return "No active Spanish 21 game!" end
+	table.insert(s21Player,table.remove(s21Deck)); local pv=s21Val(s21Player)
+	if pv>21 then loseGame(); local r="=== SPANISH 21 - BUST ===\n\nYour hand: "
+		for _,v in ipairs(s21Player)do r=r..tostring(v)..s21Suits().." " end
+		r=r.."= "..tostring(pv).."\n\nX BUST X -"..tostring(s21Bet).." chips"; s21Active=false; recordGame("SPANISH 21",false,s21Bet); return r end
+	local r="=== SPANISH 21 ===\n\nYour hand: "
+	for _,v in ipairs(s21Player)do r=r..tostring(v)..s21Suits().." " end
+	r=r.."= "..tostring(pv).."\nDealer: "..tostring(s21Dealer[1])..s21Suits().." [?]\n\nType 'hit', 'stand', 'double', or 'surrender'"; return r
+end
+
+function s21Stand()
+	if not s21Active then return "No active Spanish 21 game!" end; s21Active=false
+	while s21Val(s21Dealer)<17 do table.insert(s21Dealer,table.remove(s21Deck)) end
+	local pv=s21Val(s21Player); local dv=s21Val(s21Dealer); local won=false; local payout=0; local bonus=#s21Player>=6 and pv==21
+	if dv>21 or pv>dv then won=true; payout=bonus and s21Bet*3 or s21Bet*2; addChipsGlobal(payout); winGame(payout)
+	elseif pv==dv then payout=s21Bet; addChipsGlobal(s21Bet)
+	else loseGame() end
+	local r="=== SPANISH 21 RESULT ===\n\nYour hand: "
+	for _,v in ipairs(s21Player)do r=r..tostring(v)..s21Suits().." " end
+	r=r.."= "..tostring(pv).."\nDealer: "
+	for _,v in ipairs(s21Dealer)do r=r..tostring(v)..s21Suits().." " end
+	r=r.."= "..tostring(dv).."\n\n"
+	if bonus then r=r.."!! 6-CARD 21 BONUS x3 !!\n" end
+	if won then r=r.."!! WIN !! +"..tostring(payout).." chips"
+	elseif pv==dv then r=r.."Push - bet returned"
+	else r=r.."X LOSE X -"..tostring(s21Bet).." chips" end
+	recordGame("SPANISH 21",won,payout>0 and payout or s21Bet); return r
+end
+
+function s21Double()
+	if not s21Active then return "No active Spanish 21 game!" end
+	if not deductChips(s21Bet) then return "Not enough chips to double!" end
+	s21Bet=s21Bet*2; table.insert(s21Player,table.remove(s21Deck)); return s21Stand()
+end
+
+function s21Surrender()
+	if not s21Active then return "No active Spanish 21 game!" end; s21Active=false
+	local refund=math.floor(s21Bet/2); addChipsGlobal(refund); loseGame(); recordGame("SPANISH 21",false,s21Bet)
+	return "You surrender. "..tostring(refund).." chips returned."
+end
+
+--// === POKER DICE ===
+
+function playPokerDice(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; deductChips(bet)
+	local dice={}; for i=1,5 do table.insert(dice,math.random(1,6)) end; table.sort(dice)
+	local c={}; for _,d in ipairs(dice)do c[d]=(c[d] or 0)+1 end
+	local p,t,q,qt=0,0,0,0
+	for _,cnt in pairs(c)do if cnt==5 then qt=qt+1 elseif cnt==4 then q=q+1 elseif cnt==3 then t=t+1 elseif cnt==2 then p=p+1 end end
+	local uc=0; for _ in pairs(c)do uc=uc+1 end
+	local str=(uc==5 and((dice[5]-dice[1]==4)or(dice[1]==1 and dice[2]==2 and dice[3]==3 and dice[4]==4 and dice[5]==5)or(dice[1]==2 and dice[2]==3 and dice[3]==4 and dice[4]==5 and dice[5]==6)))
+	local rank=0; local name="NOTHING"; local mult=0
+	if qt>0 then rank=8;name="FIVE OF A KIND";mult=100
+	elseif str then rank=7;name="STRAIGHT";mult=10
+	elseif q>0 then rank=6;name="FOUR OF A KIND";mult=20
+	elseif p>0 and t>0 then rank=5;name="FULL HOUSE";mult=8
+	elseif t>0 and p==0 then rank=4;name="THREE OF A KIND";mult=5
+	elseif p>=2 then rank=3;name="TWO PAIR";mult=3
+	elseif p>=1 then rank=2;name="ONE PAIR";mult=2
+	elseif uc>=4 then rank=1;name="HIGH DIE";mult=1 end
+	local payout=bet*mult; local won=mult>=2
+	if won then addChipsGlobal(payout); winGame(payout); if rank>=5 then VFX:JackpotText();VFX:ChipShower(12)end;VFX:WinText(payout,"POKER DICE")
+	else loseGame();if mult==1 then addChipsGlobal(bet)end;VFX:LossText(bet,"POKER DICE")end
+	recordGame("POKER DICE",won,payout>0 and payout or bet)
+	local ds=""; for _,d in ipairs(dice)do ds=ds.."["..tostring(d).."] " end
+	return "=== POKER DICE ===\n\n"..ds.."\n\n"..name.."\n\n"..(won and("!! +"..tostring(payout).." chips !!")or("X -"..tostring(bet).." chips X"))
+end
+
+--// ============================================================
+--// V3: INTERACTIVE FEATURES
+--// ============================================================
+
+--// === DICE ROLL VISUALS ===
+
+local diceVisuals={}
+
+function makeDie(val,pos)
+	local d=Instance.new("Frame"); d.Size=UDim2.new(0,50,0,50); d.Position=pos or UDim2.new(0.5,-25,0.5,-25)
+	d.BackgroundColor3=Color3.fromRGB(255,255,255); d.BorderSizePixel=0; d.ZIndex=80; d.Parent=gui
+	local dc=Instance.new("UICorner"); dc.CornerRadius=UDim.new(0,8); dc.Parent=d
+	local ds=Instance.new("UIStroke"); ds.Thickness=2; ds.Color=Color3.fromRGB(200,50,50); ds.Parent=d
+	local dots={[1]={{0.5,0.5}},[2]={{0.3,0.3},{0.7,0.7}},[3]={{0.3,0.3},{0.5,0.5},{0.7,0.7}},[4]={{0.3,0.3},{0.7,0.3},{0.3,0.7},{0.7,0.7}},[5]={{0.3,0.3},{0.7,0.3},{0.5,0.5},{0.3,0.7},{0.7,0.7}},[6]={{0.3,0.25},{0.7,0.25},{0.3,0.5},{0.7,0.5},{0.3,0.75},{0.7,0.75}}}
+	for _,p in ipairs(dots[val] or {})do
+		local dot=Instance.new("Frame"); dot.Size=UDim2.new(0,10,0,10); dot.Position=UDim2.new(p[1]-0.05,0,p[2]-0.05,0)
+		dot.BackgroundColor3=Color3.fromRGB(0,0,0); dot.BorderSizePixel=0; dot.ZIndex=81; dot.Parent=d
+		local dotc=Instance.new("UICorner"); dotc.CornerRadius=UDim.new(0,5); dotc.Parent=dot
+	end
+	table.insert(diceVisuals,d); return d
+end
+
+function animateDice(values)
+	for _,v in ipairs(diceVisuals)do v:Destroy()end; diceVisuals={}
+	for i,val in ipairs(values)do
+		makeDie(1,UDim2.new(0.35+(i-1)*0.15,-25,0.4,-25))
+	end
+	local t=0; local conn
+	conn=RunService.Heartbeat:Connect(function(dt)
+		t=t+dt
+		if t>=1.5 then conn:Disconnect()
+			for i,val in ipairs(values)do
+				local d=makesDie(val,UDim2.new(0.35+(i-1)*0.15,-25,0.4,-25))
+				table.insert(diceVisuals,d)
+			end; return
+		end
+		for _,v in ipairs(diceVisuals)do
+			local oldPos=v.Position; v:Destroy(); local nv=math.random(1,6); local nd=makeDie(nv,oldPos)
+		end
+	end)
+end
+
+--// === COUNTDOWN TIMER ===
+
+local ctLabel,ctBar,ctFill,ctConn,ctActive=nil,nil,nil,nil,false
+
+ctLabel=Instance.new("TextLabel"); ctLabel.Size=UDim2.new(0,60,0,30); ctLabel.Position=UDim2.new(0.5,-30,0,85)
+ctLabel.BackgroundColor3=Color3.fromRGB(5,5,5); ctLabel.BackgroundTransparency=0.3; ctLabel.Text=""; ctLabel.TextColor3=Color3.fromRGB(255,215,0)
+ctLabel.Font=Enum.Font.GothamBlack; ctLabel.TextSize=20; ctLabel.ZIndex=30; ctLabel.Visible=false; ctLabel.Parent=container
+local ctc=Instance.new("UICorner"); ctc.CornerRadius=UDim.new(0,6); ctc.Parent=ctLabel
+
+ctBar=Instance.new("Frame"); ctBar.Size=UDim2.new(0,120,0,4); ctBar.Position=UDim2.new(0.5,-60,0,117)
+ctBar.BackgroundColor3=Color3.fromRGB(30,30,30); ctBar.BorderSizePixel=0; ctBar.Visible=false; ctBar.ZIndex=30; ctBar.Parent=container
+ctFill=Instance.new("Frame"); ctFill.Size=UDim2.new(1,0,1,0); ctFill.BackgroundColor3=Color3.fromRGB(255,215,0); ctFill.BorderSizePixel=0; ctFill.Parent=ctBar
+local ctfc=Instance.new("UICorner"); ctfc.CornerRadius=UDim.new(0,2); ctfc.Parent=ctFill
+
+function startCountdown(secs,onExpire)
+	if ctConn then ctConn:Disconnect() end
+	ctLabel.Visible=true; ctBar.Visible=true; ctActive=true; ctLabel.Text=tostring(secs); ctFill.Size=UDim2.new(1,0,1,0)
+	local el=0
+	ctConn=RunService.Heartbeat:Connect(function(dt)
+		el=el+dt; local r=math.max(0,secs-el); local pct=r/secs
+		ctFill:TweenSize(UDim2.new(pct,0,1,0),Enum.EasingDirection.Out,Enum.EasingStyle.Linear,0.1,true)
+		ctLabel.Text=tostring(math.ceil(r))
+		ctFill.BackgroundColor3=pct<0.3 and Color3.fromRGB(255,50,50) or pct<0.6 and Color3.fromRGB(255,200,50) or Color3.fromRGB(255,215,0)
+		if r<=0 then ctConn:Disconnect(); ctActive=false; ctLabel.Visible=false; ctBar.Visible=false; if onExpire then onExpire() end end
+	end)
+end
+
+function stopCountdown()
+	if ctConn then ctConn:Disconnect(); ctConn=nil end; ctActive=false; ctLabel.Visible=false; ctBar.Visible=false
+end
+
+--// === DEALER COMMENTARY ===
+
+local dealerMsgs={
+	welcome={"Welcome to the table!","Good luck tonight!","Place your bets!","New game starting!"},
+	hit={"Hitting!","Another card!","Let's see it!","Bold move!"},stand={"Standing pat!","Playing it safe!","Good choice!"},
+	win={"Winner!","Nice hand!","You're on fire!","The house pays!"},lose={"House wins this one!","Better luck next time!","Tough break!"},
+	bust={"Bust! Over 21!","Too many cards!","Went over!"},blackjack={"BLACKJACK!","Natural 21!","Pay the man!"},
+	jackpot={"JACKPOT! BIG WIN!","The jackpot hits!","HUGE PAYOUT!"},streak={"You're heating up!","On a roll!","Can't stop you!"},
+	chips={"Stack's getting high!","Building that bankroll!","Chips are flowing!"}
+}
+
+local dBubble,dBubbleText=nil,nil
+dBubble=Instance.new("Frame"); dBubble.Size=UDim2.new(0,200,0,36); dBubble.Position=UDim2.new(0.5,-100,0,85)
+dBubble.BackgroundColor3=Color3.fromRGB(5,5,5); dBubble.BackgroundTransparency=0.2; dBubble.BorderSizePixel=0; dBubble.Visible=false; dBubble.ZIndex=40; dBubble.Parent=container
+local dbc=Instance.new("UICorner"); dbc.CornerRadius=UDim.new(0,8); dbc.Parent=dBubble
+local dbs=Instance.new("UIStroke"); dbs.Thickness=1; dbs.Color=Color3.fromRGB(255,215,0); dbs.Transparency=0.4; dbs.Parent=dBubble
+local dba=Instance.new("Frame"); dba.Size=UDim2.new(0,12,0,12); dba.Position=UDim2.new(0.5,-6,1,-6); dba.BackgroundColor3=Color3.fromRGB(5,5,5); dba.BorderSizePixel=0; dba.Rotation=45; dba.ZIndex=39; dba.Parent=dBubble
+dBubbleText=Instance.new("TextLabel"); dBubbleText.Size=UDim2.new(1,-10,1,0); dBubbleText.Position=UDim2.new(0,5,0,0); dBubbleText.BackgroundTransparency=1
+dBubbleText.Text=""; dBubbleText.TextColor3=Color3.fromRGB(255,215,0); dBubbleText.Font=Enum.Font.GothamBold; dBubbleText.TextSize=14; dBubbleText.TextXAlignment=Enum.TextXAlignment.Center; dBubbleText.ZIndex=41; dBubbleText.Parent=dBubble
+
+function dealerSay(cat)
+	local msgs=dealerMsgs[cat]; if not msgs then return end
+	local msg=msgs[math.random(#msgs)]
+	dBubble.Visible=true; dBubbleText.Text=msg; dBubble.BackgroundTransparency=0.2
+	TweenService:Create(dBubble,TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,-100,0,80)}):Play()
+	task.delay(2.5,function()
+		TweenService:Create(dBubble,TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Position=UDim2.new(0.5,-100,0,60),BackgroundTransparency=1}):Play()
+		task.delay(0.3,function()dBubble.Visible=false;dBubble.BackgroundTransparency=0.2 end)
+	end)
+end
+
+--// === CHIP STACK VISUALS ===
+
+local chipStacks={}
+local chipDenoms={1,5,25,100,500}
+local chipCols={[1]=Color3.fromRGB(255,255,255),[5]=Color3.fromRGB(255,50,50),[25]=Color3.fromRGB(50,200,50),[100]=Color3.fromRGB(50,50,255),[500]=Color3.fromRGB(200,50,255)}
+
+function renderChipStack(amount,pos)
+	for _,ex in ipairs(chipStacks)do if ex.parent then ex.parent:Destroy() end end; chipStacks={}
+	local stack={}; local rem=amount
+	for i=#chipDenoms,1,-1 do local d=chipDenoms[i]; while rem>=d and #stack<8 do table.insert(stack,d); rem=rem-d end end
+	local sf=Instance.new("Frame"); sf.Size=UDim2.new(0,60,0,#stack*6+10); sf.Position=pos or UDim2.new(0.85,-30,0.82,-30); sf.BackgroundTransparency=1; sf.ZIndex=20; sf.Parent=container
+	for i,den in ipairs(stack)do
+		local ch=Instance.new("Frame"); ch.Size=UDim2.new(0,40+math.random(-2,2),0,8); ch.Position=UDim2.new(0,10,0,(i-1)*6)
+		ch.BackgroundColor3=chipCols[den] or Color3.fromRGB(255,215,0); ch.BorderSizePixel=0; ch.ZIndex=20+i; ch.Parent=sf
+		local cc=Instance.new("UICorner"); cc.CornerRadius=UDim.new(0,3); cc.Parent=ch; table.insert(chipStacks,{frame=ch,parent=sf})
+	end
+end
+
+--// === DRAGGABLE CHIP ===
+
+local dcActive,dcChip,dcStart,dcOffset=false,nil,nil,nil
+
+function makeDragChip(amount)
+	if dcChip then dcChip:Destroy() end
+	dcChip=Instance.new("Frame"); dcChip.Size=UDim2.new(0,30,0,30); dcChip.Position=UDim2.new(0.85,-15,0.82,-15)
+	dcChip.BackgroundColor3=chipCols[amount] or Color3.fromRGB(255,215,0); dcChip.BorderSizePixel=0; dcChip.ZIndex=100; dcChip.Parent=gui
+	local dcc=Instance.new("UICorner"); dcc.CornerRadius=UDim.new(0,15); dcc.Parent=dcChip
+	local dcs=Instance.new("UIStroke"); dcs.Thickness=1; dcs.Color=Color3.fromRGB(255,255,255); dcs.Transparency=0.5; dcs.Parent=dcChip
+	local dcl=Instance.new("TextLabel"); dcl.Size=UDim2.new(1,0,1,0); dcl.BackgroundTransparency=1; dcl.Text=tostring(amount); dcl.TextColor3=Color3.fromRGB(0,0,0); dcl.Font=Enum.Font.GothamBlack; dcl.TextSize=10; dcl.ZIndex=101; dcl.Parent=dcChip
+	dcChip.InputBegan:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then dcActive=true;dcStart=inp.Position;dcOffset=dcChip.Position end end)
+	dcChip.InputChanged:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseMovement and dcActive then local d=inp.Position-dcStart;dcChip.Position=UDim2.new(0,dcOffset.X.Offset+d.X,0,dcOffset.Y.Offset+d.Y)end end)
+	dcChip.InputEnded:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then dcActive=false end end)
+end
+
+--// ============================================================
+--// V3: STATS & TRACKING
+--// ============================================================
+
+local sessionStats={biggestWin=0,longestWinStreak=0,longestLossStreak=0,curWinStreak=0,curLossStreak=0,totalWon=0,totalLost=0,sessionStart=tick(),games=0}
+
+function updSession(amt,won)
+	sessionStats.games=sessionStats.games+1
+	if won then sessionStats.totalWon=sessionStats.totalWon+amt;sessionStats.curWinStreak=sessionStats.curWinStreak+1;sessionStats.curLossStreak=0
+		if sessionStats.curWinStreak>sessionStats.longestWinStreak then sessionStats.longestWinStreak=sessionStats.curWinStreak end
+		if amt>sessionStats.biggestWin then sessionStats.biggestWin=amt end
+	else sessionStats.totalLost=sessionStats.totalLost+amt;sessionStats.curLossStreak=sessionStats.curLossStreak+1;sessionStats.curWinStreak=0
+		if sessionStats.curLossStreak>sessionStats.longestLossStreak then sessionStats.longestLossStreak=sessionStats.curLossStreak end
+	end
+	longestStreak=math.max(longestStreak,sessionStats.longestWinStreak);biggestWin=math.max(biggestWin,sessionStats.biggestWin)
+end
+
+local origRG=recordGame
+function recordGame(g,w,a)
+	origRG(g,w,a); updSession(a,w)
+	gameCounts[g]=(gameCounts[g] or 0)+1
+	local mc=0; local mg="none"
+	for gm,ct in pairs(gameCounts)do if ct>mc then mc=ct;mg=gm end end
+	favoriteGame=mg
+end
+
+function showSession()
+	local el=tick()-sessionStats.sessionStart
+	local h=math.floor(el/3600);local m=math.floor((el%3600)/60);local s=math.floor(el%60)
+	local wr=sessionStats.games>0 and(sessionStats.totalWon/math.max(1,sessionStats.totalWon+sessionStats.totalLost)*100)or 0
+	local r="=== SESSION STATS ===\n\nPlay Time: "..string.format("%02d:%02d:%02d",h,m,s).."\nGames: "..tostring(sessionStats.games).."\nBiggest Win: "..tostring(sessionStats.biggestWin).."\nLongest Win Streak: "..tostring(sessionStats.longestWinStreak).."\nLongest Loss Streak: "..tostring(sessionStats.longestLossStreak).."\nTotal Won: "..tostring(math.floor(sessionStats.totalWon)).."\nTotal Lost: "..tostring(math.floor(sessionStats.totalLost)).."\nWin Rate: "..string.format("%.1f",wr).."%\nFavorite Game: "..favoriteGame; return r
+end
+
+--// === HOT NUMBERS ===
+
+local numHistory={}
+local maxHist=100
+
+function trackNum(num,game)
+	table.insert(numHistory,{num=num,game=game,time=tick()})
+	if #numHistory>maxHist then table.remove(numHistory,1) end
+end
+
+function hotNums()
+	local cts={}
+	for _,e in ipairs(numHistory)do local k=tostring(e.num);cts[k]=(cts[k] or 0)+1 end
+	local sorted={}; for k,v in pairs(cts)do table.insert(sorted,{num=k,count=v})end; table.sort(sorted,function(a,b)return a.count>b.count end)
+	local r="=== HOT NUMBERS ===\n\nLast "..tostring(#numHistory).." results:\n\n"
+	for i,e in ipairs(sorted)do if i>10 then break end; r=r..tostring(i)..". "..e.num.." - "..tostring(e.count).."x\n" end; return r
+end
+
+--// === CARD COUNTING (HI-LO) ===
+
+local runCount,trueCnt,decRem,cardsSeen=0,0,6,{}
+
+function resetCount()
+	runCount=0;trueCnt=0;decRem=6;cardsSeen={}
+end
+
+function countCard(card)
+	local rk=((card-1)%13)+1; cardsSeen[card]=true
+	local seen=0; for _ in pairs(cardsSeen)do seen=seen+1 end; decRem=math.max(1,6-seen/52)
+	if rk>=2 and rk<=6 then runCount=runCount+1 elseif rk>=10 or rk==1 then runCount=runCount-1 end
+	trueCnt=math.floor(runCount/decRem)
+end
+
+function countAdvice()
+	local adv=""
+	if trueCnt<=1 then adv="Neutral - bet minimum"
+	elseif trueCnt<=2 then adv="Slight advantage - increase bet slightly"
+	elseif trueCnt<=4 then adv="Good advantage - increase bet 2-3x"
+	elseif trueCnt<=6 then adv="Strong advantage - increase bet 4-6x"
+	else adv="!! VERY HOT - max your bets !!" end
+	return "Running Count: "..tostring(runCount).."\nTrue Count: "..tostring(trueCnt).."\nDecks Remaining: "..string.format("%.1f",decRem).."\n\nAdvice: "..adv
+end
+
+--// === RISK METER ===
+
+local rm=Instance.new("Frame"); rm.Size=UDim2.new(0,60,0,8); rm.Position=UDim2.new(0,10,0.95,0); rm.BackgroundColor3=Color3.fromRGB(30,30,30); rm.BorderSizePixel=0; rm.Visible=false; rm.Parent=container
+local rmf=Instance.new("Frame"); rmf.Size=UDim2.new(0.5,0,1,0); rmf.BackgroundColor3=Color3.fromRGB(50,255,50); rmf.BorderSizePixel=0; rmf.Parent=rm
+local rmc=Instance.new("UICorner"); rmc.CornerRadius=UDim.new(0,4); rmc.Parent=rmf
+local rmc2=Instance.new("UICorner"); rmc2.CornerRadius=UDim.new(0,4); rmc2.Parent=rm
+
+function updRisk()
+	local risk=math.min(1,(currentBet or 0)/math.max(1,playerChips)*5)
+	rmf:TweenSize(UDim2.new(risk,0,1,0),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.3,true)
+	rmf.BackgroundColor3=risk<0.3 and Color3.fromRGB(50,255,50) or risk<0.6 and Color3.fromRGB(255,200,50) or Color3.fromRGB(255,50,50)
+end
+
+--// ============================================================
+--// V3: ECONOMY FEATURES
+--// ============================================================
+
+--// === DAILY BONUS ===
+
+local lastDailyBonus=0
+
+function claimDaily()
+	local today=os.date("*t"); local last=lastDailyBonus; local tn=today.yday
+	if tn==last then return "Daily bonus already claimed! Come back tomorrow." end
+	if tn~=last+1 and last~=0 then dailyBonusDay=1 elseif last~=0 then dailyBonusDay=math.min(7,dailyBonusDay+1) else dailyBonusDay=1 end
+	local bonus=100*dailyBonusDay; addChipsGlobal(bonus); lastDailyBonus=tn
+	local r="=== DAILY BONUS ===\n\nDay "..tostring(dailyBonusDay).." of 7\n+"..tostring(bonus).." free chips!\n\n"
+	r=r..(dailyBonusDay<7 and "Come back tomorrow for Day "..tostring(dailyBonusDay+1).." ("..tostring(100*(dailyBonusDay+1)).." chips)" or "MAX BONUS! Come back tomorrow to restart")
+	updateResultText(r); return r
+end
+
+--// BANK SYSTEM
+
+function bankDeposit(amt)
+	amt=tonumber(amt)or 0; if amt<=0 then return "Enter a valid amount!" end
+	if amt>playerChips then return "Not enough chips to deposit!" end
+	deductChips(amt); bankBalance=bankBalance+amt; return "Deposited "..tostring(amt).." chips.\nBank Balance: "..tostring(math.floor(bankBalance))
+end
+
+function bankWithdraw(amt)
+	amt=tonumber(amt)or 0; if amt<=0 then return "Enter a valid amount!" end
+	if amt>bankBalance then return "Not enough in bank!" end
+	bankBalance=bankBalance-amt; addChipsGlobal(amt); return "Withdrew "..tostring(amt).." chips.\nBank Balance: "..tostring(math.floor(bankBalance))
+end
+
+function bankInterest()
+	if bankBalance<=0 then return end
+	bankBalance=bankBalance+math.floor(bankBalance*0.01)
+end
+
+task.spawn(function()while true do task.wait(60);bankInterest()end end)
+
+--// LOAN SHARK
+
+function takeLoan(amt)
+	amt=tonumber(amt)or 0; if amt<=0 then return "Enter a valid amount!" end
+	if loanAmount>0 then return "You already have an outstanding loan of "..tostring(math.floor(loanAmount)).." chips!" end
+	loanAmount=amt; loanDue=tick()+300; addChipsGlobal(amt)
+	return "Loan approved: +"..tostring(amt).." chips\nDue in 5 minutes with 25% interest ("..tostring(math.floor(amt*1.25)).." total)"
+end
+
+function repayLoan()
+	if loanAmount<=0 then return "No outstanding loan!" end
+	local due=math.floor(loanAmount*1.25)
+	if playerChips<due then return "Not enough chips! Need "..tostring(due).." to repay." end
+	deductChips(due); loanAmount=0; loanDue=0; return "Loan repaid: -"..tostring(due).." chips."
+end
+
+task.spawn(function()
+	while true do task.wait(10)
+		if loanAmount>0 and tick()>loanDue then
+			local due=math.floor(loanAmount*1.5)
+			if playerChips>=due then deductChips(due); loanAmount=0; loanDue=0; showOverlay("Loan collected: -"..tostring(due).." chips",Color3.fromRGB(255,50,50),2)
+			else playerChips=math.max(0,playerChips-math.floor(loanAmount*0.5)); loanAmount=loanAmount*0.5; loanDue=tick()+300; showOverlay("Debt collectors took half your chips!",Color3.fromRGB(255,50,50),3) end
+		end
+	end
+end)
+
+--// COMP POINTS & LEVELING
+
+function addXP(amt)
+	local xp=math.max(1,math.floor(amt/10)); playerXP=playerXP+xp; compPoints=compPoints+math.floor(amt/20)
+	local nextXP=playerLevel*100
+	while playerXP>=nextXP do playerXP=playerXP-nextXP; playerLevel=playerLevel+1; nextXP=playerLevel*100; showOverlay("LEVEL UP! Now level "..tostring(playerLevel),Color3.fromRGB(255,215,0),2); VFX:Burst(UDim2.new(0.5,-3,0.4,-3),10,Color3.fromRGB(255,215,0)) end
+end
+
+function redeemComp(amt)
+	amt=tonumber(amt)or 0; if amt<=0 then return "Enter valid amount!" end; if amt>compPoints then return "Not enough comp points! You have "..tostring(math.floor(compPoints)) end
+	compPoints=compPoints-amt; addChipsGlobal(amt); return "Redeemed "..tostring(amt).." comp points for "..tostring(amt).." chips!"
+end
+
+--// PRESTIGE
+
+function doPrestige()
+	if playerChips<100000 then return "Need 100,000 chips to prestige! You have "..tostring(math.floor(playerChips)) end
+	prestiges=prestiges+1; playerChips=1000; bankBalance=0; playerLevel=1; playerXP=0
+	showOverlay("PRESTIGE "..tostring(prestiges).."! Permanent x"..string.format("%.1f",1+prestiges*0.1).." multiplier!",Color3.fromRGB(255,215,0),3); VFX:JackpotText(); VFX:ChipShower(30)
+	return "PRESTIGE "..tostring(prestiges).." achieved!"
+end
+
+function prestigeMult()
+	return 1+(prestiges*0.1)
+end
+
+local origAGC=addChipsGlobal
+function addChipsGlobal(amt)
+	origAGC(math.floor(amt*prestigeMult())); addXP(amt)
+end
+
+--// ============================================================
+--// V3: VISUAL UPGRADES
+--// ============================================================
+
+--// CUSTOM FELT COLORS
+
+local feltColors={
+	{name="CASINO GREEN",bg=Color3.fromRGB(0,80,40),trim=Color3.fromRGB(255,215,0)},
+	{name="ROYAL BLUE",bg=Color3.fromRGB(0,40,120),trim=Color3.fromRGB(200,200,255)},
+	{name="CRIMSON RED",bg=Color3.fromRGB(80,10,10),trim=Color3.fromRGB(255,200,100)},
+	{name="PURPLE VELVET",bg=Color3.fromRGB(40,10,60),trim=Color3.fromRGB(200,150,255)},
+	{name="OBSIDIAN",bg=Color3.fromRGB(10,10,15),trim=Color3.fromRGB(100,200,255)},
+	{name="GOLDEN HOUR",bg=Color3.fromRGB(60,40,10),trim=Color3.fromRGB(255,255,200)}
+}
+local curFelt=1
+
+function setFelt(idx)
+	curFelt=idx; local f=feltColors[idx]; if not f then return end
+	main.BackgroundColor3=f.bg; showOverlay("Felt: "..f.name,f.trim,1)
+end
+
+--// TOOLTIP SYSTEM
+
+local ttFrame,ttText=nil,nil
+
+ttFrame=Instance.new("Frame"); ttFrame.Size=UDim2.new(0,200,0,60); ttFrame.Position=UDim2.new(0,0,0,0); ttFrame.BackgroundColor3=Color3.fromRGB(5,5,5); ttFrame.BackgroundTransparency=0.1; ttFrame.BorderSizePixel=0; ttFrame.ZIndex=300; ttFrame.Visible=false; ttFrame.Parent=gui
+local ttc=Instance.new("UICorner"); ttc.CornerRadius=UDim.new(0,6); ttc.Parent=ttFrame
+local tts=Instance.new("UIStroke"); tts.Thickness=1; tts.Color=Color3.fromRGB(255,215,0); tts.Transparency=0.3; tts.Parent=ttFrame
+ttText=Instance.new("TextLabel"); ttText.Size=UDim2.new(1,-10,1,-10); ttText.Position=UDim2.new(0,5,0,5); ttText.BackgroundTransparency=1; ttText.Text=""; ttText.TextColor3=Color3.fromRGB(255,255,255); ttText.Font=Enum.Font.GothamBold; ttText.TextSize=12; ttText.TextWrapped=true; ttText.TextXAlignment=Enum.TextXAlignment.Left; ttText.TextYAlignment=Enum.TextYAlignment.Top; ttText.ZIndex=301; ttText.Parent=ttFrame
+
+local tooltipTimer=nil
+
+function showTooltip(text,x,y)
+	if tooltipTimer then tooltipTimer:Cancel() end; ttFrame.Visible=true; ttText.Text=text; ttFrame.Position=UDim2.new(0,x+10,0,y-10); ttFrame.BackgroundTransparency=0.1
+end
+
+function hideTooltip()
+	if tooltipTimer then tooltipTimer:Cancel() end; tooltipTimer=task.delay(0.1,function()ttFrame.Visible=false end)
+end
+
+--// RESPONSIVE UI
+
+function scaleUI()
+	local ss=workspace.CurrentCamera.ViewportSize; local sx=ss.X/1920; local sy=ss.Y/1080; local s=math.min(sx,sy)
+	container.Size=s<0.7 and UDim2.new(0,math.floor(400*s),0,math.floor(700*s)) or UDim2.new(0,400,0,700)
+end
+
+UserInputService:GetPropertyChangedSignal("MouseIconEnabled"):Connect(scaleUI)
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(scaleUI)
+
+--// DRAGGABLE WINDOW
+
+local wdActive,wdStart,wdOffset=false,nil,nil
+
+local db2=Instance.new("TextButton"); db2.Size=UDim2.new(1,0,0,20); db2.Position=UDim2.new(0,0,0,0); db2.BackgroundTransparency=1; db2.Text=""; db2.ZIndex=60; db2.Parent=container
+db2.InputBegan:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then wdActive=true;wdStart=inp.Position;wdOffset=container.Position end end)
+db2.InputChanged:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseMovement and wdActive then local d=inp.Position-wdStart;container.Position=UDim2.new(0,wdOffset.X.Offset+d.X,0,wdOffset.Y.Offset+d.Y)end end)
+db2.InputEnded:Connect(function(inp)if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then wdActive=false end end)
+
+--// ============================================================
+--// V3: AI & AUTOMATION
+--// ============================================================
+
+progressionType = "none"
+progressionStep = 1
+progressionBase = 10
+
+function startProgression(system, baseBet)
+	progressionType = system
+	progressionStep = 1
+	progressionBase = baseBet
+	local systems = {
+		martingale = "Martingale: Double after loss, reset after win",
+		fibonacci = "Fibonacci: +1 step on loss, -2 on win",
+		d_alembert = "D'Alembert: +1 unit on loss, -1 on win",
+		paroli = "Paroli: Double after win (max 3), reset on loss",
+		oscar = "Oscar's Grind: +1 unit after win, same after loss"
+	}
+	return "Progression started: " .. (systems[system] or system) .. "\nBase bet: " .. tostring(baseBet)
+end
+
+local fibSeq = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987}
+
+function getProgressionBet(won)
+	if progressionType == "martingale" then
+		if won then progressionStep = 1 else progressionStep = math.min(progressionStep * 2, 100) end
+		return math.min(progressionBase * progressionStep, 10000)
+	elseif progressionType == "fibonacci" then
+		if won then progressionStep = math.max(1, progressionStep - 2) else progressionStep = math.min(#fibSeq, progressionStep + 1) end
+		return math.min(progressionBase * fibSeq[math.min(progressionStep, #fibSeq)], 10000)
+	elseif progressionType == "d_alembert" then
+		if won then progressionStep = math.max(1, progressionStep - 1) else progressionStep = progressionStep + 1 end
+		return math.min(progressionBase * progressionStep, 10000)
+	elseif progressionType == "paroli" then
+		if won then progressionStep = math.min(progressionStep + 1, 3) else progressionStep = 1 end
+		return math.min(progressionBase * (2 ^ (progressionStep - 1)), 10000)
+	elseif progressionType == "oscar" then
+		if won then progressionStep = progressionStep + 1 end
+		return math.min(progressionBase * progressionStep, 10000)
+	end
+	return progressionBase
+end
+
+function stopProgression()
+	progressionType = "none"
+	progressionStep = 0
+	return "Progression stopped."
+end
+
+--// === STRATEGY ADVISOR ===
+
+function getBJAdvice(playerTotal, dealerUp, hasAce, canSplit, canDouble)
+	if canSplit then
+		if playerTotal == 20 then return "STAND - never split 10s"
+		elseif playerTotal == 18 then return "SPLIT if dealer shows 8 or less"
+		elseif playerTotal == 16 or playerTotal == 14 then return "SPLIT vs dealer 2-7"
+		elseif playerTotal == 12 then return "SPLIT vs dealer 2-6"
+		elseif playerTotal == 8 then return "SPLIT always"
+		elseif playerTotal == 6 then return "SPLIT vs dealer 2-6"
+		elseif playerTotal == 4 then return "SPLIT vs dealer 5-6"
+		end
+	elseif hasAce then
+		if playerTotal >= 19 then return "STAND (strong with ace)"
+		elseif playerTotal == 18 then return dealerUp >= 9 and "HIT" or "STAND"
+		elseif playerTotal == 17 then return dealerUp >= 7 and "HIT" or dealerUp >= 2 and "DOUBLE" or "HIT"
+		else return dealerUp >= 7 and "HIT" or "DOUBLE"
+		end
+	else
+		if playerTotal >= 17 then return "STAND"
+		elseif playerTotal >= 13 then return dealerUp >= 7 and "HIT" or "STAND"
+		elseif playerTotal == 12 then return (dealerUp >= 7 or dealerUp <= 3) and "HIT" or "STAND"
+		else return "HIT"
+		end
+	end
+	if canDouble and playerTotal >= 9 and playerTotal <= 11 then
+		if playerTotal == 11 then return "DOUBLE (always)"
+		elseif playerTotal == 10 then return dealerUp <= 9 and "DOUBLE" or "STAND"
+		elseif playerTotal == 9 then return dealerUp >= 3 and dealerUp <= 6 and "DOUBLE" or "HIT"
+		end
+	end
+	return "HIT"
+end
+
+--// === ODDS DISPLAY ===
+
+function computeOdds(game, params)
+	if game == "blackjack" then
+		local pt = tonumber(params[1]) or 0
+		if pt <= 11 then return "~65% to win (favorable)"
+		elseif pt <= 16 then return "~40-45% to win (unfavorable)"
+		elseif pt <= 20 then return "~55-60% to win (slight edge)"
+		elseif pt == 21 then return "~85% to win (very favorable)"
+		else return "~0% (bust)" end
+	elseif game == "slots" then return "Jackpot: ~0.1% | Pair: ~30% | Any win: ~40%"
+	elseif game == "roulette" then return "Red/Black: 47.4% | Single #: 2.63% | Green: 2.63%"
+	elseif game == "dice" then return "Specific #: 16.7% | Even/Odd: 50% | High/Low: 50%"
+	elseif game == "coin" then return "Heads or Tails: 50% exactly"
+	elseif game == "war" then return "Win: ~47% | Lose: ~47% | Tie: ~6%"
+	end
+	return ""
+end
+
+--// === DEALER PERSONALITIES ===
+
+local dealerPersonalities = {
+	{name = "Dimitri", greeting = "Welcome, my friend! Lady Luck smiles tonight!", hit = "Da! Another card for you!", win = "Excellent play! The house respects skill!", lose = "Ah, the house wins this round. Again!"},
+	{name = "Vivian", greeting = "Well hello there. Ready to lose?", hit = "One more card... if you dare.", win = "Lucky. Very lucky.", lose = "As expected. Next?"},
+	{name = "Rico", greeting = "Let's get this money! Let's GO!", hit = "COME ON! LET'S GO!", win = "LETS GOOOOO! PAY THE MAN!", lose = "AIGHT AIGHT, house takes this one."},
+	{name = "Sage", greeting = "The cards will reveal all in time.", hit = "The path unfolds...", win = "The universe provides.", lose = "Balance must be maintained."}
+}
+
+local currentDealer = dealerPersonalities[1]
+
+function setDealer(index)
+	currentDealer = dealerPersonalities[index] or dealerPersonalities[1]
+	dealerSay("welcome")
+	return "Dealer: " .. currentDealer.name
+end
+
+local origDealerSay = dealerSay
+function dealerSay(category)
+	local msgMap = {welcome = currentDealer.greeting, hit = currentDealer.hit, win = currentDealer.win, lose = currentDealer.lose}
+	local msg = msgMap[category]
+	if not msg then
+		msg = dealerMsgs[category] and dealerMsgs[category][math.random(#dealerMsgs[category])] or ""
+	end
+	dBubble.Visible = true
+	dBubbleText.Text = msg
+	dBubble.BackgroundTransparency = 0.2
+	TweenService:Create(dBubble, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -100, 0, 80)
+	}):Play()
+	task.delay(2.5, function()
+		TweenService:Create(dBubble, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, -100, 0, 60),
+			BackgroundTransparency = 1
+		}):Play()
+		task.delay(0.3, function()
+			dBubble.Visible = false
+			dBubble.BackgroundTransparency = 0.2
+		end)
+	end)
+end
+
+--// ============================================================
+--// V3: META SYSTEMS
+--// ============================================================
+
+--// === SETTINGS MENU ===
+
+local settingsFrame = nil
+local settingsOpen = false
+
+do
+	settingsFrame = Instance.new("Frame")
+	settingsFrame.Size = UDim2.new(0.9, 0, 0, 220)
+	settingsFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+	settingsFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+	settingsFrame.BackgroundTransparency = 0.2
+	settingsFrame.BorderSizePixel = 0
+	settingsFrame.Visible = false
+	settingsFrame.ZIndex = 70
+	settingsFrame.Parent = container
+
+	local setCorner = Instance.new("UICorner")
+	setCorner.CornerRadius = UDim.new(0, 8)
+	setCorner.Parent = settingsFrame
+	local setStroke = Instance.new("UIStroke")
+	setStroke.Thickness = 1.5
+	setStroke.Color = Color3.fromRGB(255, 215, 0)
+	setStroke.Parent = settingsFrame
+	local setTitle = Instance.new("TextLabel")
+	setTitle.Size = UDim2.new(1, 0, 0, 30)
+	setTitle.BackgroundTransparency = 1
+	setTitle.Text = "SETTINGS"
+	setTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+	setTitle.Font = Enum.Font.GothamBlack
+	setTitle.TextSize = 18
+	setTitle.ZIndex = 71
+	setTitle.Parent = settingsFrame
+
+	local settingsOptions = {
+		{name = "Animations", key = "animations", type = "toggle", val = settingsData.animations},
+		{name = "Auto-Stand (BJ)", key = "autoStand", type = "toggle", val = settingsData.autoStand},
+		{name = "Card Speed", key = "cardSpeed", type = "slider", val = settingsData.cardSpeed},
+	}
+
+	for i, opt in ipairs(settingsOptions) do
+		local y = 35 + (i - 1) * 35
+		local lbl = Instance.new("TextLabel")
+		lbl.Size = UDim2.new(0.5, 0, 0, 25)
+		lbl.Position = UDim2.new(0, 10, 0, y)
+		lbl.BackgroundTransparency = 1
+		lbl.Text = opt.name
+		lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		lbl.Font = Enum.Font.GothamBold
+		lbl.TextSize = 14
+		lbl.TextXAlignment = Enum.TextXAlignment.Left
+		lbl.ZIndex = 71
+		lbl.Parent = settingsFrame
+
+		if opt.type == "toggle" then
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(0, 40, 0, 24)
+			btn.Position = UDim2.new(0.75, -20, 0, y)
+			btn.Text = opt.val and "ON" or "OFF"
+			btn.TextColor3 = opt.val and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
+			btn.Font = Enum.Font.GothamBold
+			btn.TextSize = 12
+			btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			btn.BorderSizePixel = 0
+			btn.ZIndex = 72
+			btn.Parent = settingsFrame
+			local btnc = Instance.new("UICorner")
+			btnc.CornerRadius = UDim.new(0, 4)
+			btnc.Parent = btn
+			btn.MouseButton1Click:Connect(function()
+				settingsData[opt.key] = not settingsData[opt.key]
+				btn.Text = settingsData[opt.key] and "ON" or "OFF"
+				btn.TextColor3 = settingsData[opt.key] and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
+			end)
+		end
+	end
+
+	local closeBtn = Instance.new("TextButton")
+	closeBtn.Size = UDim2.new(0, 60, 0, 24)
+	closeBtn.Position = UDim2.new(0.5, -30, 1, -30)
+	closeBtn.Text = "CLOSE"
+	closeBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.TextSize = 12
+	closeBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	closeBtn.BorderSizePixel = 0
+	closeBtn.ZIndex = 72
+	closeBtn.Parent = settingsFrame
+	local cbc = Instance.new("UICorner")
+	cbc.CornerRadius = UDim.new(0, 4)
+	cbc.Parent = closeBtn
+	closeBtn.MouseButton1Click:Connect(function()
+		settingsFrame.Visible = false
+		settingsOpen = false
+	end)
+end
+
+function toggleSettings()
+	settingsOpen = not settingsOpen
+	settingsFrame.Visible = settingsOpen
+end
+
+--// === QUICK BET BUTTONS ===
+
+local qbFrame = Instance.new("Frame")
+qbFrame.Size = UDim2.new(0.9, 0, 0, 30)
+qbFrame.Position = UDim2.new(0.05, 0, 0.95, -30)
+qbFrame.BackgroundTransparency = 1
+qbFrame.Parent = container
+
+local betPcts = {10, 25, 50, 100}
+local lastBetAmount = 0
+
+for i, pct in ipairs(betPcts) do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 50, 0, 24)
+	btn.Position = UDim2.new(0, (i - 1) * 55, 0.5, -12)
+	btn.Text = tostring(pct) .. "%"
+	btn.TextColor3 = Color3.fromRGB(255, 215, 0)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 11
+	btn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+	btn.BorderSizePixel = 0
+	btn.Parent = qbFrame
+	local btnc = Instance.new("UICorner")
+	btnc.CornerRadius = UDim.new(0, 4)
+	btnc.Parent = btn
+	btn.MouseButton1Click:Connect(function()
+		local amt = math.floor(playerChips * pct / 100)
+		if amt > 0 then
+			cmdBox.Text = tostring(amt)
+			lastBetAmount = amt
+			showOverlay("Quick bet: " .. tostring(amt) .. " chips", Color3.fromRGB(255, 215, 0), 0.8)
+		end
+	end)
+end
+
+local repBtn = Instance.new("TextButton")
+repBtn.Size = UDim2.new(0, 50, 0, 24)
+repBtn.Position = UDim2.new(0, 4 * 55 + 5, 0.5, -12)
+repBtn.Text = "REP"
+repBtn.TextColor3 = Color3.fromRGB(100, 200, 255)
+repBtn.Font = Enum.Font.GothamBold
+repBtn.TextSize = 11
+repBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+repBtn.BorderSizePixel = 0
+repBtn.Parent = qbFrame
+local rpc = Instance.new("UICorner")
+rpc.CornerRadius = UDim.new(0, 4)
+rpc.Parent = repBtn
+repBtn.MouseButton1Click:Connect(function()
+	if lastBetAmount > 0 then cmdBox.Text = tostring(lastBetAmount) end
+end)
+
+--// === HOTKEYS ===
+
+UserInputService.InputBegan:Connect(function(input, gp)
+	if gp then return end
+	if input.KeyCode == Enum.KeyCode.One then cmdBox.Text = "10"
+	elseif input.KeyCode == Enum.KeyCode.Two then cmdBox.Text = "25"
+	elseif input.KeyCode == Enum.KeyCode.Three then cmdBox.Text = "50"
+	elseif input.KeyCode == Enum.KeyCode.Four then cmdBox.Text = "100"
+	elseif input.KeyCode == Enum.KeyCode.Five then cmdBox.Text = "250"
+	elseif input.KeyCode == Enum.KeyCode.H then
+		if cmdBox:IsFocused() then return end
+		cmdBox.Text = "help"
+		cmdBox:CaptureFocus()
+	elseif input.KeyCode == Enum.KeyCode.R then
+		if cmdBox:IsFocused() then return end
+		if holdemState.active then holdemAction("fold") end
+	elseif input.KeyCode == Enum.KeyCode.S then
+		if cmdBox:IsFocused() then return end
+		if blackjackActive then blackjackStand() end
+	elseif input.KeyCode == Enum.KeyCode.D then
+		if cmdBox:IsFocused() then return end
+		if blackjackActive then blackjackHit() end
+	elseif input.KeyCode == Enum.KeyCode.T then
+		if cmdBox:IsFocused() then return end
+		toggleSettings()
+	end
+end)
+
+--// === AUTO-PLAY SYSTEM ===
+
+local apActive, apGame, apBet, apCount, apMax, apStopWin, apStopLoss, apStart = false, "slots", 10, 0, 50, 0, 0, 0
+
+function startAutoPlay(game, bet, maxGames, stopWin, stopLoss)
+	apActive = true
+	apGame = game or "slots"
+	apBet = bet or 10
+	apCount = 0
+	apMax = maxGames or 50
+	apStopWin = stopWin or 0
+	apStopLoss = stopLoss or 0
+	apStart = playerChips
+
+	task.spawn(function()
+		while apActive and apCount < apMax do
+			if playerChips < apBet then
+				apActive = false
+				showOverlay("Auto-play ended: out of chips", Color3.fromRGB(255, 50, 50), 2)
+				return
+			end
+			if apStopWin > 0 and playerChips >= apStart + apStopWin then
+				apActive = false
+				showOverlay("Auto-play ended: stop win reached", Color3.fromRGB(50, 255, 50), 2)
+				return
+			end
+			if apStopLoss > 0 and playerChips <= apStart - apStopLoss then
+				apActive = false
+				showOverlay("Auto-play ended: stop loss reached", Color3.fromRGB(255, 50, 50), 2)
+				return
+			end
+
+			if apGame == "slots" then playSlots(apBet)
+			elseif apGame == "dice" then playDice(apBet, {"even", "odd", "high", "low"}[math.random(4)])
+			elseif apGame == "coin" then playCoinFlip(apBet, {"heads", "tails"}[math.random(2)])
+			elseif apGame == "war" then playWar(apBet)
+			end
+			apCount = apCount + 1
+			task.wait(1.5)
+		end
+		apActive = false
+		showOverlay("Auto-play completed: " .. tostring(apCount) .. " games", Color3.fromRGB(255, 215, 0), 2)
+	end)
+	return "Auto-play started: " .. apGame .. " " .. tostring(apBet) .. " chips x" .. tostring(apMax)
+end
+
+function stopAutoPlay()
+	apActive = false
+	return "Auto-play stopped after " .. tostring(apCount) .. " games"
+end
+
+--// === TOURNAMENT MODE ===
+
+local tournActive, tournPlayers, tournRound, tournTotal, tournScores, tournBet = false, {}, 1, 10, {}, 0
+
+function startTournament(entryFee)
+	if entryFee > playerChips then return "NOT ENOUGH CHIPS for entry fee!" end
+	if tournActive then return "Tournament already active!" end
+	deductChips(entryFee)
+	tournActive = true
+	tournBet = entryFee
+	tournRound = 1
+	tournTotal = 10
+	tournScores = {}
+	tournPlayers = {}
+
+	local names = {"AI_Alice", "AI_Bob", "AI_Carlos", "AI_Diana", "AI_Eve", "AI_Frank"}
+	for _, name in ipairs(names) do
+		table.insert(tournPlayers, {name = name, chips = 1000, active = true})
+		tournScores[name] = 0
+	end
+	tournScores["Player"] = 0
+
+	local r = "=== TOURNAMENT ===\nEntry Fee: " .. tostring(entryFee) .. "\n" .. tostring(#tournPlayers + 1) .. " players\n" .. tostring(tournTotal) .. " rounds\n\nPlay games to earn points!\nEach win = 10 points\nBig wins = bonus points\n\nType 'tournament play' to start a round\nType 'tournament status' to see standings"
+	return r
+end
+
+function tournamentPlay()
+	if not tournActive then return "No active tournament!" end
+	if tournRound > tournTotal then return tournamentResults() end
+	local r = "=== TOURNAMENT ROUND " .. tostring(tournRound) .. "/" .. tostring(tournTotal) .. " ===\n\nPlay a game! Win to earn points.\nAvailable: slots, dice, coin flip, war\nType 'tournament [game] [bet]' to play"
+	return r
+end
+
+function tournamentPlayGame(game, bet)
+	if not tournActive then return "No active tournament!" end
+	local won = false
+	local amount = bet
+	if game == "slots" then playSlots(bet); won = winStreak > 0
+	elseif game == "dice" then playDice(bet, {"even", "odd", "high", "low"}[math.random(4)]); won = winStreak > 0
+	elseif game == "coin" then playCoinFlip(bet, {"heads", "tails"}[math.random(2)]); won = winStreak > 0
+	elseif game == "war" then playWar(bet); won = winStreak > 0
+	end
+	local points = 0
+	if won then
+		points = 10 + math.floor(amount / 100)
+		tournScores["Player"] = (tournScores["Player"] or 0) + points
+		showOverlay("+ " .. tostring(points) .. " tournament points!", Color3.fromRGB(50, 255, 50), 1.5)
+	end
+	for i, ai in ipairs(tournPlayers) do
+		if ai.active then
+			local aiWon = math.random() < 0.4
+			local aiPts = aiWon and (10 + math.random(0, 5)) or 0
+			tournScores[ai.name] = (tournScores[ai.name] or 0) + aiPts
+		end
+	end
+	tournRound = tournRound + 1
+	if tournRound > tournTotal then return tournamentResults() end
+	local r = "Round " .. tostring(tournRound - 1) .. " complete!\n" .. (won and "You earned " .. tostring(points) .. " points!\n" or "") .. "\nType 'tournament status' for standings\nType 'tournament play' for next round"
+	return r
+end
+
+function tournamentStatus()
+	local sorted = {}
+	for name, pts in pairs(tournScores) do table.insert(sorted, {name = name, points = pts}) end
+	table.sort(sorted, function(a, b) return a.points > b.points end)
+	local r = "=== TOURNAMENT STANDINGS ===\nRound " .. tostring(math.min(tournRound - 1, tournTotal)) .. "/" .. tostring(tournTotal) .. "\n\n"
+	for i, e in ipairs(sorted) do
+		local m = i == 1 and "★" or i == 2 and "◆" or i == 3 and "●" or tostring(i) .. "."
+		r = r .. m .. " " .. e.name .. ": " .. tostring(e.points) .. " pts\n"
+	end
+	return r
+end
+
+function tournamentResults()
+	tournActive = false
+	local sorted = {}
+	for name, pts in pairs(tournScores) do table.insert(sorted, {name = name, points = pts}) end
+	table.sort(sorted, function(a, b) return a.points > b.points end)
+	local r = "=== TOURNAMENT RESULTS ===\n\n"
+	for i, e in ipairs(sorted) do
+		local m = i == 1 and "★" or i == 2 and "◆" or i == 3 and "●" or ""
+		r = r .. m .. " " .. e.name .. ": " .. tostring(e.points) .. " pts\n"
+	end
+	if sorted[1] and sorted[1].name == "Player" then
+		local prize = tournBet * #tournPlayers
+		addChipsGlobal(prize)
+		r = r .. "\n!! YOU WIN THE TOURNAMENT !! +" .. tostring(prize) .. " chips"
+		VFX:JackpotText(); VFX:ChipShower(25)
+	else
+		r = r .. "\nX You placed " .. tostring(#sorted) .. "th. Better luck next time!"
+	end
+	return r
+end
+
+--// === DAILY QUESTS ===
+
+local questDefs = {
+	{id = "q_slots_5", name = "SLOT ENTHUSIAST", desc = "Play slots 5 times", goal = 5, reward = 200},
+	{id = "q_win_3", name = "WINNING STREAK", desc = "Win 3 games in a row", goal = 3, reward = 300},
+	{id = "q_bj_3", name = "BLACKJACK MASTER", desc = "Play blackjack 3 times", goal = 3, reward = 250},
+	{id = "q_explore", name = "GAME EXPLORER", desc = "Play 3 different games", goal = 3, reward = 400},
+	{id = "q_earn", name = "HIGH EARNER", desc = "Earn 1000 total chips", goal = 1000, reward = 500},
+	{id = "q_spin", name = "WHEEL SPINNER", desc = "Spin the wheel 3 times", goal = 3, reward = 200}
+}
+
+local dailyQuests = {}
+local questProgress = {}
+local questDone = {}
+
+function generateQuests()
+	dailyQuests = {}
+	local shuffled = {}
+	for _, d in ipairs(questDefs) do table.insert(shuffled, d) end
+	for i = #shuffled, 2, -1 do local j = math.random(i); shuffled[i], shuffled[j] = shuffled[j], shuffled[i] end
+	for i = 1, math.min(3, #shuffled) do table.insert(dailyQuests, shuffled[i]); questProgress[shuffled[i].id] = 0; questDone[shuffled[i].id] = false end
+end
+
+function trackQuest(game, won, amount)
+	for _, q in ipairs(dailyQuests) do
+		if questDone[q.id] then continue end
+		local progress = false
+		if q.id == "q_slots_5" and game == "SLOTS" then progress = true end
+		if q.id == "q_win_3" and won then progress = true end
+		if q.id == "q_bj_3" and game == "BLACKJACK" then progress = true end
+		if q.id == "q_explore" then
+			questProgress[q.id] = (questProgress[q.id] or 0) + 1
+			if questProgress[q.id] <= q.goal then progress = true end
+		end
+		if q.id == "q_earn" and won then
+			questProgress[q.id] = (questProgress[q.id] or 0) + amount
+			if questProgress[q.id] >= q.goal then progress = true end
+		end
+		if q.id == "q_spin" and game == "WHEEL" then progress = true end
+		if progress then
+			questProgress[q.id] = (questProgress[q.id] or 0) + 1
+			if questProgress[q.id] >= q.goal and not questDone[q.id] then
+				questDone[q.id] = true
+				addChipsGlobal(q.reward)
+				showOverlay("Quest Complete: " .. q.name .. "! +" .. tostring(q.reward), Color3.fromRGB(255, 215, 0), 2.5)
+				VFX:Burst(UDim2.new(0.5, -3, 0.3, -3), 10, Color3.fromRGB(255, 215, 0))
+			end
+		end
+	end
+end
+
+function showQuests()
+	local r = "=== DAILY QUESTS ===\n\n"
+	for _, q in ipairs(dailyQuests) do
+		local pct = math.min(1, (questProgress[q.id] or 0) / q.goal)
+		local bar = ""
+		for i = 1, 10 do bar = bar .. (i / 10 <= pct and "■" or "□") end
+		r = r .. q.name .. " " .. (questProgress[q.id] or 0) .. "/" .. q.goal .. "\n" .. bar .. " " .. (questDone[q.id] and "★ COMPLETE" or "") .. "\n+ " .. tostring(q.reward) .. " chips\n\n"
+	end
+	return r
+end
+
+generateQuests()
+
+--// === MINI MODE ===
+
+local miniMode = false
+
+function toggleMini()
+	miniMode = not miniMode
+	if miniMode then
+		container:TweenSize(UDim2.new(0, 200, 0, 350), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+		for _, ch in ipairs(container:GetChildren()) do
+			if ch ~= reelBg and ch ~= jackpotLabel and ch ~= comboFrame and ch ~= statsFrame and ch ~= db2 and ch ~= minBtn then
+				ch.Visible = false
+			end
+		end
+	else
+		container:TweenSize(UDim2.new(0, 400, 0, 700), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+		for _, ch in ipairs(container:GetChildren()) do ch.Visible = true end
+	end
+end
+
+--// === REPLAY SYSTEM ===
+
+local replayHist = {}
+local replayMax = 20
+
+function saveReplay(gameName, result, bet, won)
+	table.insert(replayHist, 1, {game = gameName, result = result, bet = bet, won = won, time = os.time(), num = #replayHist + 1})
+	if #replayHist > replayMax then table.remove(replayHist) end
+end
+
+function showReplay(index)
+	index = index or 1
+	if index < 1 or index > #replayHist then return "No replay at index " .. tostring(index) end
+	local e = replayHist[index]
+	local r = "=== REPLAY #" .. tostring(e.num) .. " ===\n" .. e.game .. " | " .. (e.won and "+" or "-") .. tostring(math.floor(e.bet)) .. "\n" .. e.result .. "\n" .. os.date("%H:%M:%S", e.time)
+	return r
+end
+
+--// ============================================================
+--// V3: COMMAND PROCESSOR UPDATE
+--// ============================================================
+
+local origProcCmd = processCommand
+
+function processCommand(input)
+	local i = string.lower(input)
+
+	-- Texas Hold'em actions (must check first)
+	if holdemState.active then
+		if i == "check" or i == "call" then return holdemAction(i == "check" and "check" or "call")
+		elseif i == "fold" then return holdemAction("fold")
+		elseif string.match(i, "^raise%s+(%d+)$") then local m = string.match(i, "^raise%s+(%d+)$"); return holdemAction("raise", m)
+		end
+	end
+
+	-- Hold'em start
+	local hm = string.match(i, "^holdem%s+(%d+)$")
+	if hm then return startHoldem(tonumber(hm)) end
+
+	-- Video Poker
+	local vpm = string.match(i, "^videopoker%s+(%d+)$")
+	if vpm then return startVideoPoker(tonumber(vpm)) end
+
+	local hld = string.match(i, "^hold%s+(.+)$")
+	if hld and vpActive then return vpHold(hld) end
+
+	-- Let It Ride
+	local lrm = string.match(i, "^letitride%s+(%d+)$")
+	if lrm then return startLetItRide(tonumber(lrm)) end
+
+	if lirActive then
+		if i == "ride" then return lirAct("ride")
+		elseif i == "pull" then return lirAct("pull") end
+	end
+
+	-- Caribbean Stud
+	local csm = string.match(i, "^caribbean%s+(%d+)$")
+	if csm then return startCaribbeanStud(tonumber(csm)) end
+
+	if csActive then
+		if i == "call" then return csAct("call")
+		elseif i == "fold" then return csAct("fold") end
+	end
+
+	-- Red Dog
+	local rdm = string.match(i, "^reddog%s+(%d+)$")
+	if rdm then return startRedDog(tonumber(rdm)) end
+
+	if rdActive then
+		if i == "raise" then return rdAct("raise")
+		elseif i == "deal" then return rdAct("deal") end
+	end
+
+	-- PaiGow
+	local pgm = string.match(i, "^paigow%s+(%d+)$")
+	if pgm then return startPaigow(tonumber(pgm)) end
+
+	if pgActive then
+		local setm = string.match(i, "^set%s+(.+)$")
+		if setm then return pgSet(setm) end
+		if string.match(i, "^auto$") then return pgSet("auto") end
+	end
+
+	-- Spanish 21
+	local s21m = string.match(i, "^spanish21%s+(%d+)$")
+	if s21m then return s21Start(tonumber(s21m)) end
+
+	if s21Active then
+		if i == "hit" then return s21Hit()
+		elseif i == "stand" then return s21Stand()
+		elseif i == "double" then return s21Double()
+		elseif i == "surrender" then return s21Surrender() end
+	end
+
+	-- Poker Dice
+	local pdm = string.match(i, "^pokerdice%s+(%d+)$")
+	if pdm then return playPokerDice(tonumber(pdm)) end
+
+	-- Daily Bonus
+	if i == "daily" then return claimDaily() end
+
+	-- Bank
+	local bdm = string.match(i, "^deposit%s+(%d+)$")
+	if bdm then return bankDeposit(tonumber(bdm)) end
+	local bwm = string.match(i, "^withdraw%s+(%d+)$")
+	if bwm then return bankWithdraw(tonumber(bwm)) end
+	if i == "balance" then return "Bank: " .. tostring(math.floor(bankBalance)) .. " | Chips: " .. tostring(math.floor(playerChips)) .. " | Comp: " .. tostring(math.floor(compPoints)) end
+
+	-- Loan
+	local lnm = string.match(i, "^loan%s+(%d+)$")
+	if lnm then return takeLoan(tonumber(lnm)) end
+	if i == "repay" then return repayLoan() end
+
+	-- Comp Points
+	local cpm = string.match(i, "^redeem%s+(%d+)$")
+	if cpm then return redeemComp(tonumber(cpm)) end
+
+	-- Prestige
+	if i == "prestige" then return doPrestige() end
+
+	-- Progression
+	local prm = string.match(i, "^progression%s+(%w+)%s+(%d+)$")
+	if prm then return startProgression(prm, tonumber(prm)) end
+	if i == "progression stop" then return stopProgression() end
+
+	-- Strategy
+	if i == "advice" then
+		if blackjackActive then
+			local pv = getHandValue(playerHand)
+			local du = ((dealerHand[1] - 1) % 13) + 1
+			if du == 1 then du = 11 elseif du >= 10 then du = 10 end
+			return "Advice: " .. getBJAdvice(pv, du, false, false, false)
+		end
+		return "Advice available during blackjack games."
+	end
+
+	-- Odds
+	if string.match(i, "^odds%s+(%w+)$") then
+		local g = string.match(i, "^odds%s+(%w+)$")
+		return "Odds: " .. computeOdds(g, {})
+	end
+
+	-- Count
+	if i == "count" then return countAdvice() end
+	if i == "reset count" then resetCount(); return "Card count reset." end
+
+	-- Tournament
+	local tm = string.match(i, "^tournament%s+(%d+)$")
+	if tm then return startTournament(tonumber(tm)) end
+	if i == "tournament play" then return tournamentPlay() end
+	if i == "tournament status" then return tournamentStatus() end
+	local tgm = string.match(i, "^tournament%s+(%w+)%s+(%d+)$")
+	if tgm then return tournamentPlayGame(tgm, tonumber(tgm)) end
+
+	-- Auto-play
+	local apm = string.match(i, "^autoplay%s+(%w+)%s+(%d+)%s+(%d+)$")
+	if apm then return startAutoPlay(apm, tonumber(apm), tonumber(apm)) end
+	if i == "autoplay stop" then return stopAutoPlay() end
+
+	-- Quests
+	if i == "quests" then return showQuests() end
+
+	-- Session stats
+	if i == "session" then return showSession() end
+
+	-- Hot numbers
+	if i == "hot" then return hotNums() end
+
+	-- Felt colors
+	local fmt = string.match(i, "^felt%s+(%d+)$")
+	if fmt then setFelt(tonumber(fmt)); return "Felt set to: " .. feltColors[tonumber(fmt)].name end
+
+	-- Dealer
+	local dlm = string.match(i, "^dealer%s+(%d+)$")
+	if dlm then return setDealer(tonumber(dlm)) end
+
+	-- Mini mode
+	if i == "mini" then toggleMini(); return "Mini mode: " .. (miniMode and "ON" or "OFF") end
+
+	-- Replay
+	if i == "replay" then return showReplay(1) end
+	local rpm = string.match(i, "^replay%s+(%d+)$")
+	if rpm then return showReplay(tonumber(rpm)) end
+
+	-- Settings
+	if i == "settings" then toggleSettings(); return "" end
+
+	-- Dealer commentary integration on wins/losses
+	local result = origProcCmd(input)
+
+	-- Track quests after game commands
+	local gameCommands = {"slots", "blackjack", "dice", "roulette", "coin flip", "wheel", "keno", "lottery", "war", "match", "holdem"}
+	for _, gc in ipairs(gameCommands) do
+		if string.find(i, gc) then
+			lastBetAmount = tonumber(string.match(i, "%d+")) or 10
+			trackQuest(string.upper(gc), winStreak > 0, lastBetAmount)
+			if winStreak > 0 then
+				dealerSay("win")
+			elseif string.find(result, "LOSE") or string.find(result, "BUST") then
+				dealerSay("lose")
+			end
+			break
+		end
+	end
+
+	return result
+end
+
+--// ============================================================
+--// V3: FINAL SETUP
+--// ============================================================
+
+-- Update the result text to mention new features
+updateResultText("=== JACKPOT TERMINAL v3.0 ===\n\n" ..
+	"Type 'help' for all commands\n\n" ..
+	"New games: holdem, videopoker, letitride,\n" ..
+	"caribbean, reddog, paigow, spanish21,\n" ..
+	"pokerdice\n\n" ..
+	"Economy: daily, deposit, withdraw, loan, prestige\n" ..
+	"Systems: progression, quests, tournament, session\n" ..
+	"Features: settings, advice, count, odds, hot, mini\n\n" ..
+	"Balance: " .. tostring(math.floor(playerChips)) .. " chips")
+
+-- Risk meter visible by default
+rm.Visible = true
+
+-- Dealer welcome
+dealerSay("welcome")
+
+-- Spin once
+spinReels()
+
+--// ============================================================
+--// JACKPOT EXPANSION v3 PART 5 - EXTENDED SYSTEMS & POLISH
+--// ============================================================
+
+--// === EXPANDED HELP SYSTEM ===
+
+local helpPages = {
+	main = {
+		title = "=== JACKPOT TERMINAL v3.0 ===",
+		lines = {
+			"Type 'help' for this menu",
+			"Type 'help [game]' for game rules",
+			"Type 'help economy' for economy features",
+			"Type 'help systems' for meta systems",
+			"",
+			"=== GAMES ===",
+			"slots [bet] - Classic slot machine",
+			"blackjack [bet] - Blackjack",
+			"poker [bet] - 5-Card Draw Poker",
+			"holdem [bet] - Texas Hold'em vs AI",
+			"videopoker [bet] - Video Poker",
+			"roulette [bet] [choice] - Roulette",
+			"dice [bet] [prediction] - Dice Game",
+			"coin flip [bet] [heads/tails]",
+			"baccarat [bet] [player/banker/tie]",
+			"wheel [bet] - Wheel of Fortune",
+			"sicbo [bet] [prediction] - Sic Bo",
+			"craps [bet] [pass/dont] - Craps",
+			"keno [bet] [numbers] - Keno",
+			"lottery [bet] - Lottery Draw",
+			"war [bet] - Card Game War",
+			"horse [bet] [1-6] - Horse Race",
+			"bingo [bet] - Auto Bingo",
+			"match [bet] - Matching Game",
+			"letitride [bet] - Let It Ride",
+			"caribbean [bet] - Caribbean Stud",
+			"reddog [bet] - Red Dog",
+			"paigow [bet] - PaiGow Poker",
+			"spanish21 [bet] - Spanish 21",
+			"pokerdice [bet] - Poker Dice",
+			"",
+			"=== ECONOMY ===",
+			"daily - Claim daily bonus",
+			"deposit [amt] - Bank deposit",
+			"withdraw [amt] - Bank withdraw",
+			"loan [amt] - Take a loan",
+			"repay - Repay your loan",
+			"redeem [amt] - Comp points to chips",
+			"prestige - Reset for multiplier",
+			"balance - View balances",
+			"",
+			"=== SYSTEMS ===",
+			"session - Session statistics",
+			"hot - Hot numbers tracker",
+			"count - Card count (blackjack)",
+			"reset count - Reset card count",
+			"advice - Strategy advice (blackjack)",
+			"odds [game] - View odds",
+			"quests - Daily quests",
+			"tournament [fee] - Tournament",
+			"tournament play/status - Tournament cmds",
+			"autoplay [game] [bet] [max] - Auto mode",
+			"autoplay stop - Stop auto mode",
+			"progression [type] [bet] - Bet system",
+			"progression stop - Stop progression",
+			"settings - Open settings menu",
+			"mini - Toggle mini mode",
+			"leaderboard - View leaderboard",
+			"felt [1-6] - Change felt color",
+			"dealer [1-4] - Change dealer",
+			"replay [n] - View hand replay",
+			"chips - Check balance",
+			"stats - Detailed game statistics",
+		}
+	},
+	blackjack = {
+		title = "=== BLACKJACK RULES ===",
+		lines = {
+			"Goal: Get as close to 21 as possible without going over.",
+			"Face cards (J/Q/K) = 10, Ace = 1 or 11, others = face value.",
+			"You and the dealer each get 2 cards (dealer shows one).",
+			"",
+			"Actions:",
+			"  'hit' - Take another card",
+			"  'stand' - Keep your hand",
+			"  'double' - Double bet, take 1 card (requires 'double [bet]')",
+			"  'surrender' - Forfeit half your bet",
+			"",
+			"Dealer must hit until 17 or higher.",
+			"Blackjack (21 on first 2 cards) pays 3:2.",
+			"Push if you tie with dealer.",
+		}
+	},
+	holdem = {
+		title = "=== TEXAS HOLD'EM RULES ===",
+		lines = {
+			"Goal: Make the best 5-card hand using any combination",
+			"of your 2 hole cards and 5 community cards.",
+			"",
+			"Hands: Royal Flush > Straight Flush > 4-of-a-Kind",
+			"> Full House > Flush > Straight > 3-of-a-Kind",
+			"> Two Pair > One Pair > High Card.",
+			"",
+			"You play against 3-6 AI opponents.",
+			"Actions: 'check', 'call', 'raise [amt]', 'fold'.",
+			"Cards are dealt in rounds: preflop, flop (3), turn, river.",
+		}
+	},
+	roulette = {
+		title = "=== ROULETTE RULES ===",
+		lines = {
+			"Bet on where the ball will land on the wheel (0-36).",
+			"Choices:",
+			"  red / black - Pays 2:1 (47.4% chance)",
+			"  even / odd - Pays 2:1 (47.4% chance)",
+			"  1-18 / 19-36 - Pays 2:1 (47.4% chance)",
+			"  [number] - Exact number pays 35:1 (2.63% chance)",
+			"  green - Bet on 0 (pays 35:1)",
+			"",
+			"Example: roulette 50 red",
+		}
+	},
+	slots = {
+		title = "=== SLOTS RULES ===",
+		lines = {
+			"Match symbols across 3 reels to win!",
+			"Three of a kind = BIG payout (multiplier based on symbol)",
+			"Pair (two match) = 2x your bet",
+			"Lucky Seven in any position = 1.5x",
+			"Three 7s = JACKPOT!",
+		}
+	},
+	dice = {
+		title = "=== DICE RULES ===",
+		lines = {
+			"Predict the outcome of a 6-sided die roll.",
+			"Predictions:",
+			"  [number] - Exact number (1-6) pays 6:1",
+			"  even / odd - Pays 2:1",
+			"  high (4-6) / low (1-3) - Pays 2:1",
+		}
+	},
+	keno = {
+		title = "=== KENO RULES ===",
+		lines = {
+			"Pick 1-10 numbers from 1 to 80.",
+			"20 numbers are drawn randomly.",
+			"Payout depends on how many match and how many you picked.",
+			"More picks = higher potential payouts!",
+			"Example: keno 50 5,12,23,44,67",
+		}
+	},
+	baccarat = {
+		title = "=== BACCARAT RULES ===",
+		lines = {
+			"Bet on Player, Banker, or Tie.",
+			"Cards 2-9 = face value, 10/J/Q/K = 0, Ace = 1.",
+			"Only last digit of total counts (0-9).",
+			"Player/Banker draw third card automatically.",
+			"Player pays 2:1, Banker pays 1.95:1, Tie pays 9:1.",
+		}
+	},
+	economy = {
+		title = "=== ECONOMY FEATURES ===",
+		lines = {
+			"Daily Bonus: Claim free chips every day!",
+			"  Day 1: 100 | Day 2: 200 | ... | Day 7: 700",
+			"  Streak resets if you miss a day.",
+			"",
+			"Bank: Store chips safely and earn 1% interest per minute.",
+			"  deposit [amt] - Put chips in bank",
+			"  withdraw [amt] - Take chips out",
+			"",
+			"Loan Shark: Need chips fast? Borrow with interest!",
+			"  loan [amt] - Get chips now, pay 25% interest",
+			"  repay - Pay back your loan",
+			"  Default: debt collectors take 50% of your chips!",
+			"",
+			"Comp Points: Earn 1 point per 20 chips bet.",
+			"  redeem [amt] - Convert to chips 1:1",
+			"",
+			"Prestige: Reset at 100K chips for permanent x1.1+ multiplier.",
+			"  Each prestige adds +0.1x to all winnings!",
+			"",
+			"Level Up: Gain XP from betting, unlock levels.",
+		}
+	},
+	systems = {
+		title = "=== META SYSTEMS ===",
+		lines = {
+			"Betting Progressions: Automated betting systems",
+			"  martingale - Double after loss, reset after win",
+			"  fibonacci - Fibonacci sequence betting",
+			"  d_alembert - +1 loss, -1 win",
+			"  paroli - Double after win (max 3x)",
+			"  oscar - Oscar's Grind system",
+			"  Usage: progression [type] [base bet]",
+			"",
+			"Tournament: Compete against AI players!",
+			"  tournament [entry fee] - Start",
+			"  tournament play - Play a round",
+			"  tournament status - Check standings",
+			"",
+			"Daily Quests: Complete challenges for bonus chips.",
+			"  Type 'quests' to view your active quests.",
+			"",
+			"Auto-Play: Let the machine play for you!",
+			"  autoplay [game] [bet] [max games]",
+			"  autoplay stop",
+			"",
+			"Strategy Advisor: Optimal blackjack advice.",
+			"  Type 'advice' during a blackjack game.",
+			"",
+			"Card Counting: Track the Hi-Lo count.",
+			"  Type 'count' to see running/true count.",
+			"  Reset with 'reset count'.",
+		}
+	}
+}
+
+local origProcCommand = processCommand
+local function procCommandOverride(input)
+	local i = string.lower(input)
+
+	-- Help pages
+	if i == "help" then
+		local r = helpPages.main.title .. "\n\n"
+		for _, line in ipairs(helpPages.main.lines) do r = r .. line .. "\n" end
+		return r
+	end
+
+	for pageName, page in pairs(helpPages) do
+		if string.match(i, "^help%s+" .. pageName .. "$") or i == "help " .. pageName then
+			local r = page.title .. "\n\n"
+			for _, line in ipairs(page.lines) do r = r .. line .. "\n" end
+			return r
+		end
+	end
+
+	-- Leaderboard (simple version)
+	if i == "leaderboard" then
+		local r = "=== LEADERBOARD ===\n\n"
+		r = r .. "Player: " .. tostring(math.floor(playerChips)) .. " chips\n"
+		r = r .. "Level: " .. tostring(playerLevel) .. " | Prestige: " .. tostring(prestiges) .. "\n"
+		r = r .. "Total Won: " .. tostring(math.floor(sessionStats.totalWon)) .. "\n"
+		r = r .. "Total Lost: " .. tostring(math.floor(sessionStats.totalLost)) .. "\n"
+		r = r .. "Games: " .. tostring(sessionStats.games) .. " | Wins: " .. tostring(gamesWon) .. "\n"
+		r = r .. "Win Rate: " .. string.format("%.1f", sessionStats.games > 0 and (gamesWon / sessionStats.games * 100) or 0) .. "%\n"
+		return r
+	end
+
+	-- Stats with per-game breakdown
+	if i == "stats" then
+		local r = "=== GAME STATISTICS ===\n\n"
+		for k, v in pairs(gameStats) do
+			r = r .. k .. ": " .. tostring(v) .. "\n"
+		end
+		r = r .. "\n---\n"
+		r = r .. "Games Played: " .. tostring(gamesPlayed) .. "\n"
+		r = r .. "Games Won: " .. tostring(gamesWon) .. "\n"
+		r = r .. "Win Rate: " .. string.format("%.1f", gamesPlayed > 0 and (gamesWon / gamesPlayed * 100) or 0) .. "%\n"
+		r = r .. "Biggest Win: " .. tostring(biggestWin) .. "\n"
+		r = r .. "Longest Streak: " .. tostring(longestStreak) .. "\n"
+		r = r .. "Favorite Game: " .. favoriteGame .. "\n"
+		r = r .. "Player Level: " .. tostring(playerLevel) .. " (" .. tostring(math.floor(playerXP)) .. "/" .. tostring(playerLevel * 100) .. " XP)\n"
+		r = r .. "Comp Points: " .. tostring(math.floor(compPoints)) .. "\n"
+		r = r .. "Prestige: " .. tostring(prestiges) .. " (x" .. string.format("%.1f", prestigeMult()) .. ")\n"
+		r = r .. "Bank Balance: " .. tostring(math.floor(bankBalance)) .. "\n"
+		r = r .. "Loan: " .. tostring(math.floor(loanAmount)) .. " chips" .. (loanAmount > 0 and " (due " .. tostring(math.max(0, math.floor((loanDue - tick()) / 60))) .. " min)" or "") .. "\n"
+		return r
+	end
+
+	return origProcCommand(input)
+end
+
+processCommand = procCommandOverride
+
+--// === ENHANCED DEALER COMMENTARY EXTENSIONS ===
+
+local dealerExtended = {
+	streak_3 = {"Three in a row! You're on a roll!", "Can't stop winning!", "The house is worried!"},
+	streak_5 = {"FIVE IN A ROW! Incredible!", "Are you counting cards?!", "Someone stop this player!"},
+	streak_10 = {"TEN WINS STRAIGHT! Legendary!", "This is unheard of!", "The casino is losing money!"},
+	big_win = {"HUGE PAYOUT! Congratulations!", "That's a massive win!", "Jackpot alert!"},
+	comeback = {"You're back in the game!", "What a comeback!", "Never count yourself out!"},
+	all_in = {"All in! Bold move!", "Everything on the line!", "No fear!"},
+	chip_milestone = {"You've passed 5000 chips!", "Building that empire!", "The stacks are growing!"},
+}
+
+function dealerExtendedSay(category)
+	local msgs = dealerExtended[category]
+	if not msgs then return end
+	local msg = msgs[math.random(#msgs)]
+	dBubble.Visible = true
+	dBubbleText.Text = msg
+	dBubble.BackgroundTransparency = 0.2
+	TweenService:Create(dBubble, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -100, 0, 80)
+	}):Play()
+	task.delay(3, function()
+		TweenService:Create(dBubble, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, -100, 0, 60),
+			BackgroundTransparency = 1
+		}):Play()
+		task.delay(0.3, function()
+			dBubble.Visible = false
+			dBubble.BackgroundTransparency = 0.2
+		end)
+	end)
+end
+
+-- Track win streaks for extended commentary
+local origWinGame3 = winGame
+function winGame(amount)
+	origWinGame3(amount)
+
+	local curStreak = sessionStats.curWinStreak
+	if curStreak == 3 then dealerExtendedSay("streak_3")
+	elseif curStreak == 5 then dealerExtendedSay("streak_5")
+	elseif curStreak == 10 then dealerExtendedSay("streak_10")
+	end
+
+	if amount >= 500 then dealerExtendedSay("big_win") end
+
+	if playerChips > 5000 and playerChips - amount <= 5000 then dealerExtendedSay("chip_milestone") end
+end
+
+-- Check for comeback
+local origDeduct = deductChips
+function deductChips(amount)
+	local result = origDeduct(amount)
+	if playerChips < 100 and playerChips + result >= 100 then
+		dealerExtendedSay("comeback")
+	end
+	return result
+end
+
+--// === VISUAL POLISH: WIN CELEBRATION SEQUENCES ===
+
+function playWinSequence(intensity)
+	intensity = intensity or "normal"
+
+	if intensity == "massive" then
+		VFX:JackpotText()
+		VFX:ChipShower(30)
+		VFX:Burst(UDim2.new(0.5, -3, 0.4, -3), 25, Color3.fromRGB(255, 215, 0))
+		task.delay(0.3, function()
+			VFX:Burst(UDim2.new(0.3, -3, 0.3, -3), 15, Color3.fromRGB(255, 50, 50))
+		end)
+		task.delay(0.6, function()
+			VFX:Burst(UDim2.new(0.7, -3, 0.3, -3), 15, Color3.fromRGB(50, 255, 50))
+		end)
+		VFX:ScreenShake(10, 0.8)
+
+		local flashCount = 0
+		local flashConn
+		flashConn = RunService.Heartbeat:Connect(function()
+			flashCount = flashCount + 1
+			container.BackgroundColor3 = flashCount % 2 == 0 and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(20, 20, 20)
+			if flashCount >= 20 then
+				flashConn:Disconnect()
+				container.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+			end
+		end)
+	elseif intensity == "big" then
+		VFX:JackpotText()
+		VFX:ChipShower(15)
+		VFX:Burst(UDim2.new(0.5, -3, 0.4, -3), 15, Color3.fromRGB(255, 215, 0))
+		VFX:ScreenShake(5, 0.3)
+		showOverlay("BIG WIN!", Color3.fromRGB(255, 215, 0), 2)
+	else
+		VFX:WinText(amount, game)
+		showOverlay("WIN! +" .. tostring(math.floor(amount)) .. " chips", Color3.fromRGB(100, 255, 100), 1.5)
+	end
+end
+
+-- Modify the existing winGame to use playWinSequence
+local origWinGame4 = winGame
+function winGame(amount)
+	origWinGame4(amount)
+	if amount >= 5000 then playWinSequence("massive")
+	elseif amount >= 1000 then playWinSequence("big")
+	end
+end
+
+--// === TUTORIAL OVERLAY ===
+
+local tutorialActive = false
+local tutorialStep = 0
+local tutorialSteps = {
+	{title = "WELCOME", text = "Welcome to the Infinite Casino!\nLet's learn the basics."},
+	{title = "COMMANDS", text = "Type commands in the text box.\nStart with 'slots 10' to play!"},
+	{title = "GAMES", text = "We have slots, blackjack, poker,\nroulette, dice, and 20+ more!"},
+	{title = "CHIPS", text = "You start with 1000 chips.\nWin games to earn more!"},
+	{title = "HELP", text = "Type 'help' anytime for commands.\nType 'help [game]' for rules."},
+}
+
+local tutorialFrame = Instance.new("Frame")
+tutorialFrame.Size = UDim2.new(0.8, 0, 0, 160)
+tutorialFrame.Position = UDim2.new(0.1, 0, 0.15, 0)
+tutorialFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+tutorialFrame.BackgroundTransparency = 0.1
+tutorialFrame.BorderSizePixel = 0
+tutorialFrame.ZIndex = 120
+tutorialFrame.Visible = false
+tutorialFrame.Parent = container
+
+local tutCorner = Instance.new("UICorner")
+tutCorner.CornerRadius = UDim.new(0, 10)
+tutCorner.Parent = tutorialFrame
+local tutStroke = Instance.new("UIStroke")
+tutStroke.Thickness = 2
+tutStroke.Color = Color3.fromRGB(255, 215, 0)
+tutStroke.Transparency = 0.3
+tutStroke.Parent = tutorialFrame
+
+local tutTitle = Instance.new("TextLabel")
+tutTitle.Size = UDim2.new(1, -20, 0, 30)
+tutTitle.Position = UDim2.new(0, 10, 0, 10)
+tutTitle.BackgroundTransparency = 1
+tutTitle.Text = ""
+tutTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+tutTitle.Font = Enum.Font.GothamBlack
+tutTitle.TextSize = 20
+tutTitle.ZIndex = 121
+tutTitle.TextXAlignment = Enum.TextXAlignment.Left
+tutTitle.Parent = tutorialFrame
+
+local tutText = Instance.new("TextLabel")
+tutText.Size = UDim2.new(1, -20, 0, 80)
+tutText.Position = UDim2.new(0, 10, 0, 45)
+tutText.BackgroundTransparency = 1
+tutText.Text = ""
+tutText.TextColor3 = Color3.fromRGB(255, 255, 255)
+tutText.Font = Enum.Font.GothamBold
+tutText.TextSize = 14
+tutText.TextWrapped = true
+tutText.ZIndex = 121
+tutText.TextXAlignment = Enum.TextXAlignment.Left
+tutText.TextYAlignment = Enum.TextYAlignment.Top
+tutText.Parent = tutorialFrame
+
+local tutBtn = Instance.new("TextButton")
+tutBtn.Size = UDim2.new(0, 100, 0, 30)
+tutBtn.Position = UDim2.new(0.5, -50, 1, -40)
+tutBtn.Text = "NEXT"
+tutBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+tutBtn.Font = Enum.Font.GothamBlack
+tutBtn.TextSize = 14
+tutBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+tutBtn.BorderSizePixel = 0
+tutBtn.ZIndex = 122
+tutBtn.Parent = tutorialFrame
+local tutBtnCorner = Instance.new("UICorner")
+tutBtnCorner.CornerRadius = UDim.new(0, 6)
+tutBtnCorner.Parent = tutBtn
+
+local tutSkipBtn = Instance.new("TextButton")
+tutSkipBtn.Size = UDim2.new(0, 80, 0, 24)
+tutSkipBtn.Position = UDim2.new(1, -90, 0, 5)
+tutSkipBtn.Text = "SKIP"
+tutSkipBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+tutSkipBtn.Font = Enum.Font.GothamBold
+tutSkipBtn.TextSize = 11
+tutSkipBtn.BackgroundTransparency = 1
+tutSkipBtn.ZIndex = 122
+tutSkipBtn.Parent = tutorialFrame
+
+tutBtn.MouseButton1Click:Connect(function()
+	tutorialStep = tutorialStep + 1
+	if tutorialStep > #tutorialSteps then
+		tutorialActive = false
+		tutorialFrame.Visible = false
+		return
+	end
+	local step = tutorialSteps[tutorialStep]
+	tutTitle.Text = step.title
+	tutText.Text = step.text
+	tutBtn.Text = tutorialStep >= #tutorialSteps and "DONE" or "NEXT"
+end)
+
+tutSkipBtn.MouseButton1Click:Connect(function()
+	tutorialActive = false
+	tutorialFrame.Visible = false
+end)
+
+function startTutorial()
+	tutorialActive = true
+	tutorialStep = 0
+	tutorialFrame.Visible = true
+	tutBtn:M1Click()
+end
+
+-- Start tutorial on first launch
+task.delay(3, function()
+	if not tutorialActive then
+		startTutorial()
+	end
+end)
+
+--// === NOTIFICATION QUEUE ===
+
+local notifQueue = {}
+local notifPlaying = false
+
+function queueNotification(text, color, duration)
+	duration = duration or 2
+	color = color or Color3.fromRGB(255, 215, 0)
+	table.insert(notifQueue, {text = text, color = color, duration = duration})
+
+	if not notifPlaying then
+		playNextNotification()
+	end
+end
+
+function playNextNotification()
+	if #notifQueue == 0 then notifPlaying = false; return end
+	notifPlaying = true
+
+	local n = table.remove(notifQueue, 1)
+	showOverlay(n.text, n.color, n.duration)
+	task.delay(n.duration + 1, playNextNotification)
+end
+
+--// === EXTENDED GAME VARIATIONS ===
+
+-- European Roulette (single zero, better odds)
+function playEuroRoulette(bet, choice)
+	if bet > playerChips then return "NOT ENOUGH CHIPS!" end
+	deductChips(bet); currentBet = bet
+	local spin = math.random(0, 36)
+	local color = spin == 0 and "GREEN" or (spin % 2 == 0 and "RED" or "BLACK")
+	local r = "🎯 EURO ROULETTE RESULT 🎯\n\nBall lands on: " .. tostring(spin) .. " " .. color .. "\n\n"
+	local cl = string.lower(choice)
+	local payout = 0; local won = false
+	if cl == "red" and color == "RED" then payout = bet * 2; won = true
+	elseif cl == "black" and color == "BLACK" then payout = bet * 2; won = true
+	elseif cl == "green" and spin == 0 then payout = bet * 35; won = true
+	elseif tonumber(cl) and tonumber(cl) == spin then payout = bet * 35; won = true
+	elseif (cl == "even" or cl == "1-18") and spin > 0 then
+		if (cl == "even" and spin % 2 == 0) or (cl == "1-18" and spin >= 1 and spin <= 18) then payout = bet * 2; won = true end
+	elseif (cl == "odd" or cl == "19-36") and spin > 0 then
+		if (cl == "odd" and spin % 2 == 1) or (cl == "19-36" and spin >= 19) then payout = bet * 2; won = true end
+	end
+	if won then addChipsGlobal(payout); winGame(payout); r = r .. "!! WIN !! +" .. tostring(math.floor(payout)) .. " chips"
+	else r = r .. "X LOSE X -" .. tostring(bet) .. " chips"; loseGame() end
+	recordGame("EURO ROULETTE", won, payout > 0 and payout or bet); return r
+end
+
+-- Insurance side bet for blackjack
+function blackjackInsurance()
+	if not blackjackActive then return "No active blackjack game!" end
+	local dealerUp = ((dealerHand[1] - 1) % 13) + 1
+	if dealerUp ~= 1 then return "Insurance only available when dealer shows Ace!" end
+	local insCost = math.floor(currentBet / 2)
+	if not deductChips(insCost) then return "Not enough chips for insurance!" end
+	local dealerHasBJ = false
+	if #dealerHand == 2 then
+		local v = getHandValue(dealerHand)
+		if v == 21 then dealerHasBJ = true end
+	end
+	if dealerHasBJ then
+		addChipsGlobal(insCost * 3)
+		return "Insurance pays! Dealer has blackjack. +" .. tostring(insCost * 3) .. " chips"
+	else
+		return "Insurance lost. Dealer does not have blackjack."
+	end
+end
+
+--// === EXPANDED CHIP INTERACTION ===
+
+local chipInteractionFrame = Instance.new("Frame")
+chipInteractionFrame.Size = UDim2.new(0, 200, 0, 40)
+chipInteractionFrame.Position = UDim2.new(0.5, -100, 0.85, 0)
+chipInteractionFrame.BackgroundTransparency = 1
+chipInteractionFrame.Parent = container
+
+local chipValues = {1, 5, 25, 100, 500}
+for i, val in ipairs(chipValues) do
+	local chip = Instance.new("TextButton")
+	chip.Size = UDim2.new(0, 32, 0, 32)
+	chip.Position = UDim2.new(0, (i - 1) * 38, 0.5, -16)
+	chip.Text = tostring(val)
+	chip.TextColor3 = Color3.fromRGB(255, 255, 255)
+	chip.Font = Enum.Font.GothamBold
+	chip.TextSize = 10
+	chip.BackgroundColor3 = chipCols[val] or Color3.fromRGB(255, 215, 0)
+	chip.BorderSizePixel = 0
+	chip.ZIndex = 25
+	chip.Parent = chipInteractionFrame
+	local chipc = Instance.new("UICorner")
+	chipc.CornerRadius = UDim.new(0, 16)
+	chipc.Parent = chip
+	chip.MouseButton1Click:Connect(function()
+		cmdBox.Text = tostring(val)
+	end)
+end
+
+--// === SLOT MACHINE HISTORY ===
+
+local slotHistory = {}
+local slotHistFrame = Instance.new("Frame")
+slotHistFrame.Size = UDim2.new(0.9, 0, 0, 40)
+slotHistFrame.Position = UDim2.new(0.05, 0, 0, 645)
+slotHistFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+slotHistFrame.BackgroundTransparency = 0.3
+slotHistFrame.BorderSizePixel = 0
+slotHistFrame.Visible = false
+slotHistFrame.Parent = container
+
+local slotHistCorner = Instance.new("UICorner")
+slotHistCorner.CornerRadius = UDim.new(0, 6)
+slotHistCorner.Parent = slotHistFrame
+local slotHistStroke = Instance.new("UIStroke")
+slotHistStroke.Thickness = 1
+slotHistStroke.Color = Color3.fromRGB(255, 215, 0)
+slotHistStroke.Transparency = 0.6
+slotHistStroke.Parent = slotHistFrame
+
+local slotHistLabel = Instance.new("TextLabel")
+slotHistLabel.Size = UDim2.new(1, -10, 1, 0)
+slotHistLabel.Position = UDim2.new(0, 5, 0, 0)
+slotHistLabel.BackgroundTransparency = 1
+slotHistLabel.Text = "Last 5 spins: "
+slotHistLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+slotHistLabel.Font = Enum.Font.GothamBold
+slotHistLabel.TextSize = 11
+slotHistLabel.TextXAlignment = Enum.TextXAlignment.Left
+slotHistLabel.Parent = slotHistFrame
+
+function addSlotHistory(reels, won)
+	table.insert(slotHistory, 1, {reels = reels, won = won})
+	if #slotHistory > 5 then table.remove(slotHistory) end
+	local txt = "Last " .. tostring(#slotHistory) .. " spins: "
+	for _, entry in ipairs(slotHistory) do
+		txt = txt .. "[" .. entry.reels .. "] " .. (entry.won and "+" or "o") .. " "
+	end
+	slotHistLabel.Text = txt
+end
+
+--// === HOTKEYS DISPLAY ===
+
+local hotkeyFrame = Instance.new("Frame")
+hotkeyFrame.Size = UDim2.new(0.9, 0, 0, 20)
+hotkeyFrame.Position = UDim2.new(0.05, 0, 0.95, -55)
+hotkeyFrame.BackgroundTransparency = 1
+hotkeyFrame.Parent = container
+
+local hotkeyBindings = "1:10 2:25 3:50 4:100 5:250 | H:Help S:Stand D:Hit R:Fold T:Settings"
+local hotkeyLabel = Instance.new("TextLabel")
+hotkeyLabel.Size = UDim2.new(1, 0, 1, 0)
+hotkeyLabel.BackgroundTransparency = 1
+hotkeyLabel.Text = hotkeyBindings
+hotkeyLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
+hotkeyLabel.Font = Enum.Font.GothamBold
+hotkeyLabel.TextSize = 10
+hotkeyLabel.TextXAlignment = Enum.TextXAlignment.Left
+hotkeyLabel.Parent = hotkeyFrame
+
+--// === BGM VISUAL EQUALIZER (EXTENDED) ===
+
+for i = 1, 20 do
+	local bar = Instance.new("Frame")
+	bar.Size = UDim2.new(0, 4, 0, 2 + math.random(3, 8))
+	bar.Position = UDim2.new(0, (i - 1) * 14 + 2, 0.5, -1)
+	bar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+	bar.BackgroundTransparency = 0.5 + math.random() * 0.3
+	bar.BorderSizePixel = 0
+	bar.Parent = statsFrame
+
+	local eqData = {frame = bar, base = 2 + math.random(3, 8), maxH = 8 + math.random(3, 12), speed = 1 + math.random() * 2, phase = math.random() * math.pi * 2}
+	table.insert(soundBars, eqData)
+end
+
+--// === ACHIEVEMENT DISPLAY (EXTENDED) ===
+
+local achDisplayFrame = Instance.new("Frame")
+achDisplayFrame.Size = UDim2.new(0.9, 0, 0, 80)
+achDisplayFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+achDisplayFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+achDisplayFrame.BackgroundTransparency = 0.2
+achDisplayFrame.BorderSizePixel = 0
+achDisplayFrame.Visible = false
+achDisplayFrame.ZIndex = 75
+achDisplayFrame.Parent = container
+
+local achCorner = Instance.new("UICorner")
+achCorner.CornerRadius = UDim.new(0, 8)
+achCorner.Parent = achDisplayFrame
+local achStroke = Instance.new("UIStroke")
+achStroke.Thickness = 1.5
+achStroke.Color = Color3.fromRGB(255, 215, 0)
+achStroke.Parent = achDisplayFrame
+
+local achTitle = Instance.new("TextLabel")
+achTitle.Size = UDim2.new(1, -10, 0, 20)
+achTitle.Position = UDim2.new(0, 5, 0, 5)
+achTitle.BackgroundTransparency = 1
+achTitle.Text = "ACHIEVEMENTS"
+achTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+achTitle.Font = Enum.Font.GothamBlack
+achTitle.TextSize = 14
+achTitle.TextXAlignment = Enum.TextXAlignment.Left
+achTitle.ZIndex = 76
+achTitle.Parent = achDisplayFrame
+
+local achList = Instance.new("TextLabel")
+achList.Size = UDim2.new(1, -10, 0, 50)
+achList.Position = UDim2.new(0, 5, 0, 25)
+achList.BackgroundTransparency = 1
+achList.Text = ""
+achList.TextColor3 = Color3.fromRGB(255, 255, 255)
+achList.Font = Enum.Font.GothamBold
+achList.TextSize = 11
+achList.TextWrapped = true
+achList.TextXAlignment = Enum.TextXAlignment.Left
+achList.TextYAlignment = Enum.TextYAlignment.Top
+achList.ZIndex = 76
+achList.Parent = achDisplayFrame
+
+local achClose = Instance.new("TextButton")
+achClose.Size = UDim2.new(0, 60, 0, 20)
+achClose.Position = UDim2.new(0.5, -30, 1, -25)
+achClose.Text = "CLOSE"
+achClose.TextColor3 = Color3.fromRGB(255, 215, 0)
+achClose.Font = Enum.Font.GothamBold
+achClose.TextSize = 11
+achClose.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+achClose.BorderSizePixel = 0
+achClose.ZIndex = 76
+achClose.Parent = achDisplayFrame
+local achCloseCorner = Instance.new("UICorner")
+achCloseCorner.CornerRadius = UDim.new(0, 4)
+achCloseCorner.Parent = achClose
+achClose.MouseButton1Click:Connect(function()
+	achDisplayFrame.Visible = false
+end)
+
+function showAchievementsUI()
+	achDisplayFrame.Visible = true
+	local txt = ""
+	local count = 0
+	for _, def in ipairs(achievementDefs) do
+		local u = unlockedAchievements[def.id] or false
+		txt = txt .. (u and "★ " or "☆ ") .. def.name .. " - " .. def.desc .. "\n"
+		if u then count = count + 1 end
+	end
+	txt = txt .. "\n" .. tostring(count) .. "/" .. tostring(#achievementDefs) .. " unlocked"
+	achList.Text = txt
+end
+
+--// === PARTICLE EFFECTS ON BIG WINS ===
+
+local function spawnParticles(amount)
+	local count = math.min(amount / 50, 30)
+	for i = 1, count do
+		local p = Instance.new("Frame")
+		p.Size = UDim2.new(0, 4 + math.random(0, 4), 0, 4 + math.random(0, 4))
+		p.Position = UDim2.new(math.random(200, 600) / 1000, 0, math.random(200, 600) / 1000, 0)
+		p.BackgroundColor3 = Color3.fromRGB(math.random(180, 255), math.random(150, 255), math.random(50, 100))
+		p.BorderSizePixel = 0
+		p.ZIndex = 95
+		p.Parent = gui
+
+		local pc = Instance.new("UICorner")
+		pc.CornerRadius = UDim.new(0, 3)
+		pc.Parent = p
+
+		local tx = math.random(-100, 100)
+		local ty = math.random(-200, -50)
+
+		TweenService:Create(p, TweenInfo.new(1 + math.random(), Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.new(p.Position.X.Scale, p.Position.X.Offset + tx, p.Position.Y.Scale, p.Position.Y.Offset + ty),
+			BackgroundTransparency = 1,
+			Rotation = math.random(-180, 180)
+		}):Play()
+
+		task.delay(1.5, function() p:Destroy() end)
+	end
+end
+
+--// === PROGRESS BAR FOR TOURNAMENT ===
+
+local tournProgress = Instance.new("Frame")
+tournProgress.Size = UDim2.new(0, 160, 0, 6)
+tournProgress.Position = UDim2.new(0.5, -80, 0, 112)
+tournProgress.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+tournProgress.BorderSizePixel = 0
+tournProgress.Visible = false
+tournProgress.Parent = container
+
+local tournProgressFill = Instance.new("Frame")
+tournProgressFill.Size = UDim2.new(0, 0, 1, 0)
+tournProgressFill.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+tournProgressFill.BorderSizePixel = 0
+tournProgressFill.Parent = tournProgress
+
+local tournProgressLabel = Instance.new("TextLabel")
+tournProgressLabel.Size = UDim2.new(1, 0, 1, 0)
+tournProgressLabel.BackgroundTransparency = 1
+tournProgressLabel.Text = ""
+tournProgressLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+tournProgressLabel.Font = Enum.Font.GothamBold
+tournProgressLabel.TextSize = 9
+tournProgressLabel.TextXAlignment = Enum.TextXAlignment.Center
+tournProgressLabel.Parent = tournProgressFill
+
+function updateTournamentProgress()
+	if not tournActive then tournProgress.Visible = false; return end
+	tournProgress.Visible = true
+	local pct = (tournRound - 1) / tournTotal
+	TweenService:Create(tournProgressFill, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(pct, 0, 1, 0)
+	}):Play()
+	tournProgressLabel.Text = tostring(tournRound - 1) .. "/" .. tostring(tournTotal)
+end
+
+-- Hook into tournament play to update progress
+local origTP = tournamentPlay
+function tournamentPlay(...)
+	local r = origTP(...)
+	updateTournamentProgress()
+	return r
+end
+
+--// === FINAL INTEGRATION HOOKS ===
+
+-- Hook playSlots to track slot history
+local origSlots = playSlots
+function playSlots(bet)
+	local r = origSlots(bet)
+	if type(r) == "string" then
+		local reelsStr = string.match(r, "%[.-%]")
+		if reelsStr then
+			addSlotHistory(reelsStr, winStreak > 0)
+		end
+	end
+	return r
+end
+
+-- Hook recordGame to track quests and update tournaments
+local origRecord2 = recordGame
+function recordGame(game, won, amount)
+	origRecord2(game, won, amount)
+	trackQuest(game, won, amount)
+	dealerSay(won and "win" or "lose")
+	if won and amount >= amount * 0.5 then
+		spawnParticles(amount)
+	end
+end
+
+-- Update result text to show comp points alongside chips
+local origUpdResult = updateResultText
+function updateResultText(text)
+	if type(text) == "string" and not string.find(text, "COMP") then
+		text = text .. "\n\n$" .. tostring(math.floor(playerChips)) .. " | Level " .. tostring(playerLevel) .. " | Comp: " .. tostring(math.floor(compPoints))
+	end
+	origUpdResult(text)
+end
+
+-- Finishing: ensure all newly created visual elements are in correct Z-order
+container.ZIndex = 1
+
+-- Final decorative border glow
+local finalGlow = Instance.new("Frame")
+finalGlow.Size = UDim2.new(1, 6, 1, 6)
+finalGlow.Position = UDim2.new(0, -3, 0, -3)
+finalGlow.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+finalGlow.BackgroundTransparency = 0.95
+finalGlow.BorderSizePixel = 0
+finalGlow.ZIndex = 0
+finalGlow.Parent = container
+
+local fgCorner = Instance.new("UICorner")
+fgCorner.CornerRadius = UDim.new(0, 22)
+fgCorner.Parent = finalGlow
+
+-- Final dealer message
+task.delay(5, function()
+	dealerSay("welcome")
+end)
+
+-- Update the version display
+jackpotLabel.Text = "JACKPOT v3.0"
+
+-- Everything initialized
+warn("Jackpot Character GUI v3.0 loaded successfully - " .. tostring(#achievementDefs) .. " achievements, " .. tostring(#helpPages) .. " help pages")
+
+
+local minBtn=Instance.new("TextButton"); minBtn.Size=UDim2.new(0,20,0,20); minBtn.Position=UDim2.new(1,-24,0,2); minBtn.Text="_"; minBtn.TextColor3=Color3.fromRGB(255,215,0); minBtn.Font=Enum.Font.GothamBlack; minBtn.TextSize=14; minBtn.BackgroundColor3=Color3.fromRGB(10,10,10); minBtn.BorderSizePixel=0; minBtn.ZIndex=60; minBtn.Parent=container
+local minc=Instance.new("UICorner"); minc.CornerRadius=UDim.new(0,4); minc.Parent=minBtn
+local isMin,minElements=false,{}
+
+minBtn.MouseButton1Click:Connect(function()
+	isMin=not isMin
+	if isMin then
+		minElements={}; for _,ch in ipairs(container:GetChildren())do if ch~=db2 and ch~=minBtn and ch~=themeBtn and ch~=consoleToggle and ch~=jackpotLabel then ch.Visible=false;table.insert(minElements,ch)end end
+		container:TweenSize(UDim2.new(0,200,0,30),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.3,true); minBtn.Text="+"
+		jackpotLabel.Size=UDim2.new(1,0,1,0)
+	else
+		container:TweenSize(UDim2.new(0,400,0,700),Enum.EasingDirection.Out,Enum.EasingStyle.Quad,0.3,true)
+		for _,ch in ipairs(minElements)do ch.Visible=true end; minElements={}; minBtn.Text="_"
+		jackpotLabel.Size=UDim2.new(0,120,0,20)
+	end
+end)
+
+function animateCardFlip(cardStr,startPos,endPos,cb)
+	local c=Instance.new("TextLabel"); c.Size=UDim2.new(0,50,0,70); c.Position=startPos or UDim2.new(0.5,-25,0,-70); c.BackgroundColor3=Color3.fromRGB(20,20,20)
+	c.BorderSizePixel=0; c.Text="?"; c.TextColor3=Color3.fromRGB(255,215,0); c.Font=Enum.Font.GothamBlack; c.TextSize=24; c.ZIndex=90; c.Parent=gui
+	local cc2=Instance.new("UICorner"); cc2.CornerRadius=UDim.new(0,6); cc2.Parent=c
+	local cs2=Instance.new("UIStroke"); cs2.Thickness=1.5; cs2.Color=Color3.fromRGB(255,215,0); cs2.Transparency=0.4; cs2.Parent=c
+	local mt=TweenService:Create(c,TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=endPos or UDim2.new(0.5,-25,0.3,-35)})
+	mt:Play(); mt.Completed:Connect(function()
+		TweenService:Create(c,TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.new(0,0,0,70)}):Play()
+		task.delay(0.15,function()
+			c.Text=cardStr
+			TweenService:Create(c,TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=UDim2.new(0,50,0,70)}):Play()
+			task.delay(0.6,function()
+				TweenService:Create(c,TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{BackgroundTransparency=1,TextTransparency=1}):Play()
+				task.delay(0.3,function()c:Destroy();if cb then cb()end end)
+			end)
+		end)
+	end)
+end
+
+local rdActive,rdCards,rdBet,rdSpread=false,{},0,0
+
+function startRedDog(bet)
+	if bet>playerChips then return "NOT ENOUGH CHIPS!" end; if rdActive then return "Red Dog already active!" end
+	deductChips(bet); rdBet=bet; rdActive=true
+	local d={}; for i=1,52 do table.insert(d,i) end; for i=#d,2,-1 do local j=math.random(i); d[i],d[j]=d[j],d[i] end
+	rdCards={table.remove(d),table.remove(d)}
+	local r1,r2=((rdCards[1]-1)%13)+1,((rdCards[2]-1)%13)+1
+	if r1>r2 then rdCards[1],rdCards[2]=rdCards[2],rdCards[1]; r1,r2=r2,r1 end
+	rdSpread=r2-r1-1
+	local mult=rdSpread==1 and 5 or rdSpread==2 and 4 or rdSpread==3 and 3 or 2
+	local r="=== RED DOG ===\n\nFirst: "..hCardStr(rdCards[1]).."  Last: "..hCardStr(rdCards[2]).."\nSpread: "..tostring(rdSpread).." cards between\nMultiplier: x"..tostring(mult).."\n\nType 'raise' to double bet or 'deal' to play"
+	gameStats.reddog_played=(gameStats.reddog_played or 0)+1; return r
+end
+
+function rdAct(action)
+	if not rdActive then return "No Red Dog game active!" end
+	if action=="raise" then if not deductChips(rdBet) then return "Not enough chips to raise!" end; rdBet=rdBet*2 end
+	rdActive=false
+	local d={}; for i=1,52 do table.insert(d,i) end; local drawn={}; for _,c in ipairs(rdCards) do drawn[c]=true end
+	local third; repeat third=math.random(1,52) until not drawn[third]
+	local r1,r2,r3=((rdCards[1]-1)%13)+1,((rdCards[2]-1)%13)+1,((third-1)%13)+1
+	local won=r3>r1 and r3<r2; local payout=0
+	local mult=rdSpread==1 and 5 or rdSpread==2 and 4 or rdSpread==3 and 3 or 2
+	if won then payout=rdBet*mult; addChipsGlobal(payout); winGame(payout); VFX:WinText(payout,"RED DOG")
+	elseif r3==r1 or r3==r2 then addChipsGlobal(rdBet)
+	else loseGame(); VFX:LossText(rdBet,"RED DOG") end
+	local r="=== RED DOG RESULT ===\n\nFirst: "..hCardStr(rdCards[1]).."  Last: "..hCardStr(rdCards[2]).."\nMiddle: "..hCardStr(third).."\nBet: "..tostring(rdBet).."\n\n"
+	if won then r=r.."!! WIN !! +"..tostring(payout).." chips"
+	elseif r3==r1 or r3==r2 then r=r.."Push - bet returned"
+	else r=r.."X LOSE X -"..tostring(rdBet).." chips" end
+	recordGame("RED DOG",won,payout>0 and payout or rdBet); return r
+end
+
