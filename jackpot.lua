@@ -1,5 +1,5 @@
---// JACKPOT - REN KUROGANE CHARACTER GUI
---// Put in StarterPlayerScripts (LocalScript)
+-- // JACKPOT - REN KUROGANE CHARACTER GUI
+-- // Put in StarterPlayerScripts (LocalScript)
 
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
@@ -6067,4 +6067,3 @@ function rdAct(action)
 	else r=r.."X LOSE X -"..tostring(rdBet).." chips" end
 	recordGame("RED DOG",won,payout>0 and payout or rdBet); return r
 end
-
