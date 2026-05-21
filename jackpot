@@ -581,6 +581,7 @@ local currentHealth = 100
 local maxEnergy = 100
 local currentEnergy = 50
 local comboCount = 0
+local winStreak = 0
 
 function updateHealth(value)
 	currentHealth = math.clamp(value, 0, maxHealth)
@@ -2104,21 +2105,14 @@ function playLottery(bet)
 	deductChips(bet)
 	currentBet = bet
 	
+	local ticketSet = {}
 	local ticket = {}
 	for i = 1, 6 do
 		local n
-		repeat n = math.random(1, 59) until ticket[n] == nil
-		ticket[n] = true
+		repeat n = math.random(1, 59) until not ticketSet[n]
+		ticketSet[n] = true
 		table.insert(ticket, n)
 	end
-	-- Clean up the table structure
-	local ticketNums = {}
-	for n, _ in pairs(ticket) do
-		if type(n) == "number" then
-			table.insert(ticketNums, n)
-		end
-	end
-	ticket = ticketNums
 	table.sort(ticket)
 	
 	local drawn = {}
@@ -2283,6 +2277,29 @@ function playHorseRace(bet, pick)
 	
 	gameStats.horse_played = (gameStats.horse_played or 0) + 1
 	
+	local function finishRace(winningHorse)
+		raceActive = false
+		winner = winningHorse
+		conn:Disconnect()
+		
+		local won = winner == pickNum
+		local payout = 0
+		
+		if won then
+			local odds = math.random(15, 30) / 10
+			payout = math.floor(bet * odds)
+			addChipsGlobal(payout)
+			winGame(payout)
+			VFX:WinText(payout, "HORSE RACE")
+			VFX:ChipShower(8)
+		else
+			loseGame()
+			VFX:LossText(bet, "HORSE RACE")
+		end
+		
+		recordGame("HORSE RACE", won, payout > 0 and payout or bet)
+	end
+	
 	local conn
 	conn = RunService.Heartbeat:Connect(function(dt)
 		if not raceActive then return end
@@ -2301,39 +2318,13 @@ function playHorseRace(bet, pick)
 			end
 		end
 		
-		if maxPos >= 100 and not raceActive then
-			raceActive = false
-			winner = leader
-			conn:Disconnect()
+		if maxPos >= 100 then
+			finishRace(leader)
+			return
 		end
 		
 		if elapsed >= 5 then
-			raceActive = false
-			conn:Disconnect()
-			local maxPos = 0
-			for i, pos in ipairs(positions) do
-				if pos > maxPos then
-					maxPos = pos
-					winner = i
-				end
-			end
-			
-			local won = winner == pickNum
-			local payout = 0
-			
-			if won then
-				local odds = math.random(15, 30) / 10
-				payout = math.floor(bet * odds)
-				addChipsGlobal(payout)
-				winGame(payout)
-				VFX:WinText(payout, "HORSE RACE")
-				VFX:ChipShower(8)
-			else
-				loseGame()
-				VFX:LossText(bet, "HORSE RACE")
-			end
-			
-			recordGame("HORSE RACE", won, payout > 0 and payout or bet)
+			finishRace(leader)
 		end
 	end)
 	
@@ -2802,33 +2793,33 @@ function processCommand(input)
 	end
 	
 	-- BACCARAT
-	local bacMatch = string.match(input, "^baccarat%s+(%d+)%s+(%w+)$")
-	if bacMatch then
-		return startBaccarat(tonumber(bacMatch), bacMatch)
+	local bacBet, bacType = string.match(input, "^baccarat%s+(%d+)%s+(%w+)$")
+	if bacBet then
+		return startBaccarat(tonumber(bacBet), bacType)
 	end
 	
 	-- ROULETTE
-	local rouletteMatch = string.match(input, "^roulette%s+(%d+)%s+(.+)$")
-	if rouletteMatch then
-		return processSlotsResult(tonumber(rouletteMatch), function(b)
-			return playRoulette(b, rouletteMatch) and "" or ""
-		end)
+	local rouletteBet, rouletteChoice = string.match(input, "^roulette%s+(%d+)%s+(.+)$")
+	if rouletteBet then
+		local r = playRoulette(tonumber(rouletteBet), rouletteChoice)
+		if type(r) == "string" then return r end
+		return r and "!! WIN !! Check your balance" or "X LOSE X Check your balance"
 	end
 	
 	-- DICE
-	local diceMatch = string.match(input, "^dice%s+(%d+)%s+(.+)$")
-	if diceMatch then
-		return processSlotsResult(tonumber(diceMatch), function(b)
-			return playDice(b, diceMatch) and "" or ""
-		end)
+	local diceBet, dicePred = string.match(input, "^dice%s+(%d+)%s+(.+)$")
+	if diceBet then
+		local r = playDice(tonumber(diceBet), dicePred)
+		if type(r) == "string" then return r end
+		return r and "!! WIN !! Check your balance" or "X LOSE X Check your balance"
 	end
 	
 	-- COIN FLIP
-	local coinMatch = string.match(input, "^coin%s+flip%s+(%d+)%s+(%w+)$")
-	if coinMatch then
-		return processSlotsResult(tonumber(coinMatch), function(b)
-			return playCoinFlip(b, coinMatch) and "" or ""
-		end)
+	local coinBet, coinSide = string.match(input, "^coin%s+flip%s+(%d+)%s+(%w+)$")
+	if coinBet then
+		local r = playCoinFlip(tonumber(coinBet), coinSide)
+		if type(r) == "string" then return r end
+		return r and "!! WIN !! Check your balance" or "X LOSE X Check your balance"
 	end
 	
 	-- WHEEL
@@ -2838,21 +2829,21 @@ function processCommand(input)
 	end
 	
 	-- SIC BO
-	local sicboMatch = string.match(input, "^sicbo%s+(%d+)%s+(%w+)$")
-	if sicboMatch then
-		return playSicBo(tonumber(sicboMatch), sicboMatch)
+	local sicboBet, sicboPred = string.match(input, "^sicbo%s+(%d+)%s+(%w+)$")
+	if sicboBet then
+		return playSicBo(tonumber(sicboBet), sicboPred)
 	end
 	
 	-- CRAPS
-	local crapsMatch = string.match(input, "^craps%s+(%d+)%s+(%w+)$")
-	if crapsMatch then
-		return playCraps(tonumber(crapsMatch), crapsMatch)
+	local crapsBet, crapsType = string.match(input, "^craps%s+(%d+)%s+(%w+)$")
+	if crapsBet then
+		return playCraps(tonumber(crapsBet), crapsType)
 	end
 	
 	-- KENO
-	local kenoMatch = string.match(input, "^keno%s+(%d+)%s+(.+)$")
-	if kenoMatch then
-		return playKeno(tonumber(kenoMatch), kenoMatch)
+	local kenoBet, kenoNums = string.match(input, "^keno%s+(%d+)%s+(.+)$")
+	if kenoBet then
+		return playKeno(tonumber(kenoBet), kenoNums)
 	end
 	
 	-- LOTTERY
@@ -2868,9 +2859,9 @@ function processCommand(input)
 	end
 	
 	-- HORSE RACE
-	local horseMatch = string.match(input, "^horse%s+(%d+)%s+(%d+)$")
-	if horseMatch then
-		return playHorseRace(tonumber(horseMatch), horseMatch)
+	local horseBet, horsePick = string.match(input, "^horse%s+(%d+)%s+(%d+)$")
+	if horseBet then
+		return playHorseRace(tonumber(horseBet), horsePick)
 	end
 	
 	-- BINGO
@@ -3078,9 +3069,14 @@ end
 --// Override the original game functions to use sanitized text
 local origPlaySlots = playSlots
 function playSlots(bet)
-	local result = origPlaySlots(bet)
-	if type(result) == "string" then
-		result = sanitizeText(result)
+	local result
+	if origPlaySlots then
+		result = origPlaySlots(bet)
+		if type(result) == "string" then
+			result = sanitizeText(result)
+		end
+	else
+		result = "=== SLOTS ===\nSlot machine spinning..."
 	end
 	recordGame("SLOTS", winStreak > 0 and true or false, winStreak > 0 and bet or bet)
 	checkAchievements(nil)
@@ -3090,34 +3086,39 @@ end
 
 local origStartBlackjack = startBlackjack
 function startBlackjack(bet)
-	local result = origStartBlackjack(bet)
-	if type(result) == "string" then
-		result = sanitizeText(result)
+	if origStartBlackjack then
+		local result = origStartBlackjack(bet)
+		if type(result) == "string" then
+			result = sanitizeText(result)
+		end
+		return result
 	end
-	return result
+	return "Blackjack is not available in this version."
 end
 
-local origBlackjackHit = blackjackHit
+-- blackjackHit/blackjackStand are stubs — the v3 section defines the real blackjack engine
 function blackjackHit()
-	origBlackjackHit()
-	local currentResult = result.Text
-	if currentResult then
-		result.Text = sanitizeText(currentResult)
+	local r = cmdResult
+	if r then
+		r.Text = sanitizeText(r.Text)
 	end
 end
 
-local origBlackjackStand = blackjackStand
 function blackjackStand()
-	origBlackjackStand()
-	local currentResult = result.Text
-	if currentResult then
-		result.Text = sanitizeText(currentResult)
+	local r = cmdResult
+	if r then
+		r.Text = sanitizeText(r.Text)
 	end
 end
 
 local origPlayRoulette = playRoulette
 function playRoulette(bet, choice)
-	local r = origPlayRoulette(bet, choice)
+	local r
+	if origPlayRoulette then
+		r = origPlayRoulette(bet, choice)
+	else
+		r = false
+	end
 	if r == true or r == false then
 		recordGame("ROULETTE", r, r and bet or bet)
 		checkAchievements(nil)
@@ -3129,7 +3130,12 @@ end
 
 local origPlayDice = playDice
 function playDice(bet, prediction)
-	local r = origPlayDice(bet, prediction)
+	local r
+	if origPlayDice then
+		r = origPlayDice(bet, prediction)
+	else
+		r = false
+	end
 	if r == true or r == false then
 		recordGame("DICE", r, r and bet or bet)
 		checkAchievements(nil)
@@ -3141,7 +3147,12 @@ end
 
 local origPlayCoinFlip = playCoinFlip
 function playCoinFlip(bet, choice)
-	local r = origPlayCoinFlip(bet, choice)
+	local r
+	if origPlayCoinFlip then
+		r = origPlayCoinFlip(bet, choice)
+	else
+		r = false
+	end
 	if r == true or r == false then
 		recordGame("COIN FLIP", r, r and bet or bet)
 		checkAchievements(nil)
